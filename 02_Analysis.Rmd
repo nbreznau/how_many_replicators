@@ -1,0 +1,64 @@
+---
+title: "Researcher Variability in Replications: Replication File, Step 2"
+output: html_notebook
+---
+
+
+
+```{r setup}
+rm(list = ls())
+library(pacman)
+
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr")
+
+# load data from 01_Data_Prep
+load(file = "data/data.Rdata")
+```
+
+
+
+
+## Figure 1
+
+The goal is to produce three metrics
+
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)|The direction and significance of the regression coefficient is the same as the original p<0.05 threshold|1=verified, 0=not|
+|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the third decimal place of the original|1=exact, 0=not|
+|*Replication Deviance* (deviance)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+
+
+
+```{r fig1}
+
+plot1 <- ggstripchart(cri_long, "count","deviance_abs", color = "Exp1", size = 3, shape = 1) + 
+  ylim(0,0.5) +
+  ylab("Absolute Deviance of Replicated\nOdds-Ratio from Original") +
+  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  theme(axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom")
+
+# get means to add
+mean0 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),3)
+mean1 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),3)
+
+plot2 <- ggboxplot(cri_long, "Exp1","deviance_abs", color = "Exp1", 
+                   whisklty = 0) +
+  coord_cartesian(ylim=c(0, 0.1)) +
+  xlab("Group") +
+  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  annotate(geom="text", x=0.8, y=0.02, label = paste0("Mean = \n",mean1),
+              color="black") + 
+  annotate(geom="text", x=1.8, y=0.045, label = paste0("Mean = \n",mean0),
+              color="black") +
+  theme(axis.title.y = element_blank(),
+        legend.position = "bottom",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank())
+
+plotF <- ggarrange(plot1,plot2)
+```
+
