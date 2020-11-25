@@ -1,0 +1,115 @@
+---
+title: "Researcher Variability in Replications: Replication File, Step 2"
+output: html_notebook
+---
+
+
+
+```{r setup}
+rm(list = ls())
+library(pacman)
+
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr","ragg")
+
+# load data from 01_Data_Prep
+load(file = "data/data.Rdata")
+```
+
+
+A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid)) - 2` teams
+
+## Figure 1
+
+The goal is to produce three metrics
+
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)|The direction and significance of the regression coefficient is the same as the original p<0.05 threshold|1=verified, 0=not|
+|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the third decimal place of the original|1=exact, 0=not|
+|*Replication Deviance* (deviance)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+
+
+
+```{r fig1}
+
+
+plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape = Exp1)) +
+  geom_point(size = 2.5) + 
+  coord_cartesian(ylim=c(0, 0.5)) +
+  ylab("Replicated Effect Deviance\n(from original odds-ratio)") +
+  scale_color_manual(values = c("#009E73","#D55E00"), name = "Group", labels = c("Transparent","Opaque")) +
+  scale_shape_manual(values = c(6,2)) +
+  theme(axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 12, color = "black"),
+        axis.line.x = element_line(),
+        axis.line.y = element_line(),
+        legend.position = "none",
+        plot.background = element_blank(),
+        panel.background = element_blank(),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.text = element_text(size = 11)) +
+  guides(color = guide_legend(override.aes = list(shape = c(19,19), size=5, fill = NA)), shape = F)
+
+
+# get means to add
+mean0 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),3)
+mean1 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),3)
+
+plot2 <- ggboxplot(cri_long, "Exp1","deviance_abs", color = "Exp1", 
+                   whisklty = 0, palette = c("#009E73","#D55E00"), 
+                   outlier.shape = NA, size = 1) +
+  coord_cartesian(ylim=c(0, 0.04)) +
+  xlab("Group") +
+  scale_fill_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  annotate(geom="text", x=1.1, y=0.013, label = paste0("mean"),
+              color="#009E73", size = 3, hjust = 0) + 
+  annotate(geom="text", x=2.1, y=0.036, label = paste0("mean"),
+              color="#D55E00", size = 3, hjust = 0) +
+  annotate(geom="text", x=1.1, y=0.0115, label = paste0("deviance"),
+              color="#009E73", size = 3, hjust = 0) + 
+  annotate(geom="text", x=2.1, y=0.0345, label = paste0("deviance"),
+              color="#D55E00", size = 3, hjust = 0) +
+  annotate(geom="text", x=1.1, y=0.0095, label = paste0(mean1),
+              color="#009E73", size = 3, hjust = 0, fontface = 2) + 
+  annotate(geom="text", x=2.1, y=0.0325, label = paste0(mean0),
+              color="#D55E00", size = 3, hjust = 0, fontface = 2) +
+  theme(axis.title.y = element_blank(),
+        legend.position = "bottom",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_text(size = 12),
+        plot.margin = margin(2,2,2,2),
+        legend.text = element_text(size = 11))
+
+plotF <- ggarrange(plot1,NA,plot2, ncol = 3, widths = c(7,1,7), common.legend = T, legend = "bottom")
+agg_png(filename = "results/Fig1.png", res = 144, width = 900)
+plotF
+dev.off()
+
+knitr::include_graphics("results/Fig1.png")
+```
+
+```{r fig1_dens}
+# there are too many zeros, adjust to spread out the density plot
+set.seed(90210)
+cri_long <- cri_long %>%
+  mutate(rnd = ifelse(Exp1 == 1, rnorm(length(deviance_abs), mean = 0, sd = 0.001), 0),
+         deviance_abs2 = deviance_abs + rnd,
+         deviance_abs2 = ifelse(deviance_abs2 < 0, 0, deviance_abs2))
+
+
+ggdensity(cri_long, "deviance_abs", color = "Exp1", add = "mean", palette = c("#00AFBB","#E7B800")) +
+  xlim(0,0.1) +
+  scale_fill_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  xlab("Deviance from Original Effect Size") +
+    theme(axis.title.y = element_blank(),
+        legend.position = c(0.7,0.5))
+
+# coord_cartesian(xlim=c(0, 0.075)) +
+
+```
+
