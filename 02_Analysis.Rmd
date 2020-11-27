@@ -9,14 +9,22 @@ output: html_notebook
 rm(list = ls())
 library(pacman)
 
+<<<<<<< HEAD
 pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr","ragg")
+=======
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr")
+>>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 
 # load data from 01_Data_Prep
 load(file = "data/data.Rdata")
 ```
 
 
+<<<<<<< HEAD
 A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid)) - 2` teams
+=======
+
+>>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 
 ## Figure 1
 
@@ -32,6 +40,7 @@ The goal is to produce three metrics
 
 ```{r fig1}
 
+<<<<<<< HEAD
 
 plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape = Exp1)) +
   geom_point(size = 2.5) + 
@@ -53,12 +62,23 @@ plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape =
         legend.text = element_text(size = 11)) +
   guides(color = guide_legend(override.aes = list(shape = c(19,19), size=5, fill = NA)), shape = F)
 
+=======
+plot1 <- ggstripchart(cri_long, "count","deviance_abs", color = "Exp1", size = 3, shape = 1) + 
+  ylim(0,0.5) +
+  ylab("Absolute Deviance of Replicated\nOdds-Ratio from Original") +
+  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  theme(axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom")
+>>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 
 # get means to add
 mean0 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),3)
 mean1 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),3)
 
 plot2 <- ggboxplot(cri_long, "Exp1","deviance_abs", color = "Exp1", 
+<<<<<<< HEAD
                    whisklty = 0, palette = c("#009E73","#D55E00"), 
                    outlier.shape = NA, size = 1) +
   coord_cartesian(ylim=c(0, 0.04)) +
@@ -111,5 +131,21 @@ ggdensity(cri_long, "deviance_abs", color = "Exp1", add = "mean", palette = c("#
 
 # coord_cartesian(xlim=c(0, 0.075)) +
 
+=======
+                   whisklty = 0) +
+  coord_cartesian(ylim=c(0, 0.1)) +
+  xlab("Group") +
+  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  annotate(geom="text", x=0.8, y=0.02, label = paste0("Mean = \n",mean1),
+              color="black") + 
+  annotate(geom="text", x=1.8, y=0.045, label = paste0("Mean = \n",mean0),
+              color="black") +
+  theme(axis.title.y = element_blank(),
+        legend.position = "bottom",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank())
+
+plotF <- ggarrange(plot1,plot2)
+>>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 ```
 

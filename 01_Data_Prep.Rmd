@@ -281,6 +281,7 @@ cri_cur_long <- cri_cur_long %>%
 
 cri_long$Exp1 <- relevel(cri_long$Exp1, "1")
 cri_cur_long$Exp1 <- relevel(cri_cur_long$Exp1, "1")
+<<<<<<< HEAD
 
 # create an in sample code (without original study and with non-convergence removed)
 cri_long$insamp <- ifelse(cri_long$u_teamid == 200 | cri_long$u_teamid == 300, NA, 1)
@@ -288,6 +289,9 @@ cri_long$insamp <- ifelse(cri_long$or == "speci", NA, cri_long$insamp)
 
 cri_cur_long$insamp <- ifelse(cri_cur_long$u_teamid == 200 | cri_cur_long$u_teamid == 300, NA, 1)
 cri_cur_long$insamp <- ifelse(cri_cur_long$or == "speci", NA, cri_cur_long$insamp)
+=======
+   
+>>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 ```
 
 ## Save Data
