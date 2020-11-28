@@ -9,44 +9,35 @@ output: html_notebook
 rm(list = ls())
 library(pacman)
 
-<<<<<<< HEAD
+
 pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr","ragg")
-=======
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr")
->>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
+
 
 # load data from 01_Data_Prep
 load(file = "data/data.Rdata")
+
+#remove original study from data
+cri_long <- subset(cri_long, insamp == 1)
+cri_cur_long <- subset(cri_cur_long, insamp == 1)
 ```
 
 
-<<<<<<< HEAD
 A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid)) - 2` teams
-=======
-
->>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 
 ## Figure 1
 
-The goal is to produce three metrics
-
-|Metric|Definition|Measure|
-|------|----------|---------|
-|*Verification* (verif)|The direction and significance of the regression coefficient is the same as the original p<0.05 threshold|1=verified, 0=not|
-|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the third decimal place of the original|1=exact, 0=not|
-|*Replication Deviance* (deviance)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
 
 
 
 ```{r fig1}
 
-<<<<<<< HEAD
+
 
 plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape = Exp1)) +
   geom_point(size = 2.5) + 
   coord_cartesian(ylim=c(0, 0.5)) +
   ylab("Replicated Effect Deviance\n(from original odds-ratio)") +
-  scale_color_manual(values = c("#009E73","#D55E00"), name = "Group", labels = c("Transparent","Opaque")) +
+  scale_color_manual(values = c("#009E73","#D55E00"), name = "Replication Group", labels = c("Transparent","Opaque")) +
   scale_shape_manual(values = c(6,2)) +
   theme(axis.title.x = element_blank(),
         axis.ticks.x = element_blank(),
@@ -62,28 +53,17 @@ plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape =
         legend.text = element_text(size = 11)) +
   guides(color = guide_legend(override.aes = list(shape = c(19,19), size=5, fill = NA)), shape = F)
 
-=======
-plot1 <- ggstripchart(cri_long, "count","deviance_abs", color = "Exp1", size = 3, shape = 1) + 
-  ylim(0,0.5) +
-  ylab("Absolute Deviance of Replicated\nOdds-Ratio from Original") +
-  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
-  theme(axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        legend.position = "bottom")
->>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
 
 # get means to add
 mean0 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),3)
 mean1 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),3)
 
 plot2 <- ggboxplot(cri_long, "Exp1","deviance_abs", color = "Exp1", 
-<<<<<<< HEAD
                    whisklty = 0, palette = c("#009E73","#D55E00"), 
                    outlier.shape = NA, size = 1) +
   coord_cartesian(ylim=c(0, 0.04)) +
   xlab("Group") +
-  scale_fill_discrete(name = "Group", labels = c("Transparent","Opaque")) +
+  scale_fill_discrete(name = "Replication Group", labels = c("Transparent","Opaque")) +
   annotate(geom="text", x=1.1, y=0.013, label = paste0("mean"),
               color="#009E73", size = 3, hjust = 0) + 
   annotate(geom="text", x=2.1, y=0.036, label = paste0("mean"),
@@ -113,39 +93,117 @@ dev.off()
 knitr::include_graphics("results/Fig1.png")
 ```
 
-```{r fig1_dens}
-# there are too many zeros, adjust to spread out the density plot
-set.seed(90210)
+
+
+```{r table2}
+
+# start with descriptive table
+
+desc <- as.data.frame(matrix(nrow = 17, ncol = 11))
+
+desc[1,] <- c("","","Means by Sample","","","Pear. Correlations w/ Raw Results","","","","","")
+
+desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Verification", "Exact Verif.", "Deviance", "", "", "")
+
+desc[,1] <- c("", "Variables","Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Independent Variables", "Stata", "Methods-Degree", "Stats-Skill", "Difficulty", "Team Size", "Transparent")
+
+desc[,2] <- c("", "Measurement","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "other software =0","other degrees =0","4-question scale, stdzd,","1-question, stdzd.","1-3 persons","Transparent group =1")
+
+# fill in transparent group results
+
+desc[3:17,3] <- c("", 
+                  mean(cri_long$verif[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$exact[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
+                  "",
+                  mean(cri_cur_long$verif[cri_cur_long$Exp1 == 1], na.rm = T),
+                  mean(cri_cur_long$exact[cri_cur_long$Exp1 == 1], na.rm = T),
+                  mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 1], na.rm = T),
+                  "",
+                  mean(cri_long$stata[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$stat_degree[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$stat_skill[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$difficult[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$numinteam[cri_long$Exp1 == 1], na.rm = T),
+                  1)
+
+# opaque
+
+desc[3:17,4] <- c("", 
+                  mean(cri_long$verif[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$exact[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
+                  "",
+                  mean(cri_cur_long$verif[cri_cur_long$Exp1 == 0], na.rm = T),
+                  mean(cri_cur_long$exact[cri_cur_long$Exp1 == 0], na.rm = T),
+                  mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 0], na.rm = T),
+                  "",
+                  mean(cri_long$stata[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$stat_degree[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$stat_skill[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$difficult[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$numinteam[cri_long$Exp1 == 0], na.rm = T),
+                  0)
+
+# pooled
+
+desc[3:17,5] <- c("", 
+                  mean(cri_long$verif, na.rm = T),
+                  mean(cri_long$exact, na.rm = T),
+                  mean(cri_long$deviance_abs, na.rm = T),
+                  "",
+                  mean(cri_cur_long$verif, na.rm = T),
+                  mean(cri_cur_long$exact, na.rm = T),
+                  mean(cri_cur_long$deviance_abs, na.rm = T),
+                  "",
+                  mean(cri_long$stata, na.rm = T),
+                  mean(cri_long$stat_degree, na.rm = T),
+                  mean(cri_long$stat_skill, na.rm = T),
+                  mean(cri_long$difficult, na.rm = T),
+                  mean(cri_long$numinteam, na.rm = T),
+                  mean(as.numeric(cri_long$u_expgroup1), na.rm = T))
+
+
+
+
+```
+
+
+```{r tbl2corr}
 cri_long <- cri_long %>%
-  mutate(rnd = ifelse(Exp1 == 1, rnorm(length(deviance_abs), mean = 0, sd = 0.001), 0),
-         deviance_abs2 = deviance_abs + rnd,
-         deviance_abs2 = ifelse(deviance_abs2 < 0, 0, deviance_abs2))
+  ungroup()
+cri_cur_long <- cri_cur_long %>%
+  ungroup()
 
 
-ggdensity(cri_long, "deviance_abs", color = "Exp1", add = "mean", palette = c("#00AFBB","#E7B800")) +
-  xlim(0,0.1) +
-  scale_fill_discrete(name = "Group", labels = c("Transparent","Opaque")) +
-  xlab("Deviance from Original Effect Size") +
-    theme(axis.title.y = element_blank(),
-        legend.position = c(0.7,0.5))
+desc_c1 <- select(cri_long, verif, exact, deviance_abs, stata, stat_degree, stat_skill, difficult, numinteam, u_expgroup1)
 
-# coord_cartesian(xlim=c(0, 0.075)) +
+desc_c1$u_expgroup1 <- as.numeric(desc_c1$u_expgroup1)
 
-=======
-                   whisklty = 0) +
-  coord_cartesian(ylim=c(0, 0.1)) +
-  xlab("Group") +
-  scale_color_discrete(name = "Group", labels = c("Transparent","Opaque")) +
-  annotate(geom="text", x=0.8, y=0.02, label = paste0("Mean = \n",mean1),
-              color="black") + 
-  annotate(geom="text", x=1.8, y=0.045, label = paste0("Mean = \n",mean0),
-              color="black") +
-  theme(axis.title.y = element_blank(),
-        legend.position = "bottom",
-        axis.title.x = element_blank(),
-        axis.text.x = element_blank())
+cor1 <- as.data.frame(cor(desc_c1, use = "pairwise"))
 
-plotF <- ggarrange(plot1,plot2)
->>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
+desc_c2 <- select(cri_cur_long, verif, exact, deviance_abs, stata, stat_degree, stat_skill, difficult, numinteam, u_expgroup1)
+
+desc_c2$u_expgroup1 <- as.numeric(desc_c2$u_expgroup1)
+
+cor2 <- as.data.frame(cor(desc_c2, use = "pairwise"))
+
+# add correlations to table
+
+desc[4:6,6:8] <- cor1[1:3,1:3]
+
+desc[12:17,6:8] <- cor1[4:9,1:3]
+
+desc[8:10,9:11] <- cor2[1:3,1:3]
+
+desc[12:17,9:11] <- cor2[4:9,1:3]
+
+write.csv(desc, file = "results/Tbl2.csv")
+```
+
+
+```{r tbl2fig2}
+ggplot(desc) +
+  geom_bar(aes(x = Group, y = verif))
 ```
 

@@ -233,7 +233,47 @@ cri_long <- left_join(cri_long, cri_long_orig, by = c("dv_tag","Exp1"))
 
 cri_cur_long <- left_join(cri_cur_long, cri_long_orig, by = c("dv_tag","Exp1"))
 
-# remove team that ran Python and could not get convergence
+
+```
+## Create Verification Measures
+
+The goal is to produce three metrics
+
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
+|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Replication Deviance* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+
+
+```{r dvs, warning = F, message = F}
+cri_long <- cri_long %>%
+  mutate(or = round(as.numeric(or),3),
+         orig_or = round(as.numeric(orig_or),3))
+
+cri_cur_long <- cri_cur_long %>%
+  mutate(or = round(as.numeric(or),3),
+         orig_or = round(as.numeric(orig_or),3))
+
+# Verification
+
+# construct measure for positive or negative coefficient
+cri_long <- cri_long %>%
+  mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
+         rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
+         verif = ifelse(is.na(orig_or), NA,ifelse(orig_direction == rep_direction, 1, 0)),
+         exact = ifelse(is.na(orig_or), NA,ifelse(abs(deviance) < 0.01, 1, 0)))
+
+# construct measure for positive or negative coefficient
+cri_cur_long <- cri_cur_long %>%
+  mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
+         rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
+         verif = ifelse(is.na(orig_or), NA, ifelse(orig_direction == rep_direction, 1, 0)),
+         exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance) < 0.01, 1, 0)))
+```
+
+```{r absdev}
+# remove teams without results
 
 cri_long <- completeFun(cri_long, "or")
 cri_cur_long <- completeFun(cri_cur_long, "or")
@@ -264,7 +304,7 @@ cri_cur_long <- cri_cur_long %>%
          max = max(count, na.rm = T),
          max1 = ifelse(Exp1 == 1, max, NA))
 
-# make highest coiutn value equal in both groups
+# make highest count value equal in both groups
 cri_long <- cri_long %>%
   mutate(Exp1 = as.factor(Exp1),
          max1 = max(cri_long$max1, na.rm=T),
@@ -281,7 +321,7 @@ cri_cur_long <- cri_cur_long %>%
 
 cri_long$Exp1 <- relevel(cri_long$Exp1, "1")
 cri_cur_long$Exp1 <- relevel(cri_cur_long$Exp1, "1")
-<<<<<<< HEAD
+
 
 # create an in sample code (without original study and with non-convergence removed)
 cri_long$insamp <- ifelse(cri_long$u_teamid == 200 | cri_long$u_teamid == 300, NA, 1)
@@ -289,10 +329,21 @@ cri_long$insamp <- ifelse(cri_long$or == "speci", NA, cri_long$insamp)
 
 cri_cur_long$insamp <- ifelse(cri_cur_long$u_teamid == 200 | cri_cur_long$u_teamid == 300, NA, 1)
 cri_cur_long$insamp <- ifelse(cri_cur_long$or == "speci", NA, cri_cur_long$insamp)
-=======
-   
->>>>>>> 6e1bc239d3a8fdb69036771d11060c3beeafd85b
+
+# stats background
+
+cri_long$stat_degree <- ifelse(cri_long$backgr_degree1 == 7, 1, 0)
+cri_cur_long$stat_degree <- ifelse(cri_cur_long$backgr_degree1 == 7, 1, 0)
+
+# stata dummy
+
+cri_long$stata <- ifelse(cri_long$software == "Stata", 1, 0)
+cri_cur_long$stata <- ifelse(cri_cur_long$software == "Stata", 1, 0)
+
 ```
+
+
+
 
 ## Save Data
 
