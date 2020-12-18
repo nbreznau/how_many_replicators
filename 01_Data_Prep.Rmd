@@ -262,14 +262,18 @@ cri_long <- cri_long %>%
   mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
          rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
          verif = ifelse(is.na(orig_or), NA,ifelse(orig_direction == rep_direction, 1, 0)),
-         exact = ifelse(is.na(orig_or), NA,ifelse(abs(deviance) < 0.01, 1, 0)))
+         exact = ifelse(is.na(orig_or), NA,ifelse(abs(deviance) < 0.01, 1, 0)),
+         verif = ifelse(verif == 0 & exact == 1, 1, verif), # this corrects studies that are 1.001 and 0.999 for example which would otherwise be coded wrong in exact
+         verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif)) # this corrects for studies that are close to odd-ratio of 1 (so effect of zero), but in both original and replication are insignificant, meaning that it is a verification (roughly zero & ns in both cases)
 
 # construct measure for positive or negative coefficient
 cri_cur_long <- cri_cur_long %>%
   mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
          rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
          verif = ifelse(is.na(orig_or), NA, ifelse(orig_direction == rep_direction, 1, 0)),
-         exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance) < 0.01, 1, 0)))
+         exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance) < 0.01, 1, 0)),
+         verif = ifelse(verif == 0 & exact == 1, 1, verif),
+         verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif))
 ```
 
 ```{r absdev}
