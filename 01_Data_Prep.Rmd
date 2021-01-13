@@ -111,21 +111,39 @@ Team max used for statistics skills and mean for difficulty of replication. The 
 
 cri2 <- cri2 %>%
   rowwise() %>%
-      mutate(stat3 = -1*(min(v_341,  v_342,  v_343,  na.rm = T) - 6),  #higher is less dificult replication
-             stat4 = max(backgr_exp_teach_stat1,  backgr_exp_teach_stat2,  backgr_exp_teach_stat3,  na.rm = T),  #higher more courses taught
-             stat5 = max(backgr_exp_famil_mlm1,  backgr_exp_famil_mlm2,  backgr_exp_famil_mlm3,  na.rm = T),  #higher more MLM familiarity
-             stat6 = max(v_181,  v_182,  v_183,  na.rm = T),  #higher is more stat publications
-             stat7 = max(v_211,  v_212,  v_213,  na.rm = T)) #higher is more MLM publications
+      mutate(stat3 = -1*(max(v_341,  v_342,  v_343,  na.rm = T)),  #higher is less dificult replication
+             stat4 = mean(c(backgr_exp_teach_stat1,  backgr_exp_teach_stat2,  backgr_exp_teach_stat3),  na.rm = T),  #higher more courses taught
+             stat5 = mean(c(backgr_exp_famil_mlm1,  backgr_exp_famil_mlm2,  backgr_exp_famil_mlm3),  na.rm = T),  #higher more MLM familiarity
+             stat6 = mean(c(v_181,  v_182,  v_183),  na.rm = T),  #higher is more stat publications
+             stat7 = mean(c(v_211,  v_212,  v_213),  na.rm = T), #higher is more MLM publications
+             degree = ifelse(backgr_degree1 == 3, 1, ifelse(backgr_degree1 == 4, 2, 3)),
+             degree2 = ifelse(backgr_degree2 == 3, 1, ifelse(backgr_degree2 == 4, 2, 3)),
+             degree = ifelse(is.na(backgr_degree1) | backgr_degree1 == 7, degree2, degree))
+
+cri2$degree <- as.numeric(ifelse(is.na(cri2$degree), 3, cri2$degree))
 
 # replace -Inf values with NA
 
 cri2 <- cri2 %>%
   ungroup() %>%
-  mutate(stat3 = ifelse(stat3 == "-Inf",  NA,  stat3), 
-         stat4 = ifelse(stat4 == "-Inf",  NA,  stat4), 
-         stat5 = ifelse(stat5 == "-Inf",  NA,  stat5), 
-         stat6 = ifelse(stat6 == "-Inf",  NA,  stat6), 
-         stat7 = ifelse(stat7 == "-Inf",  NA,  stat7))
+  mutate(stat3 = ifelse(stat3 == "Inf",  NA,  stat3), 
+         stat4 = ifelse(stat4 == "-Inf" | stat4 == "NaN",  NA,  stat4), 
+         stat5 = ifelse(stat5 == "-Inf" | stat5 == "NaN",  NA,  stat5), 
+         stat6 = ifelse(stat6 == "-Inf" | stat6 == "NaN",  NA,  stat6), 
+         stat7 = ifelse(stat7 == "-Inf" | stat7 == "NaN",  NA,  stat7)) %>%
+  select(-c(degree2))
+
+# impute a few missing values
+imp <- lm(stat3 ~ stat4 + stat5 + stat6 + stat7, data = cri2)
+
+cri2$stat3i <- round(predict.lm(imp, newdata = cri2),0)
+
+cri2$stat3 <- ifelse(is.na(cri2$stat3), cri2$stat3i, cri2$stat3)
+
+cri2 <- select(cri2, -c(stat3i))
+
+
+
 
 ```
 
@@ -148,11 +166,11 @@ cri2_nomis <- select(cri2_nomis,  u_teamid,  difficult,  stat_skill)
 
 cri2 <- left_join(cri2,  cri2_nomis,  by = "u_teamid")
 
-# mean replacement
+# mean replacement (don't use, too risky)
 
-cri2 <- cri2 %>%
-  mutate(difficult = ifelse(is.na(difficult),  mean(difficult,  na.rm = T),  difficult), 
-         stat_skill = ifelse(is.na(stat_skill),  mean(stat_skill,  na.rm = T),  stat_skill))
+# cri2 <- cri2 %>%
+#  mutate(difficult = ifelse(is.na(difficult),  mean(difficult,  na.rm = T),  difficult), 
+#         stat_skill = ifelse(is.na(stat_skill),  mean(stat_skill,  na.rm = T),  stat_skill))
 
 rm(cri2_nomis,  preds,  cfa)
 
@@ -169,7 +187,7 @@ cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
 
 # select only needed vars
 
-cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1,  numinteam,  software_final_models,  difficult,  stat_skill)
+cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_degree2, backgr_degree3,  numinteam,  software_final_models,  degree, difficult,  stat_skill)
 
 cri <- left_join(cri,  cri2,  by = "u_teamid")
 
@@ -186,7 +204,7 @@ It is necessary to convert them into long form for plotting and analysis
 
 ```{r results}
 
-columns <- c("x", "Exp1", "oa10", "s10", "dif10", "oa20", "s20", "dif20", "oa30", "s30", "dif30", "oa40", "s40", "dif40", "oa50", "s50", "dif50", "oa55", "s55", "dif55", "oa60", "s60", "dif60", "oa65", "s65", "dif65", "oa70", "s70", "dif70", "oa75", "s75", "dif75", "oa80", "s80", "dif80", "oa85", "s85", "dif85", "oa90", "s90", "dif90", "oa97", "s97", "dif97", "oa100", "s100", "dif100", "oa107", "s107", "dif107", "oa110", "s110", "dif110", "oa117", "s117", "dif117", "oa120", "s120", "dif120", "oa127", "s127", "dif127", "oa131", "s131", "dif131", "oa141", "s141", "dif141", "oa151", "s151", "dif151", "oa161", "s161", "dif161", "oa175", "s175", "dif175", "oa171", "s171", "dif171", "oa185", "s185", "dif185", "oa181", "s181", "dif181", "oa195", "s195", "dif195", "oa191", "s191", "dif191", "oa205", "s205", "dif205", "oa201", "s201", "dif201", "oa217", "s217", "dif217", "oa211", "s211", "dif211", "oa227", "s227", "dif227", "oa221", "s221", "dif221", "oa237", "s237", "dif237", "oa231", "s231", "dif231", "oa247", "s247", "dif247", "oa241", "s241", "dif241", "oa400", "s400", "dif400", "oa401", "s401", "dif401", "oa390", "s390", "dif390", "oa391", "s391", "dif391", "oa380", "s380", "dif380", "oa381", "s381", "dif381", "oa370", "s370", "dif370", "oa371", "s371", "dif371", "u_teamid", "u_teamid2", "u_expgroup1", "backgr_degree1", "numinteam", "software_final_models", "difficult", "stat_skill")
+columns <- c("x", "Exp1", "oa10", "s10", "dif10", "oa20", "s20", "dif20", "oa30", "s30", "dif30", "oa40", "s40", "dif40", "oa50", "s50", "dif50", "oa55", "s55", "dif55", "oa60", "s60", "dif60", "oa65", "s65", "dif65", "oa70", "s70", "dif70", "oa75", "s75", "dif75", "oa80", "s80", "dif80", "oa85", "s85", "dif85", "oa90", "s90", "dif90", "oa97", "s97", "dif97", "oa100", "s100", "dif100", "oa107", "s107", "dif107", "oa110", "s110", "dif110", "oa117", "s117", "dif117", "oa120", "s120", "dif120", "oa127", "s127", "dif127", "oa131", "s131", "dif131", "oa141", "s141", "dif141", "oa151", "s151", "dif151", "oa161", "s161", "dif161", "oa175", "s175", "dif175", "oa171", "s171", "dif171", "oa185", "s185", "dif185", "oa181", "s181", "dif181", "oa195", "s195", "dif195", "oa191", "s191", "dif191", "oa205", "s205", "dif205", "oa201", "s201", "dif201", "oa217", "s217", "dif217", "oa211", "s211", "dif211", "oa227", "s227", "dif227", "oa221", "s221", "dif221", "oa237", "s237", "dif237", "oa231", "s231", "dif231", "oa247", "s247", "dif247", "oa241", "s241", "dif241", "oa400", "s400", "dif400", "oa401", "s401", "dif401", "oa390", "s390", "dif390", "oa391", "s391", "dif391", "oa380", "s380", "dif380", "oa381", "s381", "dif381", "oa370", "s370", "dif370", "oa371", "s371", "dif371", "u_teamid", "u_teamid2", "u_expgroup1", "backgr_degree1", "backgr_degree2", "backgr_degree3", "numinteam", "software_final_models", "degree", "difficult", "stat_skill")
 
 colnames(cri) <- columns
 colnames(cri_cur) <- columns
@@ -215,8 +233,8 @@ rm(columns)
 
 # update colnames
 
-colnames(cri_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","numinteam","software","difficult","stat_skill","dv_tag","deviance","or","sig")
-colnames(cri_cur_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","numinteam","software","difficult","stat_skill","dv_tag","deviance","or","sig")
+colnames(cri_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software", "degree", "difficult","stat_skill","dv_tag","deviance","or","sig")
+colnames(cri_cur_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software","degree", "difficult","stat_skill","dv_tag","deviance","or","sig")
 
 # make original study a value in each row
 
@@ -336,8 +354,17 @@ cri_cur_long$insamp <- ifelse(cri_cur_long$or == "speci", NA, cri_cur_long$insam
 
 # stats background
 
-cri_long$stat_degree <- ifelse(cri_long$backgr_degree1 == 7, 1, 0)
-cri_cur_long$stat_degree <- ifelse(cri_cur_long$backgr_degree1 == 7, 1, 0)
+cri_long <- cri_long %>%
+  mutate(backgr_degree2 = ifelse(is.na(backgr_degree2), 6, backgr_degree2),
+         backgr_degree3 = ifelse(is.na(backgr_degree3), 6, backgr_degree3),
+         stat_degree = ifelse(backgr_degree1 == 7, 1, ifelse(backgr_degree2 == 7, 1, ifelse(backgr_degree3 == 7, 1, 0))))
+         
+cri_cur_long <- cri_cur_long %>%
+  mutate(backgr_degree2 = ifelse(is.na(backgr_degree2), 6, backgr_degree2),
+         backgr_degree3 = ifelse(is.na(backgr_degree3), 6, backgr_degree3),
+         stat_degree = ifelse(backgr_degree1 == 7, 1, ifelse(backgr_degree2 == 7, 1, ifelse(backgr_degree3 == 7, 1, 0))))         
+         
+
 
 # stata dummy
 

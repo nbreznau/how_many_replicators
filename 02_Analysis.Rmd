@@ -3,22 +3,35 @@ title: "Researcher Variability in Replications: Replication File, Step 2"
 output: html_notebook
 ---
 
-
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
+|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Replication Deviance* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
 
 ```{r setup}
 rm(list = ls())
 library(pacman)
 
 
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra","ggpubr","lme4")
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot")
+
+```
 
 
+```{r setup2}
 # load data from 01_Data_Prep
 load(file = "data/data.Rdata")
 
 #remove original study from data
 cri_long <- subset(cri_long, insamp == 1)
 cri_cur_long <- subset(cri_cur_long, insamp == 1)
+
+# Team 33 missing data on stat degree, code to 0
+cri_cur_long$stat_degree <- ifelse(is.na(cri_cur_long$stat_degree), 0, cri_cur_long$stat_degree)
+
+# disable scientific notation
+options(scipen = 999)
 ```
 
 
@@ -209,28 +222,282 @@ cri_cur_agg <- aggregate(cri_cur_long, by = list(cri_cur_long$u_teamid), FUN = m
 
 ## Explaining Variance
 
-Multilevel logistic regressions (general mixed models with lme4) run for verifications and exact verifications and then a multilevel linear model (glm) for absolute deviance from original.
+Our observations take place only at the team level, therefore it is only necessary to run a regression on the team averages ('level-2') of the three outcome variables *verif*, *exact* and *deviance_abs*.
+
+Aggregate data to team-level
+
+```{r aggregate_team}
+# curated
+cri_team <- cri_cur_long %>%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
+  group_by(u_teamid2) %>%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T))
+
+cri_team_orig <- cri_long %>%
+  group_by(u_teamid2) %>%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T))
+
+cri_team$degree <- factor(cri_team$degree, labels = c("Sociology", "Political Science", "Other"))
+cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Political Science", "Other"))
+
+# trim outlier
+cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
+cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
+
+
+
+
+```
+Variance decomposition
+
+```{r decomp}
+# curated
+mlm01_verif <- glmer(verif ~ (1 | u_teamid2), family = binomial, data = cri_cur_long)
+
+mlm11_exact <- glmer(exact ~ (1 | u_teamid2), family = binomial, data = cri_cur_long)
+
+mlm21_deviance <- lmer(deviance_abs ~ (1 | u_teamid2), data = cri_cur_long)
+
+# original
+mlm01_verif_orig <- glmer(verif ~ (1 | u_teamid2), family = binomial, data = cri_long)
+
+mlm11_exact_orig <- glmer(exact ~ (1 | u_teamid2), family = binomial, data = cri_long)
+
+mlm21_deviance_orig <- lmer(deviance_abs ~ (1 | u_teamid2), data = cri_long)
+
+tab_model(mlm01_verif, mlm01_verif_orig, mlm11_exact, mlm11_exact_orig, mlm21_deviance, mlm21_deviance_orig,show.ci = F, file = "results/mlm.htm")
+
+mlm <- as.data.frame(read_html("results/mlm.htm") %>% html_table(fill=TRUE))
+  
+```
+
+Variance decomposition reveals that of the total variance, `r paste0(100*(as.numeric(mlm$verif[mlm$Var.1 == "ICC"])),"%")` of *Verification*, `r paste0(100*(as.numeric(mlm$exact[mlm$Var.1 == "ICC"])),"%")` of *Exact Verification*, and `r paste0(100*(as.numeric(mlm$deviance_abs[mlm$Var.1 == "ICC"])),"%")` of *Replication Deviance* occurs between-teams (as opposed to within-teams).
+
+### Regressions predicting within-team variance **curated**
 
 ```{r varexp}
 
-# baseline
-m01_verif <- lmer(verif ~ (1 | u_teamid2), data = cri_cur_long)
-m11_exact <- lmer(exact ~ (1 | u_teamid2), data = cri_cur_long)
-m21_deviance <- glm(deviance_abs ~ (1 | u_teamid2), data = cri_cur_long)
 
-# variables
-m02_verif <- lmer(verif ~ stata + stat_degree + stat_skill + difficult + numinteam(1 | u_teamid2), data = cri_cur_long)
-m12_exact <- lmer(exact ~ stata + stat_degree + stat_skill + difficult + numinteam(1 | u_teamid2), data = cri_cur_long)
-m22_deviance <- lmer(deviance_abs ~ stata + stat_degree + stat_skill + difficult + numinteam(1 | u_teamid2), data = cri_cur_long)
+# variables, researcher aspects
+
+# MEANS
+m01_verif_mean <- lm(verif_m ~ exp + stata + stat_skill , data = cri_team)
+
+m11_exact_mean <- lm(exact_m ~ exp + stata + stat_skill , data = cri_team)
+
+m21_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill , data = cri_team)
+
+#SDs
+m001_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill , data = cri_team)
+
+m011_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill , data = cri_team)
+
+m021_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill , data = cri_team)
 
 
-m01_verif_dev <- as.data.frame(VarCorr(m01_verif))
-m02_verif_dev <- as.data.frame(VarCorr(m02_verif))
+# unimportant criteria
 
-m11_exact_dev <- as.data.frame(VarCorr(m11_exact))
-m12_exact_dev <- as.data.frame(VarCorr(m12_exact))
+# MEANS
+m02_verif_mean <- lm(verif_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
+
+m12_exact_mean <- lm(exact_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
+
+m22_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
+
+#SDs
+m002_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
+
+m012_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
+
+m022_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
+
+
+# difficulty
+
+# MEANS
+m03_verif_mean <- lm(verif_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
+
+m13_exact_mean <- lm(exact_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
+
+m23_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
+
+#SDs
+m003_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
+
+m013_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
+
+m023_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
+
+
 
 ```
 
-create coeff plot
+### Regressions predicting within-team variance **original**
+
+```{r varexp_orig}
+
+
+# variables, researcher aspects
+
+# MEANS
+m01_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill , data = cri_team_orig)
+
+m11_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill , data = cri_team_orig)
+
+m21_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill , data = cri_team_orig)
+
+#SDs
+m001_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill , data = cri_team_orig)
+
+m011_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill , data = cri_team_orig)
+
+m021_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill , data = cri_team_orig)
+
+
+# Unimportant criteria
+
+# MEANS
+m02_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+m12_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+m22_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+#SDs
+m002_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+m012_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+m022_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
+
+
+# Difficulty
+
+# MEANS
+m03_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
+
+m13_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
+
+m23_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
+
+#SDs
+m003_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
+
+m013_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
+
+m023_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
+
+```
+
+```{r}
+cor <- select(cri_team, verif_m, exact_m, dev_m, stata, stat_skill, difficult)
+cor1 <- cor(cor, use = "pairwise.complete.obs")
+
+cor_orig <- select(cri_team_orig, verif_m, exact_m, dev_m, stata, stat_skill, difficult)
+cor1_orig <- cor(cor_orig, use = "pairwise.complete.obs")
+
+```
+
+
+### Regression Tables Curated
+```{r regtbl}
+tab_model(m01_verif_mean, m02_verif_mean, m03_verif_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+tab_model(m11_exact_mean, m12_exact_mean, m13_exact_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+
+tab_model(m21_deviance_mean, m22_deviance_mean, m23_deviance_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+```
+
+### Regression Tables Original
+```{r regtbl_orig}
+tab_model(m01_verif_mean_orig, m02_verif_mean_orig, m03_verif_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+
+tab_model(m11_exact_mean_orig, m12_exact_mean_orig, m13_exact_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+
+tab_model(m21_deviance_mean_orig, m22_deviance_mean_orig, m23_deviance_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+
+```
+
+### Indirect Effects
+
+There are clearly effects of these through perceived difficulty
+
+```{r diff_dv}
+m1_diff <- lm(difficult ~ stata + stat_skill, data = cri_team)
+
+m1_diff_orig <- lm(difficult ~ stata + stat_skill, data = cri_team_orig)
+
+tab_model(m1_diff, m1_diff_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
+```
+
+### SEM
+
+```{r sem}
+m1 <- 'verif_m ~ exp + stata + stat_skill'
+m2 <- 'verif_m ~ exp + stata + stat_skill + difficult'
+m3 <- 'verif_m ~ exp + a2*stata + b2*stat_skill + m*difficult
+       difficult ~ a1*stata + b1*stat_skill
+       # total effects
+         total_stata := a2 + (a1*m)
+         total_stat_skill := b2 + (b1*m)
+       # indirect effects
+         indir_stata := a1*m
+         indir_stat_skill := b1*m'
+
+m1fit <- sem(m1, data = cri_team_orig)
+m2fit <- sem(m2, data = cri_team_orig)
+m3fit <- sem(m3, data = cri_team_orig)
+
+m1out <- summary(m1fit, fit.measures = T)
+m2out <- summary(m2fit, fit.measures = T)
+m3out <- summary(m3fit, fit.measures = T)
+
+# not really ideal for showing all features of the model
+# lavaanPlot(model = m3fit, coefs = T, stand = T, sig = 1.00)
+
+# m1out[["FIT"]][["aic"]]
+```
+
+
+### Plotting the model
+
+What led to mistakes - lack of transparency, working in the same software as the original - some kind of procedural similarity that is unique to softwares. 
+
+Show all three models and their fit statistics, then plot the direct and indirect effects.
+
+```{r}
+
+
+```
+
+
+### Predict routine v. non-routine
+
 
