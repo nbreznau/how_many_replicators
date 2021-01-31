@@ -1,6 +1,6 @@
 ---
 title: "Researcher Variability in Replications: Replication File, Step 1"
-output: html_notebook
+output: html_document
 ---
 
 This project uses data from the Crowdsourced Replication Initiative ([CRI](https://osf.io/preprints/socarxiv/6j9qb/)). This represents the first stage where reseracher participants had to replicate a study by Brady and Finnigan ([2014](https://doi.org/10.1177/0003122413513022)). The teams consisted of 1-3 members and were randmly divided into two groups,  one with the original study,  paper and code and the other with only a anonymized methods section,  no knowledge of the original study (or link to it in their work) and no code. 
