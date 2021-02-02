@@ -1,6 +1,6 @@
 ---
 title: "Researcher Variability in Replications: Replication File, Step 2"
-output: html_notebook
+output: html_document
 ---
 
 |Metric|Definition|Measure|
@@ -45,7 +45,7 @@ options(scipen = 999)
 ```
 
 
-A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid)) - 2` teams
+A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid))` teams
 
 ## Figure 1
 
