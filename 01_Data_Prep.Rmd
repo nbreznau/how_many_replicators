@@ -9,8 +9,8 @@ Datafiles needed
 
 | File | Description |
 |------|-------------|
-| cristageone.xlsx | Results of the CRI in raw format,  as the teams submitted them |
-| cristageon.cur1.xlsx | Results after code curation |
+| cristageone.xlsx | Results of the CRI in raw format; odd-ratios, significance and deviance from original,  as the teams submitted them |
+| cristageone.cur1.xlsx | Results after code curation |
 | cri_survey_wide_public_nolabs.dta | Survey of the replicators |
 | teamsize.csv | Datafile containing teamsize and primary software used |
 
@@ -47,8 +47,6 @@ cri$u_teamid <- cri$`Team ID`
 cri_cur$u_teamid <- cri_cur$`Team ID`
 
 # unique IDs for two-result teams
-
-
 cri <- cri %>%
   mutate(u_teamid2 = ifelse(u_teamid == 70 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  701,  u_teamid), 
          u_teamid2 = ifelse(u_teamid == 101 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  1001,  u_teamid2))
@@ -65,7 +63,7 @@ cri_cur <- cri_cur %>%
 
 Original work up of individual/team researcher qualities done in Stata
 
-NOTE: These Stata files include identifying information breaking the anonymity of the teams,  so we have to clean them before making them public. The CRI provided a file with the cleaned and merged data "cri_survey_wide_public.dta" and its raw data (without labels) version with "cri_survey_wide_public_nolabs.dta"
+NOTE: These Stata files include identifying information breaking the anonymity of the teams,  so we have to clean them before making them public. The CRI provided a file with the cleaned and merged data "cri_survey_wide_public_nolabs.dta" and its raw data (without labels) version with "cri_survey_wide_public_nolabs.dta"
 
 This was created from the following:
 
@@ -179,8 +177,9 @@ rm(cri2_nomis,  preds,  cfa)
 
 ### Merge
 
-```{r teamsize}
+```{r merge_two}
 
+# teamsize unfortunately not in these data
 teamsize <- read.csv(file = "data/teamsize.csv",  header = T)
 
 cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
@@ -189,22 +188,33 @@ cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
 
 cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_degree2, backgr_degree3,  numinteam,  software_final_models,  degree, difficult,  stat_skill)
 
+
+# add instances of routine reseracher variability
+routine <- read.csv(file = "data/routine_var.csv", header = F)
+
+colnames(routine) <- c("routine","u_teamid")
+routine$routine <- as.numeric("1")
+
+
+cri2 <- left_join(cri2, routine, by = "u_teamid")
+cri2$routine <- ifelse(is.na(cri2$routine), 0, cri2$routine)
+
 cri <- left_join(cri,  cri2,  by = "u_teamid")
 
 cri_cur <- left_join(cri_cur,  cri2,  by = "u_teamid")
 
-rm(teamsize,  cri2)
+rm(teamsize,  routine, cri2)
 
 ```
 
 ### Replication Results
 
-It is necessary to convert them into long form for plotting and analysis
+It is necessary to convert them into long form for plotting and analysis. Also, not that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 70 and 101)
 
 
 ```{r results}
 
-columns <- c("x", "Exp1", "oa10", "s10", "dif10", "oa20", "s20", "dif20", "oa30", "s30", "dif30", "oa40", "s40", "dif40", "oa50", "s50", "dif50", "oa55", "s55", "dif55", "oa60", "s60", "dif60", "oa65", "s65", "dif65", "oa70", "s70", "dif70", "oa75", "s75", "dif75", "oa80", "s80", "dif80", "oa85", "s85", "dif85", "oa90", "s90", "dif90", "oa97", "s97", "dif97", "oa100", "s100", "dif100", "oa107", "s107", "dif107", "oa110", "s110", "dif110", "oa117", "s117", "dif117", "oa120", "s120", "dif120", "oa127", "s127", "dif127", "oa131", "s131", "dif131", "oa141", "s141", "dif141", "oa151", "s151", "dif151", "oa161", "s161", "dif161", "oa175", "s175", "dif175", "oa171", "s171", "dif171", "oa185", "s185", "dif185", "oa181", "s181", "dif181", "oa195", "s195", "dif195", "oa191", "s191", "dif191", "oa205", "s205", "dif205", "oa201", "s201", "dif201", "oa217", "s217", "dif217", "oa211", "s211", "dif211", "oa227", "s227", "dif227", "oa221", "s221", "dif221", "oa237", "s237", "dif237", "oa231", "s231", "dif231", "oa247", "s247", "dif247", "oa241", "s241", "dif241", "oa400", "s400", "dif400", "oa401", "s401", "dif401", "oa390", "s390", "dif390", "oa391", "s391", "dif391", "oa380", "s380", "dif380", "oa381", "s381", "dif381", "oa370", "s370", "dif370", "oa371", "s371", "dif371", "u_teamid", "u_teamid2", "u_expgroup1", "backgr_degree1", "backgr_degree2", "backgr_degree3", "numinteam", "software_final_models", "degree", "difficult", "stat_skill")
+columns <- c("x", "Exp1", "oa10", "s10", "dif10", "oa20", "s20", "dif20", "oa30", "s30", "dif30", "oa40", "s40", "dif40", "oa50", "s50", "dif50", "oa55", "s55", "dif55", "oa60", "s60", "dif60", "oa65", "s65", "dif65", "oa70", "s70", "dif70", "oa75", "s75", "dif75", "oa80", "s80", "dif80", "oa85", "s85", "dif85", "oa90", "s90", "dif90", "oa97", "s97", "dif97", "oa100", "s100", "dif100", "oa107", "s107", "dif107", "oa110", "s110", "dif110", "oa117", "s117", "dif117", "oa120", "s120", "dif120", "oa127", "s127", "dif127", "oa131", "s131", "dif131", "oa141", "s141", "dif141", "oa151", "s151", "dif151", "oa161", "s161", "dif161", "oa175", "s175", "dif175", "oa171", "s171", "dif171", "oa185", "s185", "dif185", "oa181", "s181", "dif181", "oa195", "s195", "dif195", "oa191", "s191", "dif191", "oa205", "s205", "dif205", "oa201", "s201", "dif201", "oa217", "s217", "dif217", "oa211", "s211", "dif211", "oa227", "s227", "dif227", "oa221", "s221", "dif221", "oa237", "s237", "dif237", "oa231", "s231", "dif231", "oa247", "s247", "dif247", "oa241", "s241", "dif241", "oa400", "s400", "dif400", "oa401", "s401", "dif401", "oa390", "s390", "dif390", "oa391", "s391", "dif391", "oa380", "s380", "dif380", "oa381", "s381", "dif381", "oa370", "s370", "dif370", "oa371", "s371", "dif371", "u_teamid", "u_teamid2", "u_expgroup1", "backgr_degree1", "backgr_degree2", "backgr_degree3", "numinteam", "software_final_models", "degree", "difficult", "stat_skill","routine")
 
 colnames(cri) <- columns
 colnames(cri_cur) <- columns
@@ -233,8 +243,8 @@ rm(columns)
 
 # update colnames
 
-colnames(cri_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software", "degree", "difficult","stat_skill","dv_tag","deviance","or","sig")
-colnames(cri_cur_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software","degree", "difficult","stat_skill","dv_tag","deviance","or","sig")
+colnames(cri_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software", "degree", "difficult","stat_skill", "routine", "dv_tag", "deviance","or","sig")
+colnames(cri_cur_long) <- c("x","Exp1","u_teamid","u_teamid2","u_expgroup1","backgr_degree1","backgr_degree2","backgr_degree3","numinteam","software","degree", "difficult","stat_skill", "routine", "dv_tag", "deviance", "or","sig")
 
 # make original study a value in each row
 
@@ -250,6 +260,8 @@ colnames(cri_long_orig) <- c("Exp1","dv_tag","orig_or","orig_sig")
 cri_long <- left_join(cri_long, cri_long_orig, by = c("dv_tag","Exp1"))
 
 cri_cur_long <- left_join(cri_cur_long, cri_long_orig, by = c("dv_tag","Exp1"))
+
+rm(cri_long_orig)
 
 
 ```
@@ -370,6 +382,23 @@ cri_cur_long <- cri_cur_long %>%
 
 cri_long$stata <- ifelse(cri_long$software == "Stata", 1, 0)
 cri_cur_long$stata <- ifelse(cri_cur_long$software == "Stata", 1, 0)
+
+#remove original study from data
+cri_long <- subset(cri_long, insamp == 1)
+cri_cur_long <- subset(cri_cur_long, insamp == 1)
+
+# Team 33 missing data on stat degree, code to 0
+cri_cur_long$stat_degree <- ifelse(is.na(cri_cur_long$stat_degree), 0, cri_cur_long$stat_degree)
+
+# Make soc degree variable (versus Poli Sci and Other)
+cri_cur_long$degree_soc <- ifelse(is.na(cri_cur_long$degree), 3, cri_cur_long$degree)
+
+cri_cur_long$degree_soc <- ifelse(cri_cur_long$degree_soc == 1, 1, 0)
+
+cri_long$degree_soc <- ifelse(is.na(cri_long$degree), 3, cri_long$degree)
+
+cri_long$degree_soc <- ifelse(cri_long$degree_soc == 1, 1, 0)
+
 
 ```
 
