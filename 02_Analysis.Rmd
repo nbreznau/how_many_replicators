@@ -508,12 +508,17 @@ ggplot(cri_sum_plot4) +
   geom_errorbar(aes(x=routine, ymin=dev_routine-(dev_routine_sd/sqrt(dev_routine_n)), ymax = dev_routine+(dev_routine_sd/sqrt(dev_routine_n)), width = 0.4)) +
   coord_flip() +
   scale_fill_manual(values = c("#D55E00","#009E73","goldenrod","mediumturquoise")) +
-  geom_label(aes(x=4, y=0.0005, label = "Had Routine Errors\n~34% of group"), fill = "white",
+  geom_label(aes(x=4, y=0.0007, label = "Routine Errors in\n34% of Group"), fill = "grey90", fontface = 3, size = 3,
               color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  geom_label(aes(x=2, y=0.0005, label = "Had Routine Errors\n~88% of group"), fill = "white",
+  geom_label(aes(x=2, y=0.0007, label = "Routine Errors in\n88% of Group"), fill = "grey90", fontface = 3, size = 3,
               color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  annotate(geom = "text", label = "Transparent Group", y = -0.001, x = 3.5, angle = 90, vjust = 0) +
+  geom_label(aes(x=3, y=0.005, label = "No Routine Errors in\n66% of Group"), fill = "white", fontface = 3, size = 3,
+              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
+  geom_label(aes(x=1, y=0.0007, label = "No Routine Errors in\n12% of Group"), fill = "grey90", fontface = 3, size = 3,
+              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
+  annotate(geom = "text", label = "Transparent Group", y = -0.001, x = 3.5, angle = 90, vjust= 0) +
   annotate(geom = "text", label = "Opaque Group", y = -0.001, x = 1.5, angle = 90, vjust = 0) +
+  #annotate("text", label = "34%", y = 0.03, x = 4, fontface = 4) +
   geom_vline(xintercept = 2.5, color = "grey23") +
   ylab(label = "Deviance from Original Results") +
   theme_classic() +
