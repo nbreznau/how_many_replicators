@@ -6,10 +6,10 @@ output: html_document
 |Metric|Definition|Measure|
 |------|----------|---------|
 |*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
-|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
-|*Replication Deviance* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
-```{r setup}
+```{r setup, warning = F, message = F}
 rm(list = ls())
 library(pacman)
 
@@ -20,7 +20,7 @@ pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", 
 ```
 
 
-```{r setup2}
+```{r setup2, warning = F, message = F}
 # load data from 01_Data_Prep
 load(file = "data/data.Rdata")
 
@@ -34,10 +34,81 @@ A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri
 
 ## Figure 1
 
+This plots how many replicators it would take to achieve replication reliability defined as the minimum number of replicators to result in a majority coming to the correct answer (here a verification) at a confidence level of 95%. 
 
+We calculate *P* as the probability that X=x (that a replicator will get the correct answer more than 50% of the time; for simplicity we assign 51% to x)
 
+$P(X=x)=(\frac{n}{x}) p^x(1-p)^{(n-x)}$
+
+Then we calculate n for different values of P and p. 
+
+First we need to map values of *x* for *n* trials (so that *x* is always at least 51% of n). We do this in a matrix to make plotting of the figure easy.
 
 ```{r fig1}
+# calculate x at its for each value of n
+# use a simple 25 n by 25 x matrix
+
+fig1 <- data.frame(n = rep(1:25,25))
+fig1 <- data.frame(fig1[order(fig1$n),])
+colnames(fig1) <- c("n")
+fig1$x <- rep(1:25,25)
+
+fig1 <- fig1 %>%
+  mutate(x_t = round(n/1.99,0),
+         x_min = ifelse(n/x_t == 2, x_t + 1, x_t),
+         x = ifelse(x < x_min, x_min, x), # remove cases where x is less than 51%
+         p_75 = 1-pbinom(x-1,n,0.75)) # compute cumulative probability of all values less than x, then subtract this from 1 to get all values greater than or equal to x
+
+#loop to generate columns for remaining values of p
+for (p in 76:99) {
+fig1 <- fig1 %>%
+  mutate(hold = 1-pbinom(x-1,n,p/100))
+
+assign(paste0("p_",p), data.frame(fig1$hold))
+
+}
+
+ps <- cbind(p_76,p_77,p_78,p_79,p_80,p_81,p_82,p_83,p_84,p_85,p_86,p_87,p_88,p_89,p_90,p_91,p_92,p_93,p_94,p_95,p_96,p_97,p_98,p_99)
+
+colnames(ps) <- c("p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_84","p_85","p_86","p_87","p_88","p_89","p_90","p_91","p_92","p_93","p_94","p_95","p_96","p_97","p_98","p_99")
+
+fig1 <- cbind(fig1,ps)
+
+rm(p_76,p_77,p_78,p_79,p_80,p_81,p_82,p_83,p_84,p_85,p_86,p_87,p_88,p_89,p_90,p_91,p_92,p_93,p_94,p_95,p_96,p_97,p_98,p_99,ps,p)
+
+fig1 <- fig1[!(fig1$x > fig1$n),] #remove rows where x is greater than n         
+
+fig1 <- fig1 %>%
+  select(-hold)
+
+# now create a df for plotting with the minimum n for each threshold of P
+fig1_plot <- data.frame(matrix(nrow=25,ncol=4))
+colnames(fig1_plot) <- c("P_90","P_95","P_99","p")
+
+
+i = 1
+for (col in c("p_75","p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_84","p_85","p_86","p_87","p_88","p_89","p_90","p_91","p_92","p_93","p_94","p_95","p_96","p_97","p_98","p_99")) {
+  figx <- fig1 %>%
+  select(n, col) 
+  colnames(figx) <- c("n","p")
+  fig1_plot[i,1] <- min(figx$n[figx$p > 0.90])
+  fig1_plot[i,2] <- min(figx$n[figx$p > 0.95])
+  fig1_plot[i,3] <- min(figx$n[figx$p > 0.99])
+  i = i + 1
+} 
+
+fig1_plot$p <- seq(75,99)
+
+```
+
+## Figure 1. Simulated Replication Reliabilities
+
+```{r fig1}
+
+```
+
+
+```{r fig1x}
 
 
 

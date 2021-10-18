@@ -3,7 +3,7 @@ title: "Researcher Variability in Replications: Replication File, Step 1"
 output: html_document
 ---
 
-This project uses data from the Crowdsourced Replication Initiative ([CRI](https://osf.io/preprints/socarxiv/6j9qb/)). This represents the first stage where reseracher participants had to replicate a study by Brady and Finnigan ([2014](https://doi.org/10.1177/0003122413513022)). The teams consisted of 1-3 members and were randmly divided into two groups,  one with the original study,  paper and code and the other with only a anonymized methods section,  no knowledge of the original study (or link to it in their work) and no code. 
+This project uses data from the Crowdsourced Replication Initiative ([CRI](https://osf.io/preprints/socarxiv/6j9qb/)). This represents the first stage where reseracher participants had to replicate a study by Brady and Finnigan ([2014](https://doi.org/10.1177/0003122413513022)). The teams consisted of 1-3 members and were randomly divided into two groups,  one with the original study,  paper and code and the other with only a anonymized methods section,  no knowledge of the original study (or link to it in their work) and no code. 
 
 Datafiles needed 
 
@@ -61,7 +61,11 @@ cri_cur <- cri_cur %>%
 
 ### Participant Survey
 
-Original work up of individual/team researcher qualities done in Stata
+An anonymized version of this survey is cleaned and available for public use here:
+
+Breznau, Nate, Eike Mark Rinke, and Alexander Wuttke. [2021](https://doi.org/10.7910/DVN/UUP8CX). “The Crowdsourced Replication Initiative Participant Survey.” Harvard Dataverse.
+
+Our workflow was done prior to publication of this so, original work up of individual/team researcher qualities done in Stata
 
 NOTE: These Stata files include identifying information breaking the anonymity of the teams,  so we have to clean them before making them public. The CRI provided a file with the cleaned and merged data "cri_survey_wide_public_nolabs.dta" and its raw data (without labels) version with "cri_survey_wide_public_nolabs.dta"
 
@@ -97,15 +101,12 @@ cri2 <- readstata13::read.dta13("data/cri_survey_wide_public_nolabs.dta")
 
 ### Set up Measurement Variables
 
-Team max used for statistics skills and mean for difficulty of replication. The logic is that as long as each team member took part in production of the final product,  the one with the highest skills will apply those skills before accepting it. Also,  even if it was very difficult for some team members (maybe because they had to learn software,  routines,  code,  etc.),  it may have been easy for others because the one with greater skills had to do more work; we think it more accurate to take the mean as a result of this risk. 
+Team maximum used for statistics skills and mean for difficulty of replication. The logic is that as long as each team member took part in production of the final product, the one with the highest skills will apply those skills before accepting it, might be the supervisor or should ultimately have some influence. Also,  even if it was very difficult for some team members (maybe because they had to learn software,  routines,  code,  etc.),  it may have been easy for others because the one with greater skills had to do more work; we think it more accurate to take the mean as a result of this risk. 
 
 
 ```{r recodes,  warning=F,  message=F}
 
 #Generate team-specific qualities
-
-# Because the CRI required teams to define the data-generating model (or at least a test of it) and use statistical competencies to carry it out,  we suspect that the highest statistical and topical knowledge and experience per team will have the greatest influence on the results. Therefore,  for the concepts 'Stats Level' and 'Topic Level' we take the row min or max for each team (depending on coding. 
-
 
 cri2 <- cri2 %>%
   rowwise() %>%
@@ -139,9 +140,6 @@ cri2$stat3i <- round(predict.lm(imp, newdata = cri2),0)
 cri2$stat3 <- ifelse(is.na(cri2$stat3), cri2$stat3i, cri2$stat3)
 
 cri2 <- select(cri2, -c(stat3i))
-
-
-
 
 ```
 
@@ -179,7 +177,7 @@ rm(cri2_nomis,  preds,  cfa)
 
 ```{r merge_two}
 
-# teamsize unfortunately not in these data
+# teamsize unfortunately not in these data, add it here
 teamsize <- read.csv(file = "data/teamsize.csv",  header = T)
 
 cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
@@ -189,7 +187,7 @@ cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
 cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_degree2, backgr_degree3,  numinteam,  software_final_models,  degree, difficult,  stat_skill)
 
 
-# add instances of routine reseracher variability
+# add instances of routine researacher variability
 routine <- read.csv(file = "data/routine_var.csv", header = F)
 
 colnames(routine) <- c("routine","u_teamid")
@@ -209,7 +207,7 @@ rm(teamsize,  routine, cri2)
 
 ### Replication Results
 
-It is necessary to convert them into long form for plotting and analysis. Also, not that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 70 and 101)
+It is necessary to convert them into long form for plotting and analysis. Also, note that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 70 and 101)
 
 
 ```{r results}
@@ -265,6 +263,7 @@ rm(cri_long_orig)
 
 
 ```
+
 ## Create Verification Measures
 
 The goal is to produce three metrics
@@ -272,8 +271,8 @@ The goal is to produce three metrics
 |Metric|Definition|Measure|
 |------|----------|---------|
 |*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
-|*Exact Verification* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
-|*Replication Deviance* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Replication Error* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
 
 
 ```{r dvs, warning = F, message = F}
@@ -305,6 +304,8 @@ cri_cur_long <- cri_cur_long %>%
          verif = ifelse(verif == 0 & exact == 1, 1, verif),
          verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif))
 ```
+
+Remove teams that did not complete the replication
 
 ```{r absdev}
 # remove teams without results
@@ -403,11 +404,16 @@ cri_long$degree_soc <- ifelse(cri_long$degree_soc == 1, 1, 0)
 ```
 
 
-
-
 ## Save Data
 
 ```{r save}
 save.image(file = "data/data.Rdata")
 ```
 
+## Colophon
+
+This file is part of [https://github.com/nbreznau/how_many_replicators](https://github.com/nbreznau/how_many_replicators), the reproduction materials for [*How Many Replicators Does It Take to Achieve Reliability? Investigating Researcher Variability in a Crowdsourced Replication*](https://osf.io/preprints/socarxiv/j7qta/).
+
+```{r colophon, echo=FALSE}
+sessionInfo()
+```
