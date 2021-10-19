@@ -16,7 +16,7 @@ Datafiles needed
 
 
 
-```{r setup}
+```{r setup, warning = F, message = F}
 
 rm(list = ls())
 library(pacman)

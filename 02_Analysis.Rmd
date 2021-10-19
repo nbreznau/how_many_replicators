@@ -44,7 +44,7 @@ Then we calculate n for different values of P and p.
 
 First we need to map values of *x* for *n* trials (so that *x* is always at least 51% of n). We do this in a matrix to make plotting of the figure easy.
 
-```{r fig1}
+```{r fig1_prep}
 # calculate x at its for each value of n
 # use a simple 25 n by 25 x matrix
 
@@ -103,7 +103,7 @@ fig1_plot$p <- seq(75,99)
 
 ## Figure 1. Simulated Replication Reliabilities
 
-```{r fig1}
+```{r fig1_out}
 
 ```
 
