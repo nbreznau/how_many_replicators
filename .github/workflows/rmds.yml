@@ -2,9 +2,9 @@ name: Render all R Markdown notebooks
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   render:
@@ -35,6 +35,5 @@ jobs:
         with:
           name: notebooks
           path: |
-            code/data_prep/*.html
-            code/*.html
+            *.html
             results/
