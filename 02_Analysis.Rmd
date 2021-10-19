@@ -103,8 +103,41 @@ fig1_plot$p <- seq(75,99)
 
 ## Figure 1. Simulated Replication Reliabilities
 
-```{r fig1_out}
+```{r fig1_out, warning = F, message = F}
+yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
+xl <- expression(paste("Binamial Probability that A Single Replication is Accurate (", italic("p"), ")", sep = ""))
+P99 <- expression(paste(italic("P"), " = 99% confidence"))
+P95 <- expression(paste(italic("P"), " = 95%"))
+P90 <- expression(paste(italic("P"), " = 90%"))
 
+reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4) are successful in 99% of all potential\nreplication trials"
+
+agg_png(filename = here::here("results/Fig1.png"), res = 144, width = 1000, height = 700)
+fig1_plot %>%
+  mutate(P_90 = P_90 - 0.05,
+         P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
+  ggplot(aes(x = p)) +
+  geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5) +
+  geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5) +
+  geom_line(aes(y = P_90), color = "#453781FF", size = 1.5) +
+  annotate("label", x = 83, y = 10, label = P99, color = "#3CBB75FF", fill = "white") +
+  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white") +
+  annotate("label", x = 80.5, y = 4, label = P90, color = "#453781FF", fill = "white") +
+  annotate("text", x = 97, y = 13, label = reps, color = "grey40", size = 3, hjust = 0) +
+  scale_x_reverse() +
+  geom_curve(
+    aes(x = 93, y = 11, xend = 89.1, yend = 7.5),
+    arrow = arrow(length = unit(0.03, "npc"), type = "closed", angle = 20),
+    color = "grey40", curvature = -0.3, lwd = 0.3) +
+  ylim(1,20) +
+  labs(y = yl, x = xl) +
+  scale_y_continuous(breaks = waiver(), n.breaks = 20) +
+  theme_classic() +
+  theme(axis.title.x = element_text(vjust=-1),
+        axis.title.y = element_text(vjust=2))
+dev.off()
+
+knitr::include_graphics(here::here("results/Fig1.png"))
 ```
 
 
