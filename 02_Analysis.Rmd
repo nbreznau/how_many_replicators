@@ -14,7 +14,7 @@ rm(list = ls())
 library(pacman)
 
 
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see")
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext")
 
 
 ```
@@ -27,6 +27,27 @@ load(file = "data/data.Rdata")
 
 # disable scientific notation
 options(scipen = 999)
+```
+
+## Test for Successful Randomization
+
+We compare means on key variables between the two experimental groups.
+
+```{r rct, warning = F, message = F}
+t_rct <- matrix(nrow = 4, ncol = 2)
+colnames(t_rct) <- c("Attribute", "ttest_p")
+# make a Stata variable for the wide form
+cri2 <- cri %>%
+  mutate(stata = ifelse(software_final_models == "Stata", 1, 0))
+t_rct[4,2] <- round(t.test(numinteam ~ u_expgroup1, data = cri2)[["p.value"]],2)
+t_rct[3,2] <- round(t.test(stat_skill ~ u_expgroup1, data = cri2)[["p.value"]],2)
+t_rct[2,2] <- round(t.test(degree ~ u_expgroup1, data = cri2)[["p.value"]],2)
+t_rct[1,2] <- round(t.test(stata ~ u_expgroup1, data = cri2)[["p.value"]],2)
+
+t_rct[,1] <- c("Stata","Stat Skill","Degree","Stata")
+rm(cri2)
+
+kable(t_rct)
 ```
 
 
@@ -45,7 +66,7 @@ Then we calculate n for different values of P and p.
 First we need to map values of *x* for *n* trials (so that *x* is always at least 51% of n). We do this in a matrix to make plotting of the figure easy.
 
 ```{r fig1_prep}
-# calculate x at its for each value of n
+# calculate x for each value of n
 # use a simple 25 n by 25 x matrix
 
 fig1 <- data.frame(n = rep(1:25,25))
@@ -105,10 +126,10 @@ fig1_plot$p <- seq(75,99)
 
 ```{r fig1_out, warning = F, message = F}
 yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
-xl <- expression(paste("Binamial Probability that A Single Replication is Accurate (", italic("p"), ")", sep = ""))
-P99 <- expression(paste(italic("P"), " = 99% confidence"))
-P95 <- expression(paste(italic("P"), " = 95%"))
-P90 <- expression(paste(italic("P"), " = 90%"))
+xl <- expression(paste("Binomial Probability that A Single Replication is Accurate (", italic("p"), ")", sep = ""))
+P99 <- expression(paste(italic("P"), " > 99% confidence"))
+P95 <- expression(paste(italic("P"), " > 95%"))
+P90 <- expression(paste(italic("P"), " > 90%"))
 
 reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4) are successful in 99% of all potential\nreplication trials"
 
@@ -120,89 +141,102 @@ fig1_plot %>%
   geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5) +
   geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5) +
   geom_line(aes(y = P_90), color = "#453781FF", size = 1.5) +
+  # P labels
   annotate("label", x = 83, y = 10, label = P99, color = "#3CBB75FF", fill = "white") +
   annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white") +
   annotate("label", x = 80.5, y = 4, label = P90, color = "#453781FF", fill = "white") +
-  annotate("text", x = 97, y = 13, label = reps, color = "grey40", size = 3, hjust = 0) +
-  scale_x_reverse() +
+  # text box and curved arrow
   geom_curve(
     aes(x = 93, y = 11, xend = 89.1, yend = 7.5),
     arrow = arrow(length = unit(0.03, "npc"), type = "closed", angle = 20),
     color = "grey40", curvature = -0.3, lwd = 0.3) +
+  annotate("label", x = 98, y = 13, label = reps, color = "grey40", size = 3, hjust = 0, fill = "white") +
+  # add white points on top of lines
+  geom_point(aes(y = P_99), color = "white", size = 0.8) +
+  geom_point(aes(y = P_95), color = "white", size = 0.8) +
+  geom_point(aes(y = P_90), color = "white", size = 0.8) +
+  scale_x_reverse() +
+
   ylim(1,20) +
   labs(y = yl, x = xl) +
   scale_y_continuous(breaks = waiver(), n.breaks = 20) +
   theme_classic() +
   theme(axis.title.x = element_text(vjust=-1),
-        axis.title.y = element_text(vjust=2))
+        axis.title.y = element_text(vjust=2),
+        panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
 dev.off()
 
 knitr::include_graphics(here::here("results/Fig1.png"))
 ```
+## Figure 2. Comparing Replication Outcomes
+
+```{r fig2}
+fig2 <- cri_long %>%
+  select(verif, exact, deviance_abs, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Original Results",
+         stat = "Verification")
+
+fig2cur <- cri_cur_long %>%
+  select(verif, exact, deviance_abs, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Curated Results",
+         stat = "Verification")
+
+fig2 <- rbind(fig2, fig2cur)
+
+fig2[5:8,2] <- fig2[1:4,3] # get a long form
+fig2[5:8, "stat"] <- "Exact Replication"
+
+fig2[9:12,2] <- fig2[1:4,4] # get a long form
+fig2[9:12, "stat"] <- "Replication Error"
+
+fig2[5:8, "group"] <- fig2[1:4, "group"]
+fig2[9:12, "group"] <- fig2[1:4, "group"]
+
+fig2[5:8, "version"] <- fig2[1:4, "version"]
+fig2[9:12, "version"] <- fig2[1:4, "version"]
+
+fig2$result <- fig2$verif_fn1*100
+
+fig3 <- fig2[9:12,]
+fig2 <- fig2[1:8,]
+
+rm(fig2cur)
+
+f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
+
+ggplot(data = fig2) +
+  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
+  scale_fill_manual(values = f2colors,
+                    labels = c("Curated Results, Opaque Group",
+                               "Curated Results, Transparent Group",
+                               "Original Results, Opaque Group",
+                               "Original Results, Transparent Group"),
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_vline(aes(xintercept = 4.75)) +
+  #annotate("text", x = 2.5, y = 34, label = "Verification\n(same sign)", angle = 90) +
+  geom_richtext(aes(x = 2.5, y = 30, label = "VERIFICATION<br>*(same sign)*"), 
+                angle = 90, label.padding = unit(10, "pt")) +
+  geom_richtext(aes(x = 7, y = 31, label = "EXACT<br>REPLICATION<br>*(within 0.01)*"), 
+                angle = 90, label.padding = unit(10, "pt")) +
+
+  ylab("Percent of Replicated Effects") +
+  coord_flip(ylim = c(25,100), clip = "on") +
+  scale_x_reverse() +
+  theme_classic() +
+  theme(axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
 
 
-```{r fig1x}
-
-
-
-plot1 <- ggplot(cri_long, aes(x = count, y = deviance_abs, color = Exp1, shape = Exp1)) +
-  geom_point(size = 2.5) + 
-  coord_cartesian(ylim=c(0, 0.5)) +
-  ylab("Replicated Effect\n(deviance from original)") +
-  scale_color_manual(values = c("#009E73","#D55E00"), name = "Replication Group", labels = c("Transparent","Opaque")) +
-  scale_shape_manual(values = c(6,2)) +
-  theme(axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 12, color = "black"),
-        axis.line.x = element_line(),
-        axis.line.y = element_line(),
-        legend.position = "none",
-        plot.background = element_blank(),
-        panel.background = element_blank(),
-        legend.background = element_blank(),
-        legend.key = element_blank(),
-        legend.text = element_text(size = 11)) +
-  guides(color = guide_legend(override.aes = list(shape = c(19,19), size=5, fill = NA)), shape = F)
-
-
-# get means to add
-mean0 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),3)
-mean1 <- round(mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),3)
-
-plot2 <- ggboxplot(cri_long, "Exp1","deviance_abs", color = "Exp1", 
-                   whisklty = 0, palette = c("#009E73","#D55E00"), 
-                   outlier.shape = NA, size = 1) +
-  coord_cartesian(ylim=c(0, 0.04)) +
-  xlab("Group") +
-  scale_fill_discrete(name = "Replication Group", labels = c("Transparent","Opaque")) +
-  annotate(geom="text", x=1.1, y=0.0145, label = paste0("mean"),
-              color="#009E73", size = 3, hjust = 0) + 
-  annotate(geom="text", x=2.1, y=0.036, label = paste0("mean"),
-              color="#D55E00", size = 3, hjust = 0) +
-  annotate(geom="text", x=1.1, y=0.013, label = paste0("deviance"),
-              color="#009E73", size = 3, hjust = 0) + 
-  annotate(geom="text", x=2.1, y=0.0345, label = paste0("deviance"),
-              color="#D55E00", size = 3, hjust = 0) +
-  annotate(geom="text", x=1.1, y=0.011, label = paste0(mean1),
-              color="#009E73", size = 3, hjust = 0, fontface = 2) + 
-  annotate(geom="text", x=2.1, y=0.0325, label = paste0(mean0),
-              color="#D55E00", size = 3, hjust = 0, fontface = 2) +
-  theme(axis.title.y = element_blank(),
-        legend.position = "bottom",
-        axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.y = element_text(size = 12),
-        plot.margin = margin(2,2,2,2),
-        legend.text = element_text(size = 11))
-
-plotF <- ggarrange(plot1,NA,plot2, ncol = 3, widths = c(7,1,7), common.legend = T, legend = "bottom")
-agg_png(filename = "results/Fig1.png", res = 144, width = 900)
-plotF
-dev.off()
-
-knitr::include_graphics("results/Fig1.png")
+#knitr::include_graphics("results/Fig2.png")
 ```
 ## Table 2
 
@@ -603,6 +637,16 @@ knitr::include_graphics("results/Fig2.png")
 A total of `r length(unique(cri_long$u_teamid[cri_long$routine == 1])) + 4` teams had routine searcher variability, but 4 of these teams also had mistakes that could not be counterfactually repaired. Thus, not counting these 4 teams, `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1])))/(length(unique(cri_long$u_teamid))-4),1)` percent of the CRI teams had routine researcher variability, but this was far more common in the opaque group which had `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "0"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "0"]))-4)),1)` percent of teams with routine variability compared to only `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "1"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "1"]))-4)),1)` percent in the transparent group.
 
 Those who had no routine error in the transparent group had an exact replication rate of `r  round(100*mean(cri_cur_long$exact[cri_cur_long$routine == 0 & cri_cur_long$u_expgroup1 == "1"], na.rm = T),1)`
+
+## Comparing Stata and R Users
+
+```{r r_vs_stata}
+r_vs_stata <- read_csv(here::here("data","r_vs_stata.csv"))
+
+
+```
+
+
 ```{r bar4}
 
 
