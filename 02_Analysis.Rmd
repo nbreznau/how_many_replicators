@@ -14,7 +14,7 @@ rm(list = ls())
 library(pacman)
 
 
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext")
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr")
 
 
 ```
@@ -126,7 +126,7 @@ fig1_plot$p <- seq(75,99)
 
 ```{r fig1_out, warning = F, message = F}
 yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
-xl <- expression(paste("Binomial Probability that A Single Replication is Accurate (", italic("p"), ")", sep = ""))
+xl <- expression(paste("Binomial Probability that a Single Replication is Accurate (", italic("p"), ")", sep = ""))
 P99 <- expression(paste(italic("P"), " > 99% confidence"))
 P95 <- expression(paste(italic("P"), " > 95%"))
 P90 <- expression(paste(italic("P"), " > 90%"))
@@ -168,9 +168,13 @@ dev.off()
 
 knitr::include_graphics(here::here("results/Fig1.png"))
 ```
+
 ## Figure 2. Comparing Replication Outcomes
 
-```{r fig2}
+### Part A. Effect-Level
+
+#### Prep Fig2a Data
+```{r fig2prep}
 fig2 <- cri_long %>%
   select(verif, exact, deviance_abs, Exp1) %>%
   group_by(Exp1) %>%
@@ -191,10 +195,13 @@ fig2cur <- cri_cur_long %>%
 
 fig2 <- rbind(fig2, fig2cur)
 
-fig2[5:8,2] <- fig2[1:4,3] # get a long form
-fig2[5:8, "stat"] <- "Exact Replication"
+fig2[5:8, "verif_fn1"] <- fig2[1:4, "exact_fn1"] # put in long form
+fig2[9:12, "verif_fn1"] <- fig2[1:4, "deviance_abs_fn1"] 
+fig2[5:8, "verif_fn2"] <- fig2[1:4, "exact_fn2"]
+fig2[9:12, "verif_fn2"] <- fig2[1:4, "deviance_abs_fn2"]
 
-fig2[9:12,2] <- fig2[1:4,4] # get a long form
+
+fig2[5:8, "stat"] <- "Exact Replication"
 fig2[9:12, "stat"] <- "Replication Error"
 
 fig2[5:8, "group"] <- fig2[1:4, "group"]
@@ -203,7 +210,8 @@ fig2[9:12, "group"] <- fig2[1:4, "group"]
 fig2[5:8, "version"] <- fig2[1:4, "version"]
 fig2[9:12, "version"] <- fig2[1:4, "version"]
 
-fig2$result <- fig2$verif_fn1*100
+fig2$result <- fig2$verif_fn1*100 # put in % scale
+fig2$se <- (fig2$verif_fn2/sqrt(1874))*100 # add standard error in % scale
 
 fig3 <- fig2[9:12,]
 fig2 <- fig2[1:8,]
@@ -212,33 +220,246 @@ rm(fig2cur)
 
 f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
 
-ggplot(data = fig2) +
+fig2$result <- round(fig2$result,1)
+```
+
+
+#### Produce Fig2a
+```{r fig2out}
+agg_png(here::here("results","Fig2a.png"), height = 700, width = 900, res = 144)
+fig2a <- ggplot(data = fig2) +
   geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
+  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
   scale_fill_manual(values = f2colors,
-                    labels = c("Curated Results, Opaque Group",
-                               "Curated Results, Transparent Group",
-                               "Original Results, Opaque Group",
-                               "Original Results, Transparent Group"),
+                    labels = c(" \nCURATED\n   Opaque\n   Group\n ",
+                               " \nCURATED\n   Transparent\n   Group\n ",
+                               " \nORIGINAL\n   Opaque\n   Group\n ",
+                               " \nORIGINAL\n   Transparent\n   Group\n "),
                     guide = guide_legend(reverse = TRUE)) +
   geom_vline(aes(xintercept = 4.75)) +
   #annotate("text", x = 2.5, y = 34, label = "Verification\n(same sign)", angle = 90) +
-  geom_richtext(aes(x = 2.5, y = 30, label = "VERIFICATION<br>*(same sign)*"), 
-                angle = 90, label.padding = unit(10, "pt")) +
-  geom_richtext(aes(x = 7, y = 31, label = "EXACT<br>REPLICATION<br>*(within 0.01)*"), 
-                angle = 90, label.padding = unit(10, "pt")) +
-
+    geom_richtext(aes(x = 2.5, y = 32, label = "VERIFICATION<br>"), 
+                angle = 90, 
+                label.padding = unit(8, "pt")
+                ) +
+  geom_richtext(aes(x = 2.5, y = 34, label = "<p style = 'font-size:10px; text-align:justify'><i>(same sign)<i></p>"), 
+                angle = 90, fill = NA, label.color = NA) +
+  geom_richtext(aes(x = 7, y = 32, label = "EXACT<br>REPLICATION<br>"), 
+                angle = 90, 
+                label.padding = unit(8, "pt")) +
+  geom_richtext(aes(x = 7, y = 35.5, label = "<p style = 'font-size:10px; text-align:justify'><i>(within 0.01)</i></p>"), 
+                angle = 90, fill = NA, label.color = NA) +
+  geom_text(aes(y = result - c(7,7,7,7,7,-7,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2$result)) +
   ylab("Percent of Replicated Effects") +
+  xlab(" ") +
+  labs(title = "A. Effect-Level Results, N = 3,742") +
   coord_flip(ylim = c(25,100), clip = "on") +
   scale_x_reverse() +
   theme_classic() +
   theme(axis.line.y = element_blank(),
         axis.ticks.y = element_blank(),
-        axis.text.y = element_blank())
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0))
+fig2a
+dev.off()
 
-
-#knitr::include_graphics("results/Fig2.png")
+knitr::include_graphics("results/Fig2a.png")
 ```
-## Table 2
+### Part B. ICC
+
+```{r fig2b_icc}
+# calculate ICC/rho
+
+#1. estimate empty model
+m1t <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
+m1o <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
+m2t <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
+m2o <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
+m3t <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
+m3o <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
+m4t <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
+m4o <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
+
+#2. icc
+a <- icc_specs(m1t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, transparent, verification") %>%
+  subset(grp == "Residual")
+aa <- icc_specs(m1o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, opaque, verification") %>%
+  subset(grp == "Residual")
+b <- icc_specs(m2t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, transparent, verification") %>%
+  subset(grp == "Residual")
+bb <- icc_specs(m2o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, opaque, verification") %>%
+  subset(grp == "Residual")
+c <- icc_specs(m3t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, transparent, exact replication") %>%
+  subset(grp == "Residual")
+cc <- icc_specs(m3o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, opaque, exact replication") %>%
+  subset(grp == "Residual")
+d <- icc_specs(m4t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, transparent, exact replication") %>%
+  subset(grp == "Residual")
+dd <- icc_specs(m4o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, opaque, exact replication") %>%
+  subset(grp == "Residual")
+
+
+icc_out <- rbind(a,aa,b,bb,c,cc,d,dd)
+rm(a,aa,b,bb,c,cc,d,dd)
+```
+
+### Part C. Team Level
+
+#### Prep Fig2b Data
+```{r fig2b_teamsummaries}
+fig2b <- cri_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = round(ifelse(deviance_abs_fn1 <= 0.01, 1, 0),2), # if replication error for the entire team is less than 0.01 then they get a zero for error and we round to the 2nd decimal then after
+         ) %>%
+  ungroup()
+
+# collapse team-level scores
+fig2b_c <- fig2b %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Original Results",
+         stat = "Verification")
+  
+  
+
+fig2bcur <- cri_cur_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = round(ifelse(deviance_abs_fn1 <= 0.01, 1, 0),2), # if replication error for the entire team is less than 0.01 then they get a zero for error and we round to the 2nd decimal then after
+         ) %>%
+  ungroup()
+
+# collapse team-level scores
+fig2bcur_c <- fig2bcur %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Curated Results",
+         stat = "Verification")
+
+fig2b <- rbind(fig2b_c, fig2bcur_c)
+rm(fig2b_c, fig2bcur, fig2bcur_c)
+
+fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
+fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
+fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
+fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
+
+
+fig2b[5:8, "stat"] <- "Exact Replication"
+fig2b[9:12, "stat"] <- "Replication Error"
+
+fig2b[5:8, "group"] <- fig2b[1:4, "group"]
+fig2b[9:12, "group"] <- fig2b[1:4, "group"]
+
+fig2b[5:8, "version"] <- fig2b[1:4, "version"]
+fig2b[9:12, "version"] <- fig2b[1:4, "version"]
+
+fig2b$result <- fig2b$verif_fn1*100 # put in % scale
+fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+
+fig3b <- fig2b[9:12,]
+fig2b <- fig2b[1:8,]
+
+fig2b$result <- round(fig2b$result,1)
+
+```
+
+#### Produce Fig2b
+
+```{r fig2bout}
+agg_png(here::here("results","Fig2b.png"), height = 700, width = 900, res = 144)
+fig2bb <- ggplot(data = fig2b) +
+  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
+  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
+  scale_fill_manual(values = f2colors) +
+  geom_vline(aes(xintercept = 4.75)) +
+  geom_richtext(aes(x = 2.5, y = 30, label = "VERIFICATION<br>"), 
+                angle = 90, 
+                label.padding = unit(8, "pt")
+                ) +
+  geom_richtext(aes(x = 2.5, y = 33, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects)<i></p>"), 
+                angle = 90, fill = NA, label.color = NA) +
+  geom_richtext(aes(x = 7, y = 30, label = "EXACT<br>REPLICATION<br>"), 
+                angle = 90, 
+                label.padding = unit(8, "pt")) +
+  geom_richtext(aes(x = 7, y = 33.5, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects</i>)"), 
+                angle = 90, fill = NA, label.color = NA) +
+  
+  # add ICC to plot
+  # title
+  annotate("text", x = 0.7, y = 89, parse = T, label = expression(paste("Within ", sigma^{2})), size = 3, color = "grey20") +
+  annotate("text", x = 1, y = 89, label = paste0(round(icc_out$percent[1],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 2, y = 89, label = paste0(round(icc_out$percent[2],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 3, y = 89, label = paste0(round(icc_out$percent[3],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 4, y = 89, label = paste0(round(icc_out$percent[4],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 5.5, y = 89, label = paste0(round(icc_out$percent[5],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 6.5, y = 89, label = paste0(round(icc_out$percent[6],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 7.5, y = 89, label = paste0(round(icc_out$percent[7],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  annotate("text", x = 8.5, y = 89, label = paste0(round(icc_out$percent[8],0),"%"), size = 3, hjust = 0, color = "grey20") +
+  # add percentages
+  geom_text(aes(y = result - c(7,7,7,7,7,-6,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2b$result)) +
+  ylab("Percent of Teams") +
+  xlab(" ") +
+  labs(title = "B. Team-Level Results, N = 87*") +
+  coord_flip(ylim = c(5,100), clip = "on") +
+  scale_x_reverse() +
+  theme_classic() +
+  theme(axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.position = "none",
+        plot.title = element_text(hjust = 0))
+fig2bb
+dev.off()
+
+knitr::include_graphics("results/Fig2b.png")
+```
+### Figure 2 Combined
+
+```{r fig2final}
+agg_png(here::here("results","Fig2.png"), width = 1300, height = 800, res = 144)
+ggarrange(fig2a,fig2bb, ncol = 2, nrow = 1, widths = c(1.4,1))
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig2.png"))
+```
+
+
+## Table 1
 
 ### Setup
 
