@@ -1,0 +1,308 @@
+		(1)	(2)	(3)	(4)	(5)	(6)
+EQUATION	VARIABLES	dgovjobs	dgovunemp	dgovincdiff	dgovretire	dgovhous	dhcare
+							
+dgovjobs	dgovjobs	.					
+		(.)					
+	netmigpct	1.065					
+		(0.656)					
+	emprate	0.964					
+		(-1.275)					
+	age	0.984*					
+		(-2.341)					
+	agesq	1.000					
+		(1.737)					
+	female	1.328***					
+		(7.889)					
+	nevermar	1.149**					
+		(2.621)					
+	divorced	1.006					
+		(0.103)					
+	widow	1.099					
+		(1.154)					
+	hhsize	1.074***					
+		(3.834)					
+	kidshh	0.999					
+		(-0.017)					
+	rural	0.950					
+		(-1.014)					
+	suburb	0.966					
+		(-0.773)					
+	lesshs	1.584***					
+		(10.592)					
+	univ	0.878**					
+		(-2.733)					
+	ptemp	1.007					
+		(0.135)					
+	unemp	1.415***					
+		(3.350)					
+	nolabor	1.034					
+		(0.702)					
+	selfemp	0.709***					
+		(-6.197)					
+	pubemp	1.152***					
+		(3.430)					
+	inczscore	0.720***					
+		(-15.659)					
+	highrel	1.152*					
+		(2.551)					
+	lowrel	0.964					
+		(-0.893)					
+	/lnsig2u	0.347**					
+		(-3.028)					
+	Constant	16.812					
+		(1.297)					
+dgovunemp	dgovunemp		.				
+			(.)				
+	netmigpct		1.182				
+			(1.344)				
+	emprate		0.974				
+			(-0.698)				
+	age		1.030***				
+			(4.078)				
+	agesq		1.000**				
+			(-2.669)				
+	female		1.080				
+			(1.958)				
+	nevermar		1.377***				
+			(5.505)				
+	divorced		1.238**				
+			(3.152)				
+	widow		1.127				
+			(1.289)				
+	hhsize		1.068**				
+			(3.245)				
+	kidshh		0.918				
+			(-1.541)				
+	rural		0.866*				
+			(-2.566)				
+	suburb		0.979				
+			(-0.450)				
+	lesshs		1.017				
+			(0.358)				
+	univ		1.230***				
+			(4.043)				
+	ptemp		1.214***				
+			(3.292)				
+	unemp		2.399***				
+			(6.789)				
+	nolabor		1.342***				
+			(5.619)				
+	selfemp		0.726***				
+			(-5.513)				
+	pubemp		1.259***				
+			(5.004)				
+	inczscore		0.814***				
+			(-9.757)				
+	highrel		0.996				
+			(-0.066)				
+	lowrel		0.942				
+			(-1.368)				
+	Constant		3.621				
+			(0.454)				
+SINGLE	/lnsig2u		0.593				
+			(-1.503)				
+	/lnsig2u			0.276***			
+				(-3.591)			
+	/lnsig2u				0.501		
+					(-1.807)		
+	/lnsig2u					0.296***	
+						(-3.433)	
+dgovincdiff	dgovincdiff			.			
+				(.)			
+	netmigpct			1.131			
+				(1.433)			
+	emprate			0.959			
+				(-1.609)			
+	age			1.020**			
+				(2.807)			
+	agesq			1.000			
+				(-1.886)			
+	female			1.244***			
+				(5.757)			
+	nevermar			1.150*			
+				(2.506)			
+	divorced			1.128			
+				(1.830)			
+	widow			1.114			
+				(1.164)			
+	hhsize			1.100***			
+				(4.823)			
+	kidshh			0.893*			
+				(-2.100)			
+	rural			1.024			
+				(0.450)			
+	suburb			1.126**			
+				(2.609)			
+	lesshs			1.603***			
+				(10.118)			
+	univ			0.935			
+				(-1.405)			
+	ptemp			1.095			
+				(1.569)			
+	unemp			1.529***			
+				(3.571)			
+	nolabor			1.016			
+				(0.308)			
+	selfemp			0.697***			
+				(-6.352)			
+	pubemp			1.325***			
+				(6.399)			
+	inczscore			0.687***			
+				(-17.531)			
+	highrel			0.955			
+				(-0.779)			
+	lowrel			0.909*			
+				(-2.254)			
+	Constant			11.944			
+				(1.271)			
+dgovretire	dgovretire				.		
+					(.)		
+	netmigpct				1.545***		
+					(3.378)		
+	emprate				0.955		
+					(-1.298)		
+	age				1.058***		
+					(3.976)		
+	agesq				1.000***		
+					(-3.378)		
+	female				1.218*		
+					(2.493)		
+	nevermar				1.211		
+					(1.620)		
+	divorced				1.015		
+					(0.110)		
+	widow				0.856		
+					(-0.857)		
+	hhsize				1.014		
+					(0.354)		
+	kidshh				0.897		
+					(-1.002)		
+	rural				0.970		
+					(-0.272)		
+	suburb				1.120		
+					(1.218)		
+	lesshs				1.171		
+					(1.578)		
+	univ				0.765**		
+					(-2.827)		
+	ptemp				0.923		
+					(-0.695)		
+	unemp				1.538		
+					(1.530)		
+	nolabor				0.947		
+					(-0.523)		
+	selfemp				0.700***		
+					(-3.300)		
+	pubemp				1.263*		
+					(2.377)		
+	inczscore				0.846***		
+					(-4.698)		
+	highrel				0.834		
+					(-1.591)		
+	lowrel				1.117		
+					(1.252)		
+	Constant				63.601		
+					(1.547)		
+dgovhous	dgovhous					.	
+						(.)	
+	netmigpct					1.395***	
+						(3.690)	
+	emprate					0.921**	
+						(-3.035)	
+	age					1.004	
+						(0.417)	
+	agesq					1.000	
+						(0.051)	
+	female					1.182***	
+						(3.773)	
+	nevermar					1.398***	
+						(5.007)	
+	divorced					1.357***	
+						(3.895)	
+	widow					1.104	
+						(0.927)	
+	hhsize					1.042	
+						(1.771)	
+	kidshh					0.958	
+						(-0.673)	
+	rural					0.854*	
+						(-2.527)	
+	suburb					1.002	
+						(0.037)	
+	lesshs					1.244***	
+						(4.020)	
+	univ					1.152*	
+						(2.491)	
+	ptemp					1.298***	
+						(3.817)	
+	unemp					2.499***	
+						(5.578)	
+	nolabor					1.204**	
+						(3.115)	
+	selfemp					0.769***	
+						(-4.089)	
+	pubemp					1.162**	
+						(2.886)	
+	inczscore					0.831***	
+						(-7.864)	
+	highrel					1.122	
+						(1.635)	
+	lowrel					0.949	
+						(-1.075)	
+	Constant					487.103**	
+						(3.053)	
+dhcare	dhcare						.
+							(.)
+	netmigpct						1.125
+							(0.644)
+	emprate						0.972
+							(-0.523)
+	age						1.035*
+							(2.151)
+	agesq						1.000*
+							(-2.106)
+	female						1.244*
+							(2.521)
+	nevermar						1.173
+							(1.198)
+	divorced						0.857
+							(-1.091)
+	widow						1.257
+							(1.120)
+	hhsize						1.003
+							(0.077)
+	kidshh						1.229
+							(1.697)
+	rural						0.957
+							(-0.347)
+	suburb						0.949
+							(-0.501)
+	lesshs						0.975
+							(-0.233)
+	univ						0.832
+							(-1.671)
+	ptemp						0.910
+							(-0.736)
+	unemp						1.157
+							(0.529)
+	nolabor						0.965
+							(-0.305)
+	selfemp						0.682**
+							(-3.254)
+	pubemp						1.100
+							(0.877)
+	inczscore						0.831***
+							(-4.797)
+	highrel						0.769*
+							(-2.029)
+	lowrel						0.933
+							(-0.690)
+	Constant						114.335
+							(1.169)
+SINGLE	/lnsig2u						1.186
+							(0.459)
+							
+	Observations	17,284	17,134	17,222	17,697	17,238	17,706
+	Number of cntry	17	17	17	17	17	17
+	z-statistics in parentheses						
+	*** p<0.001, ** p<0.01, * p<0.05						

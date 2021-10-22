@@ -119,7 +119,14 @@ cri2 <- cri2 %>%
              degree2 = ifelse(backgr_degree2 == 3, 1, ifelse(backgr_degree2 == 4, 2, 3)),
              degree = ifelse(is.na(backgr_degree1) | backgr_degree1 == 7, degree2, degree))
 
-cri2$degree <- as.numeric(ifelse(is.na(cri2$degree), 3, cri2$degree))
+cri2$degree <- as.numeric(ifelse(is.na(cri2$degree), 3, cri2$degree)) # 1 Soc 2 Poli Sci 3 Other
+
+# quick info on how many teams have consistent background degrees
+cri2 <- cri2 %>%
+  mutate(degree_consist = ifelse(degree == degree2, 1, 0),
+         degree_consist = ifelse(is.na(degree2), 1, degree_consist),
+         degree_consist = ifelse(backgr_degree1 == backgr_degree3 & !is.na(backgr_degree3), 1, degree_consist),
+         degree_consist = ifelse(is.na(backgr_degree1) & !is.na(backgr_degree3), 1, degree_consist))
 
 # replace -Inf values with NA
 
@@ -184,10 +191,10 @@ cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
 
 # select only needed vars
 
-cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_degree2, backgr_degree3,  numinteam,  software_final_models,  degree, difficult,  stat_skill)
+cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_degree2, backgr_degree3,  numinteam,  software_final_models,  degree, difficult,  stat_skill, degree_consist)
 
 
-# add instances of routine researacher variability
+# add instances of routine researcher variability
 routine <- read.csv(file = "data/routine_var.csv", header = F)
 
 colnames(routine) <- c("routine","u_teamid")
@@ -199,7 +206,18 @@ cri2$routine <- ifelse(is.na(cri2$routine), 0, cri2$routine)
 
 cri <- left_join(cri,  cri2,  by = "u_teamid")
 
-cri_cur <- left_join(cri_cur,  cri2,  by = "u_teamid")
+
+
+cri_cur <- left_join(cri_cur,  cri2,  by = "u_teamid") 
+
+# check number of consistent degrees in our relevant sample
+sum(cri$degree_consist, na.rm = T)
+
+cri <- cri %>%
+  select(-degree_consist)
+
+cri_cur <- cri_cur %>%
+  select(-degree_consist)
 
 rm(teamsize,  routine, cri2)
 
@@ -312,8 +330,12 @@ Remove teams that did not complete the replication
 
 cri_long <- completeFun(cri_long, "or")
 cri_cur_long <- completeFun(cri_cur_long, "or")
+```
 
-#create absolute deviance
+## Replication Error
+
+```{r absdev}
+#create replication error
 
 cri_long <- cri_long %>%
   mutate(deviance_abs = abs(deviance))
@@ -351,7 +373,10 @@ cri_cur_long <- cri_cur_long %>%
          max1 = max(cri_long$max1, na.rm=T),
          max = max(cri_long$max, na.rm=T),
          count = ifelse(Exp1 == 1, round((max/max1)*count,3), count))
+```
 
+Some Clean Up
+```{r absdev}
 # relevel to have transparent group first
 
 cri_long$Exp1 <- relevel(cri_long$Exp1, "1")

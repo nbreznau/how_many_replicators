@@ -169,12 +169,44 @@ dev.off()
 knitr::include_graphics(here::here("results/Fig1.png"))
 ```
 
+## Summary Statistics for Appendix
+
+```{r team_sums}
+cri_sum <- cri_long %>%
+  group_by(u_teamid2) %>%
+  mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
+  select(verif, exact, deviance_abs, Exp) %>%
+  summarise_all(.funs = c(mean))
+
+cri_sum_cur <- cri_cur_long %>%
+  group_by(u_teamid2) %>%
+  mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
+  select(verif, exact, deviance_abs, Exp) %>%
+  mutate(verif_cur = verif,
+         exact_cur = exact,
+         deviance_cur = deviance_abs) %>%
+  select(-c(verif, exact, deviance_abs, Exp)) %>%
+  summarise_all(.funs = c(mean))
+
+cri_sums <- left_join(cri_sum, cri_sum_cur, by = "u_teamid2")
+
+cri_sums <- cri_sums %>%
+  arrange(Exp, u_teamid2) %>%
+  mutate(verif = verif*100,
+         exact = exact*100,
+         verif_cur = verif_cur*100,
+         exact_cur = exact_cur*100) %>%
+  select(u_teamid2, verif, exact, deviance_abs, verif_cur, exact_cur, deviance_cur, Exp)
+
+write_csv(cri_sums, file = here::here("results","team_summary.csv"))
+```
+
 ## Figure 2. Comparing Replication Outcomes
 
 ### Part A. Effect-Level
 
 #### Prep Fig2a Data
-```{r fig2prep}
+```{r fig2prep, warning = F, message = F}
 fig2 <- cri_long %>%
   select(verif, exact, deviance_abs, Exp1) %>%
   group_by(Exp1) %>%
