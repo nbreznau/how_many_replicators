@@ -1,0 +1,1146 @@
+<table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;color: #000000;border-top: 2px solid #000000;">
+<caption>Statistical models</caption>
+<thead>
+<tr>
+<th style="padding-left: 5px;padding-right: 5px;">&nbsp;</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 1</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 2</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 3</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 4</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 5</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 6</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 7</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 8</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 9</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 10</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 11</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 12</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 13</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 14</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 15</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 16</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 17</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 18</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-top: 1px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">(Intercept)</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.577<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.081</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.112<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.379</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.617<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">147.976<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">6.298<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.260</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.609<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.981</td>
+<td style="padding-left: 5px;padding-right: 5px;">56.625<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">873.670<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.224</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.131</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.936</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.121</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.465<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">125.933<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.071)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.259)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.837)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.449)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.430)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.385)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.534)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.475)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.988)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.003)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.006)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.603)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.764)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.221)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.141)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.380)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.051)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.157)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">foreign_born</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.945<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.001</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.947<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.091<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.996</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.895<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.944<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.000</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.944<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.079<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.966</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.876<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.930<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.002</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.921<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.067</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.000</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.892<sup>**</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.992)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.061)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.611)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.590)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.223)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.555)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.130)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.010)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.774)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.152)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.918)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.049)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.206)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.110)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.665)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.800)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.008)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.036)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">lesshs</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.453<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.018</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.437<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.148<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.143<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.963</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.458<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.019</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.443<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.154<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.172<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.976</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.456<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.017</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.442<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.159<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.142<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.964</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.849)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.506)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.164)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.014)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.603)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.547)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.942)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.535)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.250)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.090)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.231)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.362)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.901)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.499)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.258)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.150)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.572)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.538)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">univ</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.861<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.306<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.962</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.831<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.220<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.922</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.860<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.306<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.961</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.830<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.215<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.918</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.862<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.306<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.965</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.835<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.219<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.922</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.148)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.828)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.074)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.821)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.863)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.150)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.195)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.817)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.111)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.838)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.757)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.209)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.106)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.819)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.004)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.740)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.847)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.143)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">ptemp</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.043</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.183<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.064</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.037</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.178<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.884</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.046</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.184<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.067</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.040</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.191<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.890</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.043</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.183<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.063</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.038</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.178<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.884</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.022)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.813)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.479)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.444)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.425)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.519)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.087)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.825)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.535)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.479)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.653)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.431)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.014)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.813)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.462)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.456)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.425)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.520)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">nolabor</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.071</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.231<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.979</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.950</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.112<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.046</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.072</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.232<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.980</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.950</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.113<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.046</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.072</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.231<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.981</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.954</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.111<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.046</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.879)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.231)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.565)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.689)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.474)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.576)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.907)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.234)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.550)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.686)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.503)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.576)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.909)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.226)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.506)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.633)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.464)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.581)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">unemp</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.458<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.195<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.456<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.129</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.798<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.305</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.461<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.195<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.458<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.131</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.812<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.314</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.462<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.194<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.462<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.139</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.797<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.307</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.068)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.609)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.850)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.729)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.782)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.484)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.091)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.611)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.866)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.738)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.848)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.518)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.098)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.604)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.899)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.781)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.774)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.489)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">selfemp</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.730<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.677<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.651<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.639<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.770<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.697<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.729<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.677<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.651<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.638<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.766<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.694<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.730<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.677<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.652<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.639<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.770<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.697<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.639)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.993)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-10.448)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.076)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.675)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.693)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.663)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.998)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-10.465)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.093)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.773)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.747)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.637)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.994)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-10.437)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.077)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.677)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.693)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">inczscore</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.714<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.796<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.673<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.801<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.773<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.804<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.715<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.796<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.673<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.802<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.777<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.805<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.714<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.796<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.672<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.802<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.773<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.804<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-23.338)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-15.361)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-27.359)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-9.298)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-16.190)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.884)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-23.267)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-15.338)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-27.287)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-9.256)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-15.924)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.783)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-23.324)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-15.362)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-27.347)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-9.263)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-16.193)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.880)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryCA-Canada</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.603<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.123</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.970</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.898</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.966</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.512<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.610<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.124</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.977</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.888</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.946</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.503<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.583<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.125</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.918</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.889</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.972</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.509<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.135)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.584)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.427)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.729)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.398)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.920)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.955)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.596)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.327)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.801)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.640)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.999)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.118)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.547)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.140)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.783)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.323)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.846)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryFR-France</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.360<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.944<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.374<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.858</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.806<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.100<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.949<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.119<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.899<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.470</td>
+<td style="padding-left: 5px;padding-right: 5px;">5.970<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.207<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.294</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.947<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.277</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.302<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.797<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.100<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.326)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.223)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.290)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.665)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.974)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.581)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.758)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.817)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.593)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.881)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.500)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.340)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.872)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.213)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.710)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.078)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.940)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.590)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryDE-Germany</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.112<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.490<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.066</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.832<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.111</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.435<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.845<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.673<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.393</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.578<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.954<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.791</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.920<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.504<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.914</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.840<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.127</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.428<sup>*</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.450)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.654)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.528)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.156)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.614)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.591)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.128)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.382)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.593)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.079)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.675)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.566)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.707)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.172)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.639)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.086)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.677)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.522)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryIE-Ireland</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.396<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">4.719<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.710<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">22.128<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">5.220<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.584</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.322<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">4.633<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.611<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">18.776<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">3.286<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.179</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.298</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.736<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.526<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">26.280<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">5.239<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.566</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.570)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(9.800)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.786)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.386)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.604)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.071)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.093)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(9.305)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.258)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.738)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.339)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.371)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.833)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(9.571)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.777)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.358)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.625)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.033)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryJP-Japan</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.598<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.179</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.488<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.723</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.227<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.029<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.577<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.157</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.464<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.190</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.122<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.018<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.409<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.212</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.261<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.464</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.249<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.027<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.204)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.589)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.917)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.478)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.183)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.586)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.351)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.513)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.096)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.097)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.720)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.970)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.342)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.487)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.468)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.499)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.103)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.439)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryNZ-New Zealand</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.923</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.812<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.589<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.294</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.790<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.021</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.973</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.822<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.616<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.337</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.915</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.106</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.851</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.817<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.516<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.074</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.808<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.000</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.243)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.116)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.130)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.711)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.977)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.113)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.393)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.682)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.787)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.877)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.071)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.541)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.768)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.216)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.275)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.395)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.048)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.000)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryNO-Norway</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.349<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">6.736<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.992</td>
+<td style="padding-left: 5px;padding-right: 5px;">21.700<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.936</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.859</td>
+<td style="padding-left: 5px;padding-right: 5px;">2.688<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">6.918<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.113</td>
+<td style="padding-left: 5px;padding-right: 5px;">22.070<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.152</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.944</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.756</td>
+<td style="padding-left: 5px;padding-right: 5px;">6.877<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.612</td>
+<td style="padding-left: 5px;padding-right: 5px;">13.045<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.007</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.802</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.910)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.995)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.045)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.758)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.253)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.294)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.208)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.701)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.547)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.794)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.539)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.110)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.946)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.403)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.670)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.241)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.020)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.336)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryES-Spain</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.816<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">10.368<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.718<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">33.187<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">9.027<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.493</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.259<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">10.585<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.976<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">32.551<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">9.953<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.509</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.534<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">10.396<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">2.436<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">48.166<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">8.977<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.489</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.978)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.392)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.466)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.203)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.971)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.530)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.095)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.141)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.690)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.198)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.383)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.460)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.058)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(11.302)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.654)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.068)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.962)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.537)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countrySE-Sweden</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.108</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.459<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.944</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.715<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.046</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.219<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.670</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.918<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.369</td>
+<td style="padding-left: 5px;padding-right: 5px;">6.681<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">4.346<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.526</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.932</td>
+<td style="padding-left: 5px;padding-right: 5px;">4.512<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.709</td>
+<td style="padding-left: 5px;padding-right: 5px;">3.660<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.090</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.210<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.821)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(9.701)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.441)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.253)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.244)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.483)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.952)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.501)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.163)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.636)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.999)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.253)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.380)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.631)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.811)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.290)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.388)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.794)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryCH-Switzerland</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.556<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.468<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.538<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.534<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.408<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.338<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.649<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.491<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.620<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.571<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.522<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.396<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.345<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.486<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.203</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.315<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.429<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.323<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.326)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(6.849)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.885)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.336)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-15.547)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-9.933)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.013)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.840)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.560)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.555)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-9.310)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.206)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.322)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.842)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.430)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.797)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.134)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.074)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryGB-Great Britain</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.006</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.449<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.841</td>
+<td style="padding-left: 5px;padding-right: 5px;">7.778<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.869<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.744</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.103</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.474<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.906</td>
+<td style="padding-left: 5px;padding-right: 5px;">7.642<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.990<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.748</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.829</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.468</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.613<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">6.238<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.948<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.714</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.039)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.003)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.049)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.404)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.621)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.627)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.593)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.041)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.578)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.373)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.882)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.612)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.854)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.683)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.187)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.752)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.483)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.635)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">countryUS-United States</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.506<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.672<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.516<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.006</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.730</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.086<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.477<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.659<sup>**</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.486<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.873</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.466<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.063<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.430<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.679<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.396<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.792</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.758</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.083<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.842)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.938)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.433)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.018)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.846)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-7.955)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.102)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.901)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.658)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.384)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.121)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-8.162)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.850)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.174)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-5.273)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.667)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.358)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.599)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">yr2006</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.857<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.634<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.389<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.920</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.066</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.443<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.872<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.638<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.411<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.960</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.199<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.599<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.846<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.635<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.361<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.840</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.073</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.437<sup>***</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.102)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-11.122)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.462)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.056)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.377)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.734)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-3.530)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-10.286)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(8.589)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.453)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(3.619)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(5.240)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-4.289)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-10.370)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(7.682)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.849)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.399)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(4.432)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">social_welfare_expenditure</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.969</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.992</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.972</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.968</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.882<sup>***</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">0.924<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.776)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.400)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-1.579)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.935)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-6.293)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-2.319)</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">employment_rate</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.012</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.999</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.020<sup>*</sup></td>
+<td style="padding-left: 5px;padding-right: 5px;">1.042</td>
+<td style="padding-left: 5px;padding-right: 5px;">0.996</td>
+<td style="padding-left: 5px;padding-right: 5px;">1.003</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.258)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.097)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(2.093)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(1.839)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(-0.336)</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.170)</td>
+</tr>
+<tr style="border-top: 1px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">AIC</td>
+<td style="padding-left: 5px;padding-right: 5px;">36434.618</td>
+<td style="padding-left: 5px;padding-right: 5px;">31786.818</td>
+<td style="padding-left: 5px;padding-right: 5px;">35560.323</td>
+<td style="padding-left: 5px;padding-right: 5px;">12148.283</td>
+<td style="padding-left: 5px;padding-right: 5px;">28723.543</td>
+<td style="padding-left: 5px;padding-right: 5px;">11552.744</td>
+<td style="padding-left: 5px;padding-right: 5px;">36433.463</td>
+<td style="padding-left: 5px;padding-right: 5px;">31788.658</td>
+<td style="padding-left: 5px;padding-right: 5px;">35559.828</td>
+<td style="padding-left: 5px;padding-right: 5px;">12149.408</td>
+<td style="padding-left: 5px;padding-right: 5px;">28685.777</td>
+<td style="padding-left: 5px;padding-right: 5px;">11549.337</td>
+<td style="padding-left: 5px;padding-right: 5px;">36435.036</td>
+<td style="padding-left: 5px;padding-right: 5px;">31788.808</td>
+<td style="padding-left: 5px;padding-right: 5px;">35557.942</td>
+<td style="padding-left: 5px;padding-right: 5px;">12146.828</td>
+<td style="padding-left: 5px;padding-right: 5px;">28725.430</td>
+<td style="padding-left: 5px;padding-right: 5px;">11554.715</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">BIC</td>
+<td style="padding-left: 5px;padding-right: 5px;">36643.380</td>
+<td style="padding-left: 5px;padding-right: 5px;">31995.375</td>
+<td style="padding-left: 5px;padding-right: 5px;">35768.843</td>
+<td style="padding-left: 5px;padding-right: 5px;">12357.668</td>
+<td style="padding-left: 5px;padding-right: 5px;">28932.180</td>
+<td style="padding-left: 5px;padding-right: 5px;">11762.103</td>
+<td style="padding-left: 5px;padding-right: 5px;">36650.576</td>
+<td style="padding-left: 5px;padding-right: 5px;">32005.557</td>
+<td style="padding-left: 5px;padding-right: 5px;">35776.689</td>
+<td style="padding-left: 5px;padding-right: 5px;">12367.168</td>
+<td style="padding-left: 5px;padding-right: 5px;">28902.759</td>
+<td style="padding-left: 5px;padding-right: 5px;">11767.070</td>
+<td style="padding-left: 5px;padding-right: 5px;">36652.148</td>
+<td style="padding-left: 5px;padding-right: 5px;">32005.708</td>
+<td style="padding-left: 5px;padding-right: 5px;">35774.803</td>
+<td style="padding-left: 5px;padding-right: 5px;">12364.588</td>
+<td style="padding-left: 5px;padding-right: 5px;">28942.412</td>
+<td style="padding-left: 5px;padding-right: 5px;">11772.449</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Log Likelihood</td>
+<td style="padding-left: 5px;padding-right: 5px;">-18192.309</td>
+<td style="padding-left: 5px;padding-right: 5px;">-15868.409</td>
+<td style="padding-left: 5px;padding-right: 5px;">-17755.162</td>
+<td style="padding-left: 5px;padding-right: 5px;">-6049.142</td>
+<td style="padding-left: 5px;padding-right: 5px;">-14336.771</td>
+<td style="padding-left: 5px;padding-right: 5px;">-5751.372</td>
+<td style="padding-left: 5px;padding-right: 5px;">-18190.732</td>
+<td style="padding-left: 5px;padding-right: 5px;">-15868.329</td>
+<td style="padding-left: 5px;padding-right: 5px;">-17753.914</td>
+<td style="padding-left: 5px;padding-right: 5px;">-6048.704</td>
+<td style="padding-left: 5px;padding-right: 5px;">-14316.889</td>
+<td style="padding-left: 5px;padding-right: 5px;">-5748.668</td>
+<td style="padding-left: 5px;padding-right: 5px;">-18191.518</td>
+<td style="padding-left: 5px;padding-right: 5px;">-15868.404</td>
+<td style="padding-left: 5px;padding-right: 5px;">-17752.971</td>
+<td style="padding-left: 5px;padding-right: 5px;">-6047.414</td>
+<td style="padding-left: 5px;padding-right: 5px;">-14336.715</td>
+<td style="padding-left: 5px;padding-right: 5px;">-5751.358</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Deviance</td>
+<td style="padding-left: 5px;padding-right: 5px;">36384.618</td>
+<td style="padding-left: 5px;padding-right: 5px;">31736.818</td>
+<td style="padding-left: 5px;padding-right: 5px;">35510.323</td>
+<td style="padding-left: 5px;padding-right: 5px;">12098.283</td>
+<td style="padding-left: 5px;padding-right: 5px;">28673.543</td>
+<td style="padding-left: 5px;padding-right: 5px;">11502.744</td>
+<td style="padding-left: 5px;padding-right: 5px;">36381.463</td>
+<td style="padding-left: 5px;padding-right: 5px;">31736.658</td>
+<td style="padding-left: 5px;padding-right: 5px;">35507.828</td>
+<td style="padding-left: 5px;padding-right: 5px;">12097.408</td>
+<td style="padding-left: 5px;padding-right: 5px;">28633.777</td>
+<td style="padding-left: 5px;padding-right: 5px;">11497.337</td>
+<td style="padding-left: 5px;padding-right: 5px;">36383.036</td>
+<td style="padding-left: 5px;padding-right: 5px;">31736.808</td>
+<td style="padding-left: 5px;padding-right: 5px;">35505.942</td>
+<td style="padding-left: 5px;padding-right: 5px;">12094.828</td>
+<td style="padding-left: 5px;padding-right: 5px;">28673.430</td>
+<td style="padding-left: 5px;padding-right: 5px;">11502.715</td>
+</tr>
+<tr style="border-bottom: 2px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">Num. obs.</td>
+<td style="padding-left: 5px;padding-right: 5px;">31272</td>
+<td style="padding-left: 5px;padding-right: 5px;">31017</td>
+<td style="padding-left: 5px;padding-right: 5px;">30971</td>
+<td style="padding-left: 5px;padding-right: 5px;">32061</td>
+<td style="padding-left: 5px;padding-right: 5px;">31116</td>
+<td style="padding-left: 5px;padding-right: 5px;">32028</td>
+<td style="padding-left: 5px;padding-right: 5px;">31272</td>
+<td style="padding-left: 5px;padding-right: 5px;">31017</td>
+<td style="padding-left: 5px;padding-right: 5px;">30971</td>
+<td style="padding-left: 5px;padding-right: 5px;">32061</td>
+<td style="padding-left: 5px;padding-right: 5px;">31116</td>
+<td style="padding-left: 5px;padding-right: 5px;">32028</td>
+<td style="padding-left: 5px;padding-right: 5px;">31272</td>
+<td style="padding-left: 5px;padding-right: 5px;">31017</td>
+<td style="padding-left: 5px;padding-right: 5px;">30971</td>
+<td style="padding-left: 5px;padding-right: 5px;">32061</td>
+<td style="padding-left: 5px;padding-right: 5px;">31116</td>
+<td style="padding-left: 5px;padding-right: 5px;">32028</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="font-size: 0.8em;" colspan="19"><sup>***</sup>p &lt; 0.001; <sup>**</sup>p &lt; 0.01; <sup>*</sup>p &lt; 0.05</td>
+</tr>
+</tfoot>
+</table>

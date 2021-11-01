@@ -192,10 +192,6 @@ cri_sums <- left_join(cri_sum, cri_sum_cur, by = "u_teamid2")
 
 cri_sums <- cri_sums %>%
   arrange(Exp, u_teamid2) %>%
-  mutate(verif = verif*100,
-         exact = exact*100,
-         verif_cur = verif_cur*100,
-         exact_cur = exact_cur*100) %>%
   select(u_teamid2, verif, exact, deviance_abs, verif_cur, exact_cur, deviance_cur, Exp)
 
 write_csv(cri_sums, file = here::here("results","team_summary.csv"))

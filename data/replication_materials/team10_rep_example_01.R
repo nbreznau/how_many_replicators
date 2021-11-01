@@ -123,6 +123,19 @@ data96 <- data96 %>%
     self_employed = if_else(is.na(employment), NA_real_, self_employed),
   )
 
+# codes
+# employment
+### 01 fulltime
+### 02 Parttime
+### 03 Less than parttime
+### 04 Helping family member
+### 05 Unemployed
+### 06 Student, etc
+### 07 Retired
+### 08 housewife/man
+### 09 Disabled/sick
+### 10 Others, not in LF
+
 # The original study standardized income within countries
 data96 <- data96 %>%
   group_by(country) %>%
