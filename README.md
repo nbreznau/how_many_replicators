@@ -4,7 +4,7 @@ Part of the Crowdsourced Replication Initiative ([Breznau, Rinke and Wuttke et a
 
 ### Principal Investigators
 
-Nate Breznau
+Nate Breznau </br>
 Eike Mark Rinke
 Alexander Wuttke
 
