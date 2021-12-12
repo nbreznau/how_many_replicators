@@ -1,0 +1,27 @@
+---
+title: "Qualitative Codes"
+author: "Nate Breznau"
+date: "12/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+pacman::p_load("tidyverse","quanteda","readtext")
+```
+
+
+```{r data}
+teamcode <- readtext(file = here::here("data", "replications_redacted", "*"))
+
+# meta data variables
+teamcode <- teamcode %>%
+  mutate(team = str_extract(text, '\\d+'),
+         software = str_extract(text, 'Software.*'),
+         software = gsub("Software:", "", software),
+         version = str_extract(text, 'Version.*'),
+         version = gsub("Version:", "", version))
+
+# codes used
+#define and then count codes
+```
+

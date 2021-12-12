@@ -1,0 +1,175 @@
+Team: 1
+Software: Stata
+Version: ORIGINAL
+
+*redacted file path
+cd "/"
+
+use "/ZA2900.dta"
+
+rename v2 id
+lab var id "id"
+
+gen year = 1996
+lab var year "year"
+
+gen oldagecare = .
+replace oldagecare = 0 if v39 >= 3 & v39 <= 4
+replace oldagecare = 1 if v39 >= 1 & v39 <= 2
+lab var oldagecare "old age care"
+
+gen unemployment = .
+replace unemployment = 0 if v41 >= 3 & v41 <= 4
+replace unemployment = 1 if v41 >= 1 & v41 <= 2
+lab var unemployment "unemployment"
+
+gen incomedifferences = .
+replace incomedifferences = 0 if v42 >= 3 & v42 <= 4
+replace incomedifferences = 1 if v42 >= 1 & v42 <= 2
+lab var incomedifferences "income differences"
+
+gen job = .
+replace job = 0 if v36 >= 3 & v36 <= 4
+replace job = 1 if v36 >= 1 & v36 <= 2
+lab var job "job"
+
+gen cntry = .
+replace cntry = 36 if v3 == 1
+replace cntry = 276 if v3 == 2 | v3 == 3
+replace cntry = 826 if v3 == 4
+replace cntry = 840 if v3 == 6
+replace cntry = 348 if v3 == 8
+replace cntry = . if v3 == 9
+replace cntry = 372 if v3 == 10
+replace cntry = 578 if v3 == 12
+replace cntry = 752 if v3 == 13
+replace cntry = 203 if v3 == 14
+replace cntry = 705 if v3 == 15
+replace cntry = 616 if v3 == 16
+replace cntry = . if v3 == 17
+replace cntry = 643 if v3 == 18
+replace cntry = 554 if v3 == 19
+replace cntry = 124 if v3 == 20
+replace cntry = . if v3 == 21
+replace cntry = 376 if v3 == 22 | v3 == 23
+replace cntry = 392 if v3 == 24
+replace cntry = 724 if v3 == 25
+replace cntry = 428 if v3 == 26
+replace cntry = 250 if v3 == 27
+replace cntry = . if v3 == 28
+replace cntry = 756 if v3 == 30
+lab var cntry "cntry"
+
+gen female = v200==2 if v200 != .
+lab var female "female"
+lab def female 0 "male" 1 "female"
+lab val female female
+
+gen age = v201
+gen age2 = age * age
+lab var age "age"
+lab var age2 "age squared"
+
+gen educ = .
+replace educ = 0 if v205 >= 1 & v205 <= 4
+replace educ = 1 if v205 == 5 | v205 == 6
+replace educ = 2 if v205 == 7
+lab var educ "education"
+lab def educ 0 "primary" 1 "secondary" 2 "tertiary"
+lab val educ educ
+
+gen employment = .
+replace employment = 0 if v206 == 2 | v206 == 3
+replace employment = 1 if v206 == 4 | (v206 >= 6 & v206 <=10)
+replace employment = 2 if v206 == 5
+replace employment = 3 if v206 == 1
+lab var employment "employment"
+lab def employment 0 "part-time" 1 "not active" 2 "active unemployed" 3 "full-time"
+lab val employment employment
+
+rename v325 weight
+lab var weight "weight"
+keep id year cntry oldagecare unemployment incomedifferences job female age age2 educ employment weight
+drop if cntry == . 
+save "Data/temp_1996.dta", replace
+
+
+use "Data/ZA4700.dta", clear
+
+rename V2 id
+lab var id "id"
+
+gen year = 2006
+lab var year "year"
+
+gen oldagecare = .
+replace oldagecare = 0 if V28 >= 3 & V28 <= 4
+replace oldagecare = 1 if V28 >= 1 & V28 <= 2
+lab var oldagecare "old age care"
+
+gen unemployment = .
+replace unemployment = 0 if V30 >= 3 & V30 <= 4
+replace unemployment = 1 if V30 >= 1 & V30 <= 2
+lab var unemployment "unemployment"
+
+gen incomedifferences = .
+replace incomedifferences = 0 if V31 >= 3 & V31 <= 4
+replace incomedifferences = 1 if V31 >= 1 & V31 <= 2
+lab var incomedifferences "income differences"
+
+gen job = .
+replace job = 0 if V25 >= 3 & V25 <= 4
+replace job = 1 if V25 >= 1 & V25 <= 2
+lab var job "job"
+
+gen cntry = V3a
+lab var cntry "cntry"
+
+gen female = sex==2 if sex != .
+lab var female "female"
+lab def female 0 "male" 1 "female"
+lab val female female
+
+gen age2 = age * age
+lab var age "age"
+lab var age2 "age squared"
+
+gen educ = .
+replace educ = 0 if degree >= 0 & degree <= 2
+replace educ = 1 if degree == 3 | degree == 4
+replace educ = 2 if degree == 5
+lab var educ "education"
+lab def educ 0 "primary" 1 "secondary" 2 "tertiary"
+lab val educ educ
+
+gen employment = .
+replace employment = 0 if wrkst == 2 | wrkst == 3
+replace employment = 1 if wrkst == 4 | (wrkst >= 6 & wrkst <=10)
+replace employment = 2 if wrkst == 5
+replace employment = 3 if wrkst == 1
+lab var employment "employment"
+lab def employment 0 "part-time" 1 "not active" 2 "active unemployed" 3 "full-time"
+lab val employment employment
+
+lab var weight "weight"
+
+keep id year cntry oldagecare unemployment incomedifferences job female age age2 educ employment weight
+drop if cntry == .
+save "/temp_2006.dta", replace
+
+use "/temp_1996.dta", clear
+append using "/temp_2006.dta"
+sort cntry year
+
+merge m:1 cntry year using "/L2data.dta"
+keep if _merge == 3
+drop _merge
+
+drop if emprate == . | foreignpct == . | socx == . | netmigpct == .
+drop if cntry == 208 | cntry == 246 | cntry == 528 | cntry == 620
+
+
+save "/pooled.dta", replace
+export delimited using "/pooled.csv", replace delimit(";")
+export delimited using "/pooled_nolab.csv", replace delimit(";") nolab
+

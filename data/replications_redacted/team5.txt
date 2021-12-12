@@ -1,0 +1,269 @@
+Team: 5
+Software: Stata
+Version: ORIGINAL
+
+
+*PI redacted paths
+cd "\"
+use "\"
+
+
+rename (V28 V30 V31 V25) (oldagecare unemployed reduce jobs)
+
+foreach var of varlist  oldagecare unemployed reduce jobs {
+recode  `var' 1 2=1 3 4=0
+}
+
+recode sex 2=1 1=0
+label define fem 1"Female" 0"Male" 
+label value  sex fem
+
+
+recode degree 0 1=0 2 3 =1   4 5=2
+label define degree2 0"lower" 1"secondary" 2"higher"
+label value degree degree2	
+
+rename wrkst employment
+recode employment ///
+		1=1 ///
+		2 3=2 ///
+		5=3 ///
+		4 6 7 8 9 10 =4 
+label define employment 1"full time"  2"part time" 3"active unemployed" 4"not active"
+label value employment employment
+
+
+gen year =1996
+rename V2 id
+rename V3a country 
+
+keep oldagecare unemployed reduce jobs sex degree age employment  id year country
+order country year id
+sort country id
+
+save "\ZA4700.dta_clean" , replace
+
+
+clear all
+
+cd "\"
+use "\ZA2900.dta"
+
+rename (v39 v41 v42 v36) (oldagecare unemployed reduce jobs)
+
+foreach var of varlist  oldagecare unemployed reduce jobs {
+recode  `var' 1 2=1 3 4=0
+}
+
+rename v200 sex
+recode sex 2=1 1=0
+label define fem 1"Female" 0"Male" 
+label value  sex fem
+
+rename v201 age
+
+rename v205 degree
+recode degree 1 2 3=0 4 5 =1   6 7=2
+label define degree2 0"lower" 1"secondary" 2"higher"
+label value degree degree2
+
+rename v206 wrkst
+rename wrkst employment
+recode employment ///	
+		1=1 ///
+		2 3=2 ///
+		5=3 ///
+		4 6 7 8 9 10 =4 
+label define employment 1"full time"  2"part time" 3"active unemployed" 4"not active"
+label value employment employment
+
+
+gen year =2006
+rename v2 id
+rename v3 country
+
+recode country 1 = 36  2 3=276 4=826 6=840 8=348 9=. 10=372 11=578 ///
+12=578 13=752 14=203 15=705 16=616 17=. 18=643 19=554 20=124 21=608 ///
+22 23=376 24=392 25=724 26=428  27=250 28=. 30=756 
+
+label define country2 36 "AU-Australia"    ///      
+124 "CA-Canada " ///
+152 "CL-Chile" ///
+158 "TW-Taiwan" ///
+191 "HR-Croatia" ///
+203 "CZ-Czech Republic" ///
+208 "DK-Denmark" ///
+214 "DO-Dominican Republic" ///
+246 "FI-Finland" ///
+250 "FR-France" ///
+276 "DE-Germany" ///
+348 "HU-Hungary" ///
+372 "IE-Ireland" ///
+376 "IL-Israel" ///
+392 "JP-Japan" ///
+410 "KR-South Korea" ///
+428 "LV-Latvia" ///
+528 "NL-Netherlands" ///
+554 "NZ-New Zealand" ///
+578 "NO-Norway" ///
+608 "PH-Philippines" ///
+616 "PL-Poland" ///
+620 "PT-Portugal" ///
+643 "RU-Russia" ///
+705 "SI-Slovenia" ///
+710 "ZA-South Africa" ///
+724 "ES-Spain" ///
+752 "SE-Sweden" ///
+756 "CH-Switzerland" ///
+826 "GB-Great Britain" ///
+840 "US-United States" ///
+858 "UY-Uruguay" ///
+862 "VE-Venezuela"
+label value country country2
+
+/*
+rename v223 lrscale
+rename v46 polint
+rename v54 trust
+*/
+
+
+keep oldagecare unemployed reduce jobs sex degree age employment  id year country
+sort id year 
+
+save "\ZA2900.dta_clean" , replace
+*******
+
+clear all
+use "\L2data.dta"
+drop country
+rename cntry country
+label define country2 ///
+36 "AU-Australia"    ///      
+124 "CA-Canada " ///
+152 "CL-Chile" ///
+158 "TW-Taiwan" ///
+191 "HR-Croatia" ///
+203 "CZ-Czech Republic" ///
+208 "DK-Denmark" ///
+214 "DO-Dominican Republic" ///
+246 "FI-Finland" ///
+250 "FR-France" ///
+276 "DE-Germany" ///
+348 "HU-Hungary" ///
+372 "IE-Ireland" ///
+376 "IL-Israel" ///
+392 "JP-Japan" ///
+410 "KR-South Korea" ///
+428 "LV-Latvia" ///
+528 "NL-Netherlands" ///
+554 "NZ-New Zealand" ///
+578 "NO-Norway" ///
+608 "PH-Philippines" ///
+616 "PL-Poland" ///
+620 "PT-Portugal" ///
+643 "RU-Russia" ///
+705 "SI-Slovenia" ///
+710 "ZA-South Africa" ///
+724 "ES-Spain" ///
+752 "SE-Sweden" ///
+756 "CH-Switzerland" ///
+826 "GB-Great Britain" ///
+840 "US-United States" ///
+858 "UY-Uruguay" ///
+862 "VE-Venezuela"
+label value country country2
+save "\L2data2.dta", replace
+
+clear all
+use "\ZA4700.dta_clean"
+cd "\"
+
+append using "\ZA2900.dta_clean"
+
+save "\ZA2900+4700.dta" , replace
+
+
+clear all 
+use "\ZA2900+4700.dta"
+cd "\"
+
+merge m:1 country year using "\L2data2.dta"
+
+save "\replication_workfile.dta",replace
+
+clear all
+use "\replication_workfile.dta"
+mark 	nmiss
+markout nmiss  oldagecare unemployed reduce jobs emprate foreignpct netmigpct  socx sex degree employment age id year country			
+tab 	nmiss, m
+drop if nmiss==0
+
+logit oldagecare i.sex ib1.degree i.employment c.age##c.age i.country i.year
+
+logit oldagecare foreignpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m1
+logit unemployed foreignpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m2
+logit reduce foreignpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m3
+logit jobs foreignpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m4
+
+logit oldagecare foreignpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m5
+logit unemployed foreignpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m6
+logit reduce foreignpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m7
+logit jobs foreignpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m8
+
+logit oldagecare foreignpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m9
+logit unemployed foreignpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m10
+logit reduce foreignpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m11
+logit jobs foreignpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m12
+
+est tab m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 , eform b(%9.4f) t(%9.4f) equations(1)
+est tab m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 , eform  star equations(1)
+
+
+*****************************
+
+logit oldagecare netmigpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m13
+logit unemployed netmigpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m14
+logit reduce netmigpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m15
+logit jobs netmigpct i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m16
+
+logit oldagecare netmigpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m17
+logit unemployed netmigpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m18
+logit reduce netmigpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m19
+logit jobs netmigpct c.socx i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m20
+
+logit oldagecare netmigpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m21
+logit unemployed netmigpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m22
+logit reduce netmigpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m23
+logit jobs netmigpct c.emprate i.sex ib1.degree i.employment c.age##c.age i.country i.year
+est store m24
+
+
+est tab m13 m14 m15 m16 m17 m18 m19 m20 m21 m22 m23 m24 , eform b(%9.4f) t(%9.4f) equations(1)
+
+est tab m13 m14 m15 m16 m17 m18 m19 m20 m21 m22 m23 m24 , eform  star equations(1)
+
+

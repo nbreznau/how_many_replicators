@@ -1,0 +1,164 @@
+Team: 1
+Software: R
+Version: ORIGINAL
+
+PackagesUsed <- c("knitr","haven", "miceadds","dplyr","stringr")
+
+repmis::LoadandCite(PackagesUsed, file = "Packages.bib", install = FALSE)
+
+read_dta("data/pooled.dta") %>%
+  mutate(educ.f = relevel(factor(educ), ref = "1"),
+         employment.f = relevel(factor(employment), ref = "3"),
+         female.f = relevel(factor(female), ref = "0"),
+         country.f = factor(country),
+         year.f = factor(year)) ->
+  DAT
+
+cluSE <- TRUE 
+
+depVar   <- c("oldagecare","unemployment","incomedifferences","job")
+inDepVar <- c("foreignpct","socx","emprate","netmigpct")
+  
+pInDepVar <- c("(Intercept)","female.f1", "age" ,"I(age^2)",
+                 "educ.f0", "educ.f2", 
+                 "employment.f0", "employment.f1", "employment.f2") 
+  
+  
+OUT.ma  <- matrix(NA, nrow=2*length(inDepVar)+2*length(pInDepVar), 
+                    ncol=6*length(depVar)) 
+  
+dimnames(OUT.ma) <-
+    list(c(paste(c("Odds","z.value"),rep(inDepVar,each=2,sep=".")),
+           paste(c("Odds","z.value"),rep(pInDepVar,each=2,sep="."))),
+         paste(1:ncol(OUT.ma), rep(depVar,6), sep="."))
+  
+depVar.mod.ls <- split(1:ncol(OUT.ma), rep(1:6,each=4))
+names(depVar.mod.ls) <- c("foreignpct",
+                            "foreignpct.socx",
+                            "foreignpct.emprate",
+                            "netmigpct",
+                            "netmigpct.socx",
+                            "netmigpct.emprate")
+  
+  
+mod1.fm <-  ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    foreignpct + country.f + year.f
+  
+mod2.fm <- oldagecare ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    foreignpct + socx + country.f + year.f
+  
+mod3.fm <- oldagecare ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    foreignpct + emprate + country.f + year.f
+  
+mod4.fm <- oldagecare ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    netmigpct + country.f + year.f
+  
+mod5.fm <- oldagecare ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    netmigpct + socx + country.f + year.f
+  
+mod6.fm <- oldagecare ~ female.f + age + I(age^2) + educ.f + employment.f + 
+    netmigpct + emprate + country.f + year.f
+  
+mods.ls <- list(mod1.fm, mod2.fm, mod3.fm, mod4.fm, mod5.fm, mod6.fm)
+
+OUT <-  
+  sapply(mods.ls, function(fm){
+      
+    fm.oldagecare <- update(fm, oldagecare ~ . )
+    fm.unemployment <- update(fm, unemployment ~ . )
+    fm.incomedifferences <- update(fm, incomedifferences ~ . )
+    fm.job <- update(fm, job ~ . )
+    
+    sapply(list(fm.oldagecare, fm.unemployment, 
+                fm.incomedifferences, fm.job),
+           function(fm.){
+             
+             if(cluSE){
+               mod <- miceadds::glm.cluster(fm., 
+                                            data=DAT,
+                                            family="binomial", 
+                                            cluster="country" )
+             }else{
+               mod <- glm(fm., 
+                          data=DAT,
+                          family=binomial)
+             }
+             
+             if(any(class(mod) == "glm")){
+               mod.su     <- summary(mod)$coefficients
+             }
+             if(any(class(mod) == "glm.cluster")){
+               invisible(capture.output(mod.su <- summary(mod)))
+             }
+  
+             odds.coef_ <- exp(mod.su[,"Estimate"])
+             z.value_   <- round(mod.su[,"z value"],4)
+             odds.coef  <- as.character(round(odds.coef_,4))
+             
+             odds.coef[mod.su[,"Pr(>|z|)"]<0.05] <- 
+               paste0(round(odds.coef_[mod.su[,"Pr(>|z|)"]<0.05],4),"*")
+             
+             odds.coef[mod.su[,"Pr(>|z|)"]<0.01] <- 
+               paste0(round(odds.coef_[mod.su[,"Pr(>|z|)"]<0.01],4),"**")
+             
+             odds.coef[mod.su[,"Pr(>|z|)"]<0.001] <- 
+               paste0(round(odds.coef_[mod.su[,"Pr(>|z|)"]<0.001],4),"***")
+             
+             
+             odds.coef <- gsub(pattern = "\\.", replacement =  ",", odds.coef)
+             names(odds.coef) <- names(odds.coef_)
+             z.value <- as.character(z.value_)
+             z.value <- gsub(pattern = "\\.", replacement =  ",", z.value)
+             names(z.value) <- names(z.value_)
+             
+             grep(paste(inDepVar,collapse = "|"), 
+                  strsplit(paste0(fm.)[3],"[+]")[[1]],value=T) %>%
+               gsub("[[:space:]]", "", .)  ->
+               which.inDepVar
+             which.DepVar <- paste0(fm.)[[2]]
+             OUT.cols <- 
+               depVar.mod.ls[[paste(which.inDepVar,collapse=".")]][
+                 which(depVar%in%which.DepVar)]
+               
+             if(length(which.inDepVar)>1){
+               oddsRow1 <- grep(paste0("Odds ", which.inDepVar[1]) , 
+                                rownames(OUT.ma))
+               OUT.ma[oddsRow1,OUT.cols] <<- 
+                 odds.coef[grep(which.inDepVar[1], names(odds.coef))]
+               OUT.ma[oddsRow1 + 1, OUT.cols] <<- 
+                 z.value[grep(which.inDepVar[1], names(z.value))]
+               
+               oddsRow2 <- grep(paste0("Odds ",which.inDepVar[2]) , 
+                                rownames(OUT.ma))
+               OUT.ma[oddsRow2,OUT.cols] <<- 
+                 odds.coef[grep(which.inDepVar[2], names(odds.coef))]
+               OUT.ma[oddsRow2 + 1, OUT.cols] <<- 
+                 z.value[grep(which.inDepVar[2], names(z.value))]
+               
+             }else{
+               oddsRow1 <- grep(paste0("Odds ", which.inDepVar[1]) , 
+                                rownames(OUT.ma))
+               OUT.ma[oddsRow1,OUT.cols] <<- 
+                 odds.coef[grep(which.inDepVar[1], names(odds.coef))]
+               OUT.ma[oddsRow1 + 1, OUT.cols] <<- 
+                 z.value[grep(which.inDepVar[1], names(z.value))]
+               
+             }
+            
+             OUT.ma[(length(inDepVar)*2+1):nrow(OUT.ma), OUT.cols] <<- 
+             c(rbind(odds.coef[grep(paste0(pInDepVar,collapse = "|"),
+                                    names(odds.coef))],
+                     z.value[grep(paste0(pInDepVar,collapse = "|"),
+                                  names(z.value))])
+               )
+  
+             
+           }, simplify = F)
+  }, simplify = F)
+  
+
+write.csv2(OUT.ma,
+           paste0("results/ReplicationTemplateInput",
+                 ifelse(cluSE,"_cluSE",""),
+                 ".csv")
+           )
