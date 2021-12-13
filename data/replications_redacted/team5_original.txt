@@ -5,7 +5,7 @@ Version: ORIGINAL
 
 *PI redacted paths
 cd "\"
-use "\"
+use "\ZA4700.dta"
 
 
 rename (V28 V30 V31 V25) (oldagecare unemployed reduce jobs)

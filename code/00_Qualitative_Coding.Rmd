@@ -6,7 +6,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-pacman::p_load("tidyverse","quanteda","readtext")
+# try out RQDA
+# devtools::install_github("BroVic/RQDAassist")
+# RQDAassist::install()
+
+pacman::p_load("tidyverse",
+               "quanteda",
+               "readtext")
 ```
 
 
