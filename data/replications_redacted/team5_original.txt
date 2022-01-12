@@ -3,8 +3,6 @@ Software: Stata
 Version: ORIGINAL
 
 
-*PI redacted paths
-cd "\"
 use "\ZA4700.dta"
 
 
