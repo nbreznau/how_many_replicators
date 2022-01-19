@@ -1,0 +1,843 @@
+TEAM: 47
+SOFTWARE: R
+VERSION: ORIGINAL
+
+
+rm(list = ls())
+library(haven)
+library(dplyr)
+library(doBy)
+library(nlme)
+library(officer)
+library(officer)
+
+path <- "/"
+
+
+dat1 <- read_dta(paste0(path, "ZA2900.dta"))
+dat1$year <- factor(1996, levels = c(1996, 2006))
+dat1$year <- relevel(dat1$year, ref = "1996")
+table(dat1$year, useNA = "always")
+
+
+dat1$pid <- dat1$v2
+attr(dat1$v3, "labels")
+dat1$cntry <- recode(unclass(dat1$v3), 
+                     "1"  = "AU", "2"  = "DE", "3"  = "DE", 
+                     "4"  = "GB", "5"  = "NIE", "6" = "US", 
+                     "7"  = "AT", "8"  = "HU", "9"  = "IT", 
+                     "10" = "IE", "11" = "NL", "12" = "NO", 
+                     "13" = "SE", "14" = "CZ", "15" = "SI", 
+                     "16" = "PL", "17" = "BG", "18" = "RU", 
+                     "19" = "NZ", "20" = "CA", "21" = "PH", 
+                     "22" = "IL", "23" = "IL", "24" = "JP", 
+                     "25" = "ES", "26" = "LV", "27" = "FR", 
+                     "28" = "CY", "30" = "CH") 
+table(dat1$cntry, useNA = "always")
+
+table(dat1$v201, useNA = "always")
+
+dat1$age <- recodeVar(dat1$v201, 1:98, 1:98, default = NA)
+table(dat1$age, useNA = "always")
+
+table(dat1$v200, useNA = "always")
+
+dat1$sex <- recodeVar(dat1$v200, 1:2, 0:1, default = NA)
+dat1$sex <- factor(dat1$sex, levels = 0:1,
+                   labels = c("male", "female"))
+dat1$sex <- relevel(dat1$sex, ref = "male")
+table(dat1$sex, useNA = "always") 
+
+table(dat1$v202, useNA = "always")
+
+dat1$marst <- recodeVar(dat1$v202, 1:5, c(1, 2, 3, 3, 4), default = NA)
+dat1$marst <- factor(dat1$marst, levels = 1:4,
+                     labels = c("Married", "Widowed",
+                                "Divorced/Separated", "Never married"))
+dat1$marst <- relevel(dat1$marst, ref = "Married")
+table(dat1$marst, useNA = "always")
+
+table(dat1$v273, useNA = "always")
+
+dat1$hhsize <- recodeVar(dat1$v273, 1:98, 1:98, default = NA)
+table(dat1$hhsize, useNA = "always")
+
+table(dat1$v274, useNA = "always")
+
+dat1$kids <- recodeVar(dat1$v274, 1:28, c(0, 1, 1, 1, 0, 
+                                          1, 1, 1, 0, 1, 
+                                          0, 1, 0, 1, 0,
+                                          1, 0, 1, 0, 1,
+                                          0, 1, 0, 1, 0, 
+                                          1, 0, 1), default = NA)
+dat1$kids <- factor(dat1$kids, levels = 0:1,
+                    labels = c("No", "Yes"))
+dat1$kids <- relevel(dat1$kids, ref = "No")
+table(dat1$kids, useNA = "always")
+
+table(dat1$v275, useNA = "always")
+
+dat1$urru <- recodeVar(dat1$v275, 1:3, 1:3, default = NA)
+dat1$urru <- factor(dat1$urru, levels = 1:3,
+                    labels = c("Urban", "Suburb", "Rural"))
+dat1$urru <- relevel(dat1$urru, ref = "Urban")
+table(dat1$urru, useNA = "always")
+
+table(dat1$v205, useNA = "always")
+
+dat1$educ <- recodeVar(dat1$v205, 1:7, c(1, 1, 1, 1, 2, 2, 3), default = NA)
+dat1$educ <- factor(dat1$educ, levels = 1:3,
+                     labels = c("less than secondary", 
+                                "Secondary", 
+                                "University"))
+dat1$educ <- relevel(dat1$educ, ref = "Secondary")
+table(dat1$educ, useNA = "always")
+
+table(dat1$v206, useNA = "always")
+
+dat1$emp_pt <- recodeVar(dat1$v206, 1:10, 
+                         c(0, rep(1, 3), rep(0, 6)), default = NA)
+
+dat1$emp_ue <- recodeVar(dat1$v206, 1:10, 
+                         c(rep(0, 4), 1, rep(0, 5)), default = NA)
+
+dat1$emp_olf <- recodeVar(dat1$v206, 1:10, 
+                          c(rep(0, 5), rep(1, 5)), default = NA)
+
+dat1$emp_se <- as.numeric(dat1$v213 %in% 1)
+dat1$emp_se[is.na(dat1$v206)] <- NA
+
+dat1$emp_pu <- as.numeric(dat1$v212 %in% 1:2)
+dat1$emp_pu[is.na(dat1$v206)] <- NA
+
+dat1$emp_pr <- as.numeric(dat1$emp_se == 0 & dat1$emp_pu == 0)
+dat1$emp_pr[is.na(dat1$v206)] <- NA
+
+table(dat1$emp_se, dat1$emp_pu, useNA = "always") 
+
+table(dat1$emp_se, dat1$emp_pr, useNA = "always")
+
+table(dat1$emp_pr, dat1$emp_pu, useNA = "always")
+
+table(dat1$emp_pt, dat1$emp_se, useNA = "always")
+
+table(dat1$emp_ue, dat1$emp_se, useNA = "always")
+
+table(dat1$emp_olf, dat1$emp_se, useNA = "always")
+
+table(dat1$emp_pt, dat1$emp_pr, useNA = "always")
+
+table(dat1$emp_ue, dat1$emp_pr, useNA = "always")
+
+table(dat1$emp_olf, dat1$emp_pr, useNA = "always")
+
+table(dat1$emp_pt, dat1$emp_pu, useNA = "always")
+
+table(dat1$emp_ue, dat1$emp_pu, useNA = "always")
+
+table(dat1$emp_olf, dat1$emp_pu, useNA = "always")
+
+dat1$emp_pt <- factor(dat1$emp_pt, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_ue <- factor(dat1$emp_ue, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_olf <- factor(dat1$emp_olf, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_se <- factor(dat1$emp_se, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_pu <- factor(dat1$emp_pu, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_pr <- factor(dat1$emp_pr, levels = 0:1, labels = c("No", "Yes"))
+dat1$emp_pt <- relevel(dat1$emp_pt, ref = "No")
+dat1$emp_ue <- relevel(dat1$emp_ue, ref = "No")
+dat1$emp_olf <- relevel(dat1$emp_olf, ref = "No")
+dat1$emp_se <- relevel(dat1$emp_se, ref = "No")
+dat1$emp_pu <- relevel(dat1$emp_pu, ref = "No")
+dat1$emp_pr <- relevel(dat1$emp_pr, ref = "No")
+table(dat1$emp_pt, useNA = "always")
+
+table(dat1$emp_ue, useNA = "always")
+
+table(dat1$emp_olf, useNA = "always")
+
+table(dat1$emp_se, useNA = "always")
+
+table(dat1$emp_pu, useNA = "always")
+
+table(dat1$emp_pr, useNA = "always")
+
+dat1$v218[dat1$v218 >= 999997] <- NA 
+dat1$income <- NA
+for (i in unique(dat1$cntry)) {
+    s <- dat1$cntry == i
+    dat1$income[s] <- scale(dat1$v218[s])
+}
+rm(s, i)
+table(is.na(dat1$income))
+
+table(dat1$v220, useNA = "always")
+
+dat1$rel <- recodeVar(dat1$v220, 1:6, c(3, 3, 2, 2, 2, 1), default = NA)
+dat1$rel <- factor(dat1$rel, levels = 1:3,
+                   labels = c("No", "Low", "High"))
+dat1$rel <- relevel(dat1$rel, ref = "No")
+table(dat1$rel, useNA = "always")
+
+dat1$qjob <- recodeVar(dat1$v36, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$qjob, useNA = "always")
+
+dat1$quem <- recodeVar(dat1$v41, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$quem, useNA = "always")
+
+dat1$qinc <- recodeVar(dat1$v42, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$qinc, useNA = "always")
+
+dat1$qret <- recodeVar(dat1$v39, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$qret, useNA = "always")
+
+dat1$qhou <- recodeVar(dat1$v44, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$qhou, useNA = "always")
+
+dat1$qhea <- recodeVar(dat1$v38, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat1$qhea, useNA = "always")
+
+
+
+dat2 <- read_dta(paste0(path, "ZA4700.dta"))
+dat2$year <- factor(2006, levels = c(1996, 2006))
+dat2$year <- relevel(dat2$year, ref = "1996")
+table(dat2$year, useNA = "always")
+
+dat2$pid <- dat2$V2
+attr(dat2$V3, "labels")
+
+dat2$cntry <- recode(unclass(dat2$V3), 
+                     "36"  = "AU", "124" = "CA", "152" = "CL",
+                     "158" = "TW", "191" = "HR", "203" = "CZ",
+                     "208" = "DK", "214" = "DO", "246" = "FI",
+                     "250" = "FR", "276.1" = "DE", "276.2" = "DE",
+                     "348" = "HU", "376.1" = "IL", "376.2" = "IL", 
+                     "372" = "IE", "392" = "JP", "410" = "KR", 
+                     "428" = "LV", "528" = "NL", "554" = "NZ", 
+                     "578" = "NO", "608" = "PH", "616" = "PL", 
+                     "620" = "PT", "643" = "RU", "703" = "SK", 
+                     "705" = "SI", "710" = "ZA", "724" = "ES", 
+                     "752" = "SE", "756" = "CH", "826.1" = "GB", 
+                     "840" = "US", "858" = "UY", "862" = "VE")
+table(dat2$cntry, useNA = "always")
+
+table(dat2$age, useNA = "always")
+
+dat2$age <- recodeVar(dat2$age, 1:98, 1:98, default = NA)
+table(dat2$age, useNA = "always")
+
+table(dat2$sex, useNA = "always")
+
+dat2$sex <- recodeVar(dat2$sex, 1:2, 0:1, default = NA)
+dat2$sex <- factor(dat2$sex, levels = 0:1,
+                   labels = c("male", "female"))
+dat2$sex <- relevel(dat2$sex, ref = "male")
+table(dat2$sex, useNA = "always")
+
+table(dat2$marital, useNA = "always")
+
+dat2$marst <- recodeVar(dat2$marital, 1:5, c(1, 2, 3, 3, 4), default = NA)
+dat2$marst <- factor(dat2$marst, levels = 1:4,
+                     labels = c("Married", "Widowed",
+                                "Divorced/Separated", 
+                                "Never married"))
+dat2$marst <- relevel(dat2$marst, ref = "Married")
+table(dat2$marst, useNA = "always")
+
+table(dat2$hompop, useNA = "always")
+
+dat2$hhsize <- recodeVar(dat2$hompop, 1:36, 1:36, default = NA)
+table(dat2$hhsize, useNA = "always")
+
+table(dat2$hhcycle, useNA = "always")
+
+dat2$kids <- recodeVar(dat2$hhcycle, 1:28, c(0, 1, 1, 1, 0, 
+                                             1, 1, 1, 0, 1, 
+                                             0, 1, 0, 1, 0,
+                                             1, 0, 1, 0, 1,
+                                             0, 1, 0, 1, 0, 
+                                             1, 0, 1), default = NA)
+dat2$kids <- factor(dat2$kids, levels = 0:1,
+                    labels = c("No", "Yes"))
+dat2$kids <- relevel(dat2$kids, ref = "No")
+table(dat2$kids, useNA = "always")
+
+table(dat2$urbrural, useNA = "always")
+
+dat2$urru <- recodeVar(dat2$urbrural, 1:5, c(1, 2, 2, 3, 3), default = NA)
+dat2$urru <- factor(dat2$urru, levels = 1:3,
+                    labels = c("Urban", "Suburb", "Rural"))
+dat2$urru <- relevel(dat2$urru, ref = "Urban")
+table(dat2$urru, useNA = "always")
+
+table(dat2$degree, useNA = "always")
+
+dat2$educ <- recodeVar(dat2$degree, 0:5, c(1, 1, 1, 2, 2, 3), default = NA)
+dat2$educ <- factor(dat2$educ, levels = 1:3,
+                    labels = c("less than secondary", 
+                               "Secondary", 
+                               "University"))
+dat2$educ <- relevel(dat2$educ, ref = "Secondary")
+table(dat2$educ, useNA = "always")
+
+table(dat2$wrkst, useNA = "always")
+
+dat2$emp_pt <- recodeVar(dat2$wrkst, 1:10, 
+                         c(0, rep(1, 3), rep(0, 6)), default = NA)
+
+dat2$emp_ue <- recodeVar(dat2$wrkst, 1:10, 
+                         c(rep(0, 4), 1, rep(0, 5)), default = NA)
+
+dat2$emp_olf <- recodeVar(dat2$wrkst, 1:10, 
+                          c(rep(0, 5), rep(1, 5)), default = NA)
+
+dat2$emp_se <- as.numeric(dat2$wrktype %in% 4)
+dat2$emp_se[is.na(dat2$wrkst)] <- NA
+
+dat2$emp_pu <- as.numeric(dat2$wrktype %in% 1:2)
+dat2$emp_pu[is.na(dat2$wrkst)] <- NA
+
+dat2$emp_pr <- as.numeric(dat2$emp_se == 0 & dat2$emp_pu == 0)
+dat2$emp_pr[is.na(dat2$wrkst)] <- NA
+table(dat2$emp_se, dat2$emp_pu, useNA = "always")
+
+table(dat2$emp_se, dat2$emp_pr, useNA = "always")
+
+table(dat2$emp_pr, dat2$emp_pu, useNA = "always")
+
+table(dat2$emp_pt, dat2$emp_se, useNA = "always")
+
+table(dat2$emp_ue, dat2$emp_se, useNA = "always")
+
+table(dat2$emp_olf, dat2$emp_se, useNA = "always")
+
+table(dat2$emp_pt, dat2$emp_pr, useNA = "always")
+
+table(dat2$emp_ue, dat2$emp_pr, useNA = "always")
+
+table(dat2$emp_olf, dat2$emp_pr, useNA = "always")
+
+table(dat2$emp_pt, dat2$emp_pu, useNA = "always")
+
+table(dat2$emp_ue, dat2$emp_pu, useNA = "always")
+
+table(dat2$emp_olf, dat2$emp_pu, useNA = "always")
+
+dat2$emp_pt <- factor(dat2$emp_pt, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_ue <- factor(dat2$emp_ue, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_olf <- factor(dat2$emp_olf, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_se <- factor(dat2$emp_se, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_pu <- factor(dat2$emp_pu, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_pr <- factor(dat2$emp_pr, levels = 0:1, labels = c("No", "Yes"))
+dat2$emp_pt <- relevel(dat2$emp_pt, ref = "No")
+dat2$emp_ue <- relevel(dat2$emp_ue, ref = "No")
+dat2$emp_olf <- relevel(dat2$emp_olf, ref = "No")
+dat2$emp_se <- relevel(dat2$emp_se, ref = "No")
+dat2$emp_pu <- relevel(dat2$emp_pu, ref = "No")
+dat2$emp_pr <- relevel(dat2$emp_pr, ref = "No")
+table(dat2$emp_pt, useNA = "always")
+
+table(dat2$emp_ue, useNA = "always")
+
+table(dat2$emp_olf, useNA = "always")
+
+table(dat2$emp_se, useNA = "always")
+
+table(dat2$emp_pu, useNA = "always")
+
+table(dat2$emp_pr, useNA = "always")
+
+dat2$income <- NA
+for (i in unique(dat2$cntry)) {
+    s <- dat2$cntry == i
+    inc <- dat2[[paste0(i, "_INC")]][s]
+    dat2$income[s] <- scale(inc)
+}
+rm(s, i)
+table(is.na(dat2$income), dat2$cntry)
+
+table(dat2$attend, useNA = "always")
+
+dat2$rel <- recodeVar(dat2$attend, 1:8, c(rep(3, 3), rep(2, 4), 1), 
+                      default = NA)
+dat2$rel <- factor(dat2$rel, levels = 1:3,
+                   labels = c("No", "Low", "High"))
+dat2$rel <- relevel(dat2$rel, ref = "No")
+table(dat2$rel, useNA = "always")
+
+dat2$qjob <- recodeVar(dat2$V25, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$qjob, useNA = "always")
+
+dat2$quem <- recodeVar(dat2$V30, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$quem, useNA = "always")
+
+dat2$qinc <- recodeVar(dat2$V31, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$qinc, useNA = "always")
+
+dat2$qret <- recodeVar(dat2$V28, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$qret, useNA = "always")
+
+dat2$qhou <- recodeVar(dat2$V33, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$qhou, useNA = "always")
+
+dat2$qhea <- recodeVar(dat2$V27, 1:4, c(1, 1, 0, 0), default = NA)
+table(dat2$qhea, useNA = "always")
+
+
+
+
+dat3 <- read_dta(paste0(path, "bradyfinnigan2014countrydata.dta"))
+
+dat3$year <- as.factor(dat3$year)
+dat3$year <- relevel(dat3$year, ref = "1996")
+table(dat3$year, useNA = "always")
+
+dat3$cntry <- recode(unclass(dat3$cntry), 
+                     "36"  = "AU", "124" = "CA", "152" = "CL",
+                     "158" = "TW", "191" = "HR", "203" = "CZ",
+                     "208" = "DK", "214" = "DO", "246" = "FI",
+                     "250" = "FR", "276" = "DE", 
+                     "348" = "HU", "376" = "IL", 
+                     "372" = "IE", "392" = "JP", "410" = "KR", 
+                     "428" = "LV", "528" = "NL", "554" = "NZ", 
+                     "578" = "NO", "608" = "PH", "616" = "PL", 
+                     "620" = "PT", "643" = "RU", "703" = "SK", 
+                     "705" = "SI", "710" = "ZA", "724" = "ES", 
+                     "752" = "SE", "756" = "CH", "826" = "GB", 
+                     "840" = "US", "858" = "UY", "862" = "VE")
+table(dat3$cntry, useNA = "always")
+
+describe(dat3[, c("foreignpct", "socx", "netmigpct", "emprate")])
+
+dat <- suppressWarnings(
+          bind_rows(select(dat1,
+                           pid, year, cntry, sex, age, marst, hhsize, 
+                           kids, urru, educ, emp_pt, emp_ue,
+                           emp_olf, emp_se, emp_pu, emp_pr,
+                           income, rel, qjob, quem, qinc, qret,
+                           qhou, qhea), 
+                    select(dat2,
+                           pid, year, cntry, sex, age, marst, hhsize, 
+                           kids, urru, educ, emp_pt, emp_ue,
+                           emp_olf, emp_se, emp_pu, emp_pr,
+                           income, rel, qjob, quem, qinc, qret,
+                           qhou, qhea)) %>%
+          left_join(dat3, by = c("cntry", "year"))
+)
+rm(dat1, dat2, dat3)
+
+dat <- filter(dat, dat$cntry %in% c("AU", "CA", "DE", "DK", "FI", 
+                                    "FR", "IE", "JP", "NL", "NZ", 
+                                    "NO", "PT", "ES", "SE", "CH", 
+                                    "GB", "US"))
+
+dat$val06 <- !is.na(dat$sex)    & !is.na(dat$age) &
+             !is.na(dat$marst)  & !is.na(dat$hhsize) & 
+             !is.na(dat$kids)   & !is.na(dat$urru) &
+             !is.na(dat$educ)   & !is.na(dat$emp_pt) &
+             !is.na(dat$emp_ue) & !is.na(dat$emp_olf) & 
+             !is.na(dat$emp_se) & !is.na(dat$emp_pu) &
+             !is.na(dat$income) & !is.na(dat$rel)
+
+dat$val <- !is.na(dat$sex)    & !is.na(dat$age) &
+           !is.na(dat$educ)   & !is.na(dat$emp_pt) &
+           !is.na(dat$emp_ue) & !is.na(dat$emp_olf) & 
+           !is.na(dat$emp_se) & # !is.na(dat$emp_pu) &
+           !is.na(dat$income) & 
+           !(dat$cntry %in% c("DK", "FI","NL", "PT"))
+
+filter(dat, val06 & !is.na(qinc) & year == 2006) %>%
+    select(cntry) %>%
+    table()
+
+filter(dat, val & !is.na(qinc) & year == 1996) %>%
+    select(cntry) %>%
+    table()
+
+depvar <- c("qjob", "quem", "qinc", "qret", "qhou", "qhea")
+
+tab4 <- array(NA, c(18, 18, 3),
+              dimnames = list(c('Foreign born',
+                                'Social welfare expenditure',
+                                'Employment rate',
+                                'Net Migration',
+                                'Age', 
+                                'Age squared',
+                                'Females', 
+                                'Less than secondary',
+                                'University degree',
+                                'Part-time employment',
+                                'Unemployment',
+                                'Not in employment',
+                                'Self-employment',
+                                'Relative income',
+                                'Year 2006',
+                                'Intercept',
+                                'Number of respondents',
+                                'Number of countries'),
+                              c(paste0(depvar, 1:6), 
+                                paste0(depvar, 7:12), 
+                                paste0(depvar, 13:18)),
+                              c("or", "z", "p")))
+
+for (i in seq_len(length(depvar))) {
+    
+    var <- depvar[i]
+    
+    f <- dat$val & !is.na(dat[[var]])
+    
+    frm <- formula(paste0(var, " ~ age + I(age^2) + sex + educ + 
+                                   emp_pt + emp_ue + emp_olf + emp_se + 
+                                   income + year + foreignpct + cntry"))
+    fit1 <- glm(frm, data = dat, subset = f, family = binomial)
+    s <- summary(fit1)$coefficients
+    tab4[c(1, 5:16), paste0(var, i), "or"] <- 
+        c(exp(s[c(13, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab4[c(1, 5:16), paste0(var, i), "z"] <- 
+        s[c(13, 2:12, 1), 'z value']      
+    tab4[c(1, 5:16), paste0(var, i), "p"] <- 
+        s[c(13, 2:12, 1), 'Pr(>|z|)']   
+    tab4[17:18, paste0(var, i), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+    
+    fit2 <- update(fit1, . ~ . + socx)
+    s <- summary(fit2)$coefficients
+    tab4[c(1:2, 5:16), paste0(var, i + 6), "or"] <- 
+        c(exp(s[c(13, 26, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab4[c(1:2, 5:16), paste0(var, i + 6), "z"] <- 
+        s[c(13, 26, 2:12, 1), 'z value']      
+    tab4[c(1:2, 5:16), paste0(var, i + 6), "p"] <- 
+        s[c(13, 26, 2:12, 1), 'Pr(>|z|)']     
+    tab4[17:18, paste0(var, i + 6), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f])))
+    
+    fit3 <- update(fit1, . ~ . + emprate)
+    s <- summary(fit3)$coefficients
+    tab4[c(1, 3, 5:16), paste0(var, i + 12), "or"] <- 
+        c(exp(s[c(13, 26, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab4[c(1, 3, 5:16), paste0(var, i + 12), "z"] <- 
+        s[c(13, 26, 2:12, 1), 'z value']      
+    tab4[c(1, 3, 5:16), paste0(var, i + 12), "p"] <- 
+        s[c(13, 26, 2:12, 1), 'Pr(>|z|)']    
+    tab4[17:18, paste0(var, i + 12), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+}
+rm(i, frm, f, var, s, depvar, fit1, fit2, fit3)
+
+round(tab4[, , "or"], 3)
+round(tab4[, , "z"], 3)
+
+round(tab4[, , "p"], 3)
+round(1 / exp(log(tab4[1, c(1, 3, 6), "or"]) * sd(dat$foreignpct[dat$val])), 2)
+round(exp(log(tab4[1, 4, "or"]) * sd(dat$foreignpct[dat$val])), 2) 
+
+depvar <- c("qjob", "quem", "qinc", "qret", "qhou", "qhea")
+
+tab5 <- array(NA, c(18, 24, 3),
+              dimnames = list(c('Foreign born',
+                                'Social welfare expenditure',
+                                'Employment rate',
+                                'Net Migration',
+                                'Age', 
+                                'Age squared',
+                                'Females', 
+                                'Less than secondary',
+                                'University degree',
+                                'Part-time employment',
+                                'Unemployment',
+                                'Not in employment',
+                                'Self-employment',
+                                'Relative income',
+                                'Year 2006',
+                                'Intercept',
+                                'Number of respondents',
+                                'Number of countries'),
+                              c(paste0(depvar, 1:6), 
+                                paste0(depvar, 7:12), 
+                                paste0(depvar, 13:18),
+                                paste0(depvar, 19:24)),
+                              c("or", "z", "p")))
+for (i in seq_len(length(depvar))) {
+    
+    var <- depvar[i]
+    
+    f <- dat$val & !is.na(dat[[var]])
+    
+    frm <- formula(paste0(var, " ~ age + I(age^2) + sex + educ + 
+                          emp_pt + emp_ue + emp_olf + emp_se + 
+                          income + year + netmigpct + cntry"))
+    fit1 <- glm(frm, data = dat, subset = f, family = binomial)
+    s <- summary(fit1)$coefficients
+    tab5[c(4, 5:16), paste0(var, i), "or"] <- 
+        c(exp(s[c(13, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab5[c(4, 5:16), paste0(var, i), "z"] <- 
+        s[c(13, 2:12, 1), 'z value']      
+    tab5[c(4, 5:16), paste0(var, i), "p"] <- 
+        s[c(13, 2:12, 1), 'Pr(>|z|)']     
+    tab5[17:18, paste0(var, i), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+    
+    fit2 <- update(fit1, . ~ . + socx)
+    s <- summary(fit2)$coefficients
+    tab5[c(4, 2, 5:16), paste0(var, i + 6), "or"] <- 
+        c(exp(s[c(13, 26, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab5[c(4, 2, 5:16), paste0(var, i + 6), "z"] <- 
+        s[c(13, 26, 2:12, 1), 'z value']     
+    tab5[c(4, 2, 5:16), paste0(var, i + 6), "p"] <- 
+        s[c(13, 26, 2:12, 1), 'Pr(>|z|)']     
+    tab5[17:18, paste0(var, i + 6), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+    
+    fit3 <- update(fit1, . ~ . + emprate)
+    s <- summary(fit3)$coefficients
+    tab5[c(4, 3, 5:16), paste0(var, i + 12), "or"] <- 
+        c(exp(s[c(13, 26, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab5[c(4, 3, 5:16), paste0(var, i + 12), "z"] <- 
+        s[c(13, 26, 2:12, 1), 'z value']     
+    tab5[c(4, 3, 5:16), paste0(var, i + 12), "p"] <- 
+        s[c(13, 26, 2:12, 1), 'Pr(>|z|)']    
+    tab5[17:18, paste0(var, i + 12), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+    
+    fit4 <- update(fit1, . ~ . + foreignpct)
+    s <- summary(fit4)$coefficients
+    tab5[c(4, 1, 5:16), paste0(var, i + 18), "or"] <- 
+        c(exp(s[c(13, 26, 2:12), 'Estimate']), s[1, 'Estimate']) 
+    tab5[c(4, 1, 5:16), paste0(var, i + 18), "z"] <- 
+        s[c(13, 26, 2:12, 1), 'z value']      
+    tab5[c(4, 1, 5:16), paste0(var, i + 18), "p"] <- 
+        s[c(13, 26, 2:12, 1), 'Pr(>|z|)']     
+    tab5[17:18, paste0(var, i + 18), "or"] <- 
+        c(sum(f), length(unique(dat$cntry[f]))) 
+}
+rm(i, frm, f, var, s, depvar, fit1, fit2, fit3, fit4)
+
+round(tab5[, , "or"], 3)
+round(tab5[, , "z"], 3)
+round(tab5[, , "p"], 3)
+
+round(exp(log(tab5[4, c(19, 22:24), "or"]) * sd(dat$netmigpct[dat$val])), 2)
+round(1 / exp(log(tab5[1, c(19, 21, 24), "or"]) * sd(dat$foreignpct[dat$val])), 2)
+round(exp(log(tab5[1, 22, "or"]) * sd(dat$foreignpct[dat$val])), 2)
+
+wtab1 <- tibble(Predictor = dimnames(tab4)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 1:6) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab4[, i, "or"], 
+                   tab4[, i, "z"],
+                   ifelse(abs(tab4[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab4[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab4[, i, 'p']) < .05, "*", ""))))
+    wtab1[, i + 1] <- gsub("\\( \\)", "", gsub("NA", "", str))
+    
+}
+rm(i, str)
+wtab1 <- regulartable(wtab1) %>%
+         set_header_labels(job = "(1)\nJobs", 
+                           uem = "(2)\nUnemp",
+                           inc = "(3)\nIncome Dif.",
+                           ret = "(4)\nOld",
+                           hou = "(5)\nHouse",
+                           hea = "(6)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+
+
+
+wtab2 <- tibble(Predictor = dimnames(tab4)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 7:12) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab4[, i, "or"], 
+                   tab4[, i, "z"],
+                   ifelse(abs(tab4[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab4[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab4[, i, 'p']) < .05, "*", ""))))
+    wtab2[, i - 5] <- gsub("\\( \\)", "", gsub("NA", "", str))
+    
+}
+rm(i, str)
+wtab2 <- regulartable(wtab2) %>%
+         set_header_labels(job = "(7)\nJobs", 
+                           uem = "(8)\nUnemp",
+                           inc = "(9)\nIncome Dif.",
+                           ret = "(10)\nOld",
+                           hou = "(11)\nHouse",
+                           hea = "(12)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+
+
+wtab3 <- tibble(Predictor = dimnames(tab4)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 13:18) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab4[, i, "or"], 
+                   tab4[, i, "z"],
+                   ifelse(abs(tab4[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab4[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab4[, i, 'p']) < .05, "*", ""))))
+    wtab3[, i - 11] <- gsub("\\( \\)", "", gsub("NA", "", str))
+}
+rm(i, str)
+wtab3 <- regulartable(wtab3) %>%
+         set_header_labels(job = "(13)\nJobs", 
+                           uem = "(14)\nUnemp",
+                           inc = "(15)\nIncome Dif.",
+                           ret = "(16)\nOld",
+                           hou = "(17)\nHouse",
+                           hea = "(18)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+rm(tab4)
+
+
+
+my_doc <- read_docx() %>%
+          body_add_fpar(fpar(ftext("Percent foreign born", prop = "on"))) %>%
+          body_add_flextable(value = wtab1) %>%
+          body_add_break(pos = "after") %>%
+          body_add_fpar(fpar(ftext("Percent foreign born and social welfare expenditures", prop = "on"))) %>%
+          body_add_flextable(value = wtab2) %>%
+          body_add_break(pos = "after") %>%
+          body_add_fpar(fpar(ftext("Percent foreign born and employment rate", prop = "on"))) %>%
+          body_add_flextable(value = wtab3)
+print(my_doc, target = "Table 4.docx")
+
+rm(wtab1, wtab2, wtab3, my_doc)
+
+
+wtab1 <- tibble(Predictor = dimnames(tab5)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 1:6) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab5[, i, "or"], 
+                   tab5[, i, "z"],
+                   ifelse(abs(tab5[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab5[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab5[, i, 'p']) < .05, "*", ""))))
+    wtab1[, i + 1] <- gsub("\\( \\)", "", gsub("NA", "", str))
+    
+}
+rm(i, str)
+wtab1 <- regulartable(wtab1) %>%
+         set_header_labels(job = "(1)\nJobs", 
+                           uem = "(2)\nUnemp",
+                           inc = "(3)\nIncome Dif.",
+                           ret = "(4)\nOld",
+                           hou = "(5)\nHouse",
+                           hea = "(6)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+
+
+
+wtab2 <- tibble(Predictor = dimnames(tab5)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 7:12) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab5[, i, "or"], 
+                   tab5[, i, "z"],
+                   ifelse(abs(tab5[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab5[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab5[, i, 'p']) < .05, "*", ""))))
+    wtab2[, i - 5] <- gsub("\\( \\)", "", gsub("NA", "", str))
+    
+}
+rm(i, str)
+wtab2 <- regulartable(wtab2) %>%
+         set_header_labels(job = "(7)\nJobs", 
+                           uem = "(8)\nUnemp",
+                           inc = "(9)\nIncome Dif.",
+                           ret = "(10)\nOld",
+                           hou = "(11)\nHouse",
+                           hea = "(12)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+
+
+wtab3 <- tibble(Predictor = dimnames(tab5)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 13:18) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab5[, i, "or"], 
+                   tab5[, i, "z"],
+                   ifelse(abs(tab5[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab5[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab5[, i, 'p']) < .05, "*", ""))))
+    wtab3[, i - 11] <- gsub("\\( \\)", "", gsub("NA", "", str))
+}
+rm(i, str)
+wtab3 <- regulartable(wtab3) %>%
+         set_header_labels(job = "(13)\nJobs", 
+                           uem = "(14)\nUnemp",
+                           inc = "(15)\nIncome Dif.",
+                           ret = "(16)\nOld",
+                           hou = "(17)\nHouse",
+                           hea = "(18)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+
+
+wtab4 <- tibble(Predictor = dimnames(tab5)[[1]],
+                job = NA, uem = NA, inc = NA, 
+                ret = NA, hou = NA, hea = NA)
+for (i in 19:24) {
+    str <- sprintf("%3.3f\n(%3.3f%s)", 
+                   tab5[, i, "or"], 
+                   tab5[, i, "z"],
+                   ifelse(abs(tab5[, i, 'p']) < .001, "***", 
+                          ifelse(abs(tab5[, i, 'p']) < .01, "**", 
+                                 ifelse(abs(tab5[, i, 'p']) < .05, "*", ""))))
+    wtab4[, i - 17] <- gsub("\\( \\)", "", gsub("NA", "", str))
+}
+rm(i, str)
+wtab4 <- regulartable(wtab4) %>%
+         set_header_labels(job = "(19)\nJobs", 
+                           uem = "(20)\nUnemp",
+                           inc = "(21)\nIncome Dif.",
+                           ret = "(22)\nOld",
+                           hou = "(23)\nHouse",
+                           hea = "(24)\nHealth") %>%
+         align(align = "center", part = "header") %>%
+         align(align = "center") %>%
+         width(j = 1, width = 1.50) %>%
+         width(j = 2:7, width = 0.80)
+rm(tab5)
+
+
+my_doc <- read_docx() %>%
+    body_add_fpar(fpar(ftext("Net migration", prop = "on"))) %>%
+    body_add_flextable(value = wtab1) %>%
+    body_add_break(pos = "after") %>%
+    body_add_fpar(fpar(ftext("Net migration and social welfare expenditures", prop = "on"))) %>%
+    body_add_flextable(value = wtab2) %>%
+    body_add_break(pos = "after") %>%
+    body_add_fpar(fpar(ftext("Net migration and employment rate", prop = "on"))) %>%
+    body_add_flextable(value = wtab3) %>%
+    body_add_break(pos = "after") %>%
+    body_add_fpar(fpar(ftext("Net migration and percentage foreign born", prop = "on"))) %>%
+    body_add_flextable(value = wtab4)
+print(my_doc, target = "Table 5.docx")
+
+rm(wtab1, wtab2, wtab3, wtab4, my_doc)
+sessionInfo()

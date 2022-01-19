@@ -1,0 +1,159 @@
+TEAM: 48
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+cd "\"
+use "ZA2900.dta", clear
+
+
+
+recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
+label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values v3a cntrylbl
+
+
+recode v36 1/2=1 nonmiss=0, gen(Rjobs)
+recode v38 1/2=1 nonmiss=0, gen(Rhealthcare)
+recode v41 1/2=1 nonmiss=0, gen(Runempl)
+recode v42 1/2=1 nonmiss=0, gen(Rincome)
+recode v39 1/2=1 nonmiss=0, gen(Rretire)
+recode v44 1/2=1 nonmiss=0, gen(Rhousing)
+
+
+
+
+
+rename v201 age
+gen age2=age^2
+
+recode v200	2=1 1=0 else=., gen(female)
+
+recode v205 1/4=1 5/7=0 else=., gen(lowersecondary)
+
+
+recode v206 (2 3=1) (nonmiss=0), gen(parttime)
+recode v206 (5=1) (nonmiss=0), gen(unemployed)
+recode v206 (4 6 7 8 9 10=1) (nonmiss=0), gen(notinlaborforce)
+recode v206 (4 6 8 9 10=1) (nonmiss=0), gen(notinlaborforce2)
+label var notinlaborforce2 "housemen not included in dummy"
+
+
+
+
+recode v213 (1=1) (2=0) (else=.), gen(selfemployed)
+clonevar selfemployed2= selfemployed
+label var selfemployed2 "uncorrected by other data"
+replace selfemployed=0 if (notinlaborforce==1 | unemployed==1) & selfemployed!=1
+
+gen stdincome=.
+levelsof v3a, local(x)
+foreach y of local x {
+egen stdincome`y'=std(v218) if v3a==`y'
+replace stdincome=stdincome`y' if v3a==`y'
+drop stdincome`y'
+}
+gen year=1996
+rename v3a cntry
+
+tempfile issp96
+save `issp96'
+
+
+use "ZA4700.dta", clear
+
+
+recode V25 1/2=1 nonmiss=0, gen(Rjobs)
+recode V27 1/2=1 nonmiss=0, gen(Rhealthcare)
+recode V36 1/2=1 nonmiss=0, gen(Runempl)
+recode V31 1/2=1 nonmiss=0, gen(Rincome)
+recode V28 1/2=1 nonmiss=0, gen(Rretire)
+recode V33 1/2=1 nonmiss=0, gen(Rhousing)
+
+
+
+
+
+gen age2=age^2
+recode sex 2=1 nonmiss=0, gen(female)
+
+recode degree 0/2=1 3/5=0 else=., gen(lowersecondary)
+recode degree 5=1 1/4=0 else=., gen(university)
+
+recode wrkst 5=1 nonmiss=0, gen(unemployed)
+recode wrkst 2 3=1 nonmiss=0, gen(parttime)
+recode wrkst 4 6 7 8 9 10=1 nonmiss=0, gen(notinlaborforce)
+recode wrkst 4 6 7 9 10=1 nonmiss=0, gen(notinlaborforce2)
+
+
+recode wrktype 4=1 nonmiss=0, gen(selfemployed)
+clonevar selfemployed2=selfemployed
+replace selfemployed=0 if (notinlaborforce==1 | unemployed==1) & selfemployed!=1
+
+
+egen income= rowtotal(AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC)
+
+gen stdincome=.
+levelsof V3a, local(x)
+foreach y of local x {
+egen stdincome`y'=std(income) if V3a==`y'
+replace stdincome=stdincome`y' if V3a==`y'
+drop stdincome`y'
+}
+
+rename V3a cntry
+gen year=2006
+
+
+append using `issp96'
+
+
+
+merge m:1 cntry year  using bradyfinnigan2014countrydata
+
+keep if inlist(cntry, 36, 124, 250, 276, 372, 392, 554, 578, 724, 752, 756, 826, 840)
+
+foreach y in jobs healthcare unempl income retire housing {
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry foreignpct, or
+eststo `y'41 
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry foreignpct socx, or
+eststo `y'42
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry foreignpct emprate , or
+eststo `y'43 
+
+
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry netmigpct, or
+eststo `y'51 
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry netmigpct socx, or
+eststo `y'52
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry netmigpct emprate , or
+eststo `y'53
+
+logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry netmigpct foreignpct , or
+eststo `y'54 
+}
+
+
+estout jobs41 unempl41 income41 retire41 housing41 healthcare41 jobs42 unempl42 income42 retire42 housing42 healthcare42 jobs43 unempl43 income43 retire43 housing43 healthcare43 using table4.xls, cells (b z) eform stats(N) replace
+
+
+estout jobs51 unempl51 income51 retire51 housing51 healthcare51 jobs52 unempl52 income52 retire52 housing52 healthcare52 jobs53 unempl53 income53 retire53 housing53 healthcare53 jobs54 unempl54 income54 retire54 housing54 healthcare54 using table5.xls, cells (b z) eform stats(N) replace
+
+
+levelsof cntry, local(cntry)
+foreach x of local cntry {
+logit Rjobs age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry foreignpct if cntry!=`x', or
+eststo tab`x'
+} 
+
+
+
+
+
+  

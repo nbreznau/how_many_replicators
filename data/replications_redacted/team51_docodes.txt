@@ -1,0 +1,34 @@
+TEAM: 51
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+melogit Old_Age_Care foreignpct Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry, or
+melogit Unemployed foreignpct Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry, or
+melogit Reduce_Income_Differences foreignpct Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry, or
+melogit Jobs foreignpct Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry, or
+
+melogit Old_Age_Care foreignpct socx Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || socx: cntry Year, intmethod(laplace) or technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Unemployed foreignpct socx Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || socx: cntry Year, intmethod(laplace) or technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Reduce_Income_Differences foreignpct socx Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || socx: cntry Year, intmethod(laplace) or technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Jobs foreignpct socx Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || socx: cntry Year, intmethod(laplace) or technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+
+melogit Old_Age_Care foreignpct emprate Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Unemployed foreignpct emprate Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Reduce_Income_Differences foreignpct emprate Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Jobs foreignpct emprate Female Age AgeSq dless dmore dpart dnact dact || foreignpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+
+melogit Old_Age_Care netmigpct Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry, or
+melogit Unemployed netmigpct Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry, or
+melogit Reduce_Income_Differences netmigpct Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry, or
+melogit Jobs netmigpct Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry, or
+
+melogit Old_Age_Care netmigpct socx Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || socx: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1e-1) ltolerance(1e-1) nrtolerance(1e-1)
+melogit Unemployed netmigpct socx Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || socx: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1e-1) ltolerance(1e-1) nrtolerance(1e-1)
+melogit Reduce_Income_Differences netmigpct socx Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || socx: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1e-1) ltolerance(1e-1) nrtolerance(1e-1)
+melogit Jobs netmigpct socx Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || socx: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1e-1) ltolerance(1e-1) nrtolerance(1e-1)
+
+melogit Old_Age_Care netmigpct emprate Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Unemployed netmigpct emprate Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Reduce_Income_Differences netmigpct emprate Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+melogit Jobs netmigpct emprate Female Age AgeSq dless dmore dpart dnact dact || netmigpct: cntry Year || emprate: cntry Year, intmethod(laplace) or difficult technique(bfgs) iterate(100) tolerance(1) ltolerance(1) nrtolerance(1)
+

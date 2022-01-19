@@ -1,0 +1,11 @@
+TEAM: 51
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+replace dless=1 if dless==0 | dless==1 | dless==2
+replace dless=. if dless==8 | dless==9
+replace dless=0 if dless==3 | dless==4 | dless==5
+
+replace dmore=0 if dmore==0 | dmore==1 | dmore==2 | dmore==3
+replace dmore=. if dmore==8 | dmore==9
+replace dmore=1 if dmore==4 | dmore==5

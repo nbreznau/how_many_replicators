@@ -1,0 +1,95 @@
+clear
+cd "\" 
+
+use "ZA2900.dta", clear
+
+decode v3, gen (country)
+
+rename v2 id
+
+
+replace country="Germany" if country=="D-E" | country=="D-W"
+replace country="Israel" if country=="IL-A" | country=="IL-J"
+replace country="Ireland" if country=="irl"
+replace country="New Zealand" if country=="nz"
+replace country="Poland" if country=="pl"
+replace country="United States" if country=="usa"
+replace country="Australia" if country=="aus"
+replace country="Russia" if country=="rus"
+replace country="Czech Republic" if country=="cz"
+replace country="United Kingdom" if country=="gb"
+replace country="Slovenia" if country=="slo"
+replace country="Latvia" if country=="lv"
+replace country="Bulgaria" if country=="bg"
+replace country="Canada" if country=="cdn"
+replace country="Switzerland" if country=="ch"
+replace country="Spain" if country=="e"
+replace country="France" if country=="f"
+replace country="Hungary" if country=="h"
+replace country="Italy" if country=="i"
+replace country="Japan" if country=="j"
+replace country="Norway" if country=="n"
+replace country="Philippines" if country=="rp"
+replace country="Sweden" if country=="s"
+
+
+*replace country="Cyprus" if country=="cy"
+
+
+
+tab country
+
+
+gen year=1996
+
+
+
+rename v39 elderly
+label variable elderly "Old Age Care"
+
+rename v41 unemployed
+label variable unemployed "Unemployed"
+
+rename v42 ReduceIncDiff
+label variable ReduceIncDiff "Reduce Income Differences"
+
+rename v36 jobs
+label variable jobs "Jobs"
+
+codebook jobs
+
+
+
+label define supportgov 1 "Support" 0 "Oppose"
+
+foreach x in elderly unemployed ReduceIncDiff jobs {
+recode `x' 3/4=0 1/2=1
+label values `x' supportgov
+}
+
+
+
+recode v200 1=0  2=1, into(Female)
+
+rename v201 age
+gen agesq = age * age
+
+
+recode v205 1/3=1 4/5=2 6/7=3, into(education)
+label define ed 1 "Primary or lower" 2 "Secondary" 3 "University or higher"
+label values education ed
+
+
+recode v206 1=4 2=1 3=1 4=2 5=3 6=2 7=2 8=2 9=2 10=2 99=., into(workstatus)
+
+label define workstat 1 "Part-time" 2 "Not active" 3 "Active unemployed" 4 "Full time"
+label values workstatus workstat
+tab v206 workstatus 
+
+rename v325 weight
+
+keep  id age agesq Female elderly unemployed ReduceIncDiff jobs year country ///
+	education workstatus weight
+
+
+save "cleanissp1996.dta", replace

@@ -1,0 +1,30 @@
+
+clear
+cd "\" 
+
+use "L2data.dta", clear
+
+replace country = "Israel" if country=="Isreal"
+
+
+tab socx country, miss
+tab foreignpct
+
+tab netmigpct
+
+foreach x in emprate foreignpct socx netmigpct {
+gen `x'miss=0
+replace `x'miss=1 if `x'==.
+}
+
+foreach x in empratemiss foreignpctmiss socxmiss netmigpctmiss {
+egen `x'c = sum(`x'), by(country)
+}
+
+foreach x in empratemissc foreignpctmissc socxmissc netmigpctmissc{
+drop if `x'>0
+}
+
+drop empratemiss foreignpctmiss socxmiss netmigpctmiss empratemissc foreignpctmissc socxmissc netmigpctmissc
+
+save "l2clean.dta", replace
