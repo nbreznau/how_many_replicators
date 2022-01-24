@@ -1,0 +1,697 @@
+TEAM: 68
+SOFTWARE: R (R-STUDIO)
+VERSION: ORIGINAL
+
+```{r, include = FALSE}
+knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
+
+if (identical(knitr:::pandoc_to(), 'latex'))
+  knitr::knit_hooks$set(plot = knitr::hook_plot_tex)
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  dev = "pdf",
+  dev.args = list(pointsize = 8),
+  crop = NULL,
+  highlight = TRUE
+)
+
+options(digits = 3)
+
+
+pacman::p_load(
+  dplyr,
+  tidyverse,
+  foreign, 
+  readxl,
+  kableExtra)
+
+
+
+```
+
+
+```{r issp1996, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+  issp1996 <- read.csv2(file="ZA2900.csv", 
+                        header = TRUE, sep=",")
+
+
+  issp1996$old.age.care <- issp1996$v39
+  issp1996$old.age.care <- recode(issp1996$old.age.care,
+                                  "Definitely should" = "1",
+                                  "Probably should" = "1",
+                                  "Probably not" = "0",
+                                  "Definitely not" = "0",
+                                  .default = "NA")
+  issp1996$old.age.care <- as.numeric(as.character(issp1996$old.age.care))
+  kable(table(issp1996$old.age.care, issp1996$v39))
+
+
+  issp1996$unemployed <- issp1996$v41
+  issp1996$unemployed <- recode(issp1996$unemployed,
+                                  "Definitely should" = "1",
+                                  "Probably should" = "1",
+                                  "Probably not" = "0",
+                                  "Definitely not" = "0",
+                                  .default = "NA")
+  issp1996$unemployed <- as.numeric(as.character(issp1996$unemployed))
+  kable(table(issp1996$unemployed, issp1996$v41))
+
+  issp1996$reduce.income.differences <- issp1996$v42
+  issp1996$reduce.income.differences <- recode(issp1996$reduce.income.differences,
+                                  "Definitely should" = "1",
+                                  "Probably should" = "1",
+                                  "Probably not" = "0",
+                                  "Definitely not" = "0",
+                                  .default = "NA")
+  issp1996$reduce.income.differences <-     as.numeric(as.character(issp1996$reduce.income.differences))
+  kable(table(issp1996$reduce.income.differences, issp1996$v42))
+  
+  issp1996$jobs.for.everyone  <- issp1996$v36    
+  issp1996$jobs.for.everyone <- issp1996$v36
+  issp1996$jobs.for.everyone <- recode(issp1996$jobs.for.everyone,
+                                  "Definitely should" = "1",
+                                  "Probably should" = "1",
+                                  "Probably not" = "0",
+                                  "Definitely not" = "0",
+                                  .default = "NA")
+  issp1996$jobs.for.everyone <- as.numeric(as.character(issp1996$jobs.for.everyone))
+  kable(table(issp1996$jobs.for.everyone, issp1996$v36))
+  
+
+  issp1996$year <- 1996
+
+  issp1996$female <- if_else(issp1996$v200 == "Female", 1, 0)
+  kable(table(issp1996$female, issp1996$v200))  
+
+  issp1996$age <- issp1996$v201
+  issp1996$age <- as.numeric(as.character(issp1996$age))
+  issp1996$age2 <- issp1996$age^2
+
+  issp1996$education <- NA
+  issp1996$degree <- as.numeric(issp1996$v205)
+  issp1996$education[issp1996$degree==2 | 
+                       issp1996$degree==3 | 
+                       issp1996$degree==4 | 
+                       issp1996$degree==5] <- 1
+  issp1996$education[issp1996$degree==6 ] <- 2
+  issp1996$education[issp1996$degree==7 | issp1996$degree==8 ] <- 3
+  issp1996$education <- factor(issp1996$education, 
+                               labels = c("primary or less", "secondary", "university or more"))
+  kable(table(issp1996$education, issp1996$v205))  %>%
+  kable_styling(font_size = 4)
+
+  issp1996$v206_num <- as.numeric(issp1996$v206)
+  issp1996$employment <- NA
+  issp1996$employment[issp1996$v206_num==2] <- 1
+  issp1996$employment[issp1996$v206_num==3] <- 2
+  issp1996$employment[issp1996$v206_num== 4 |
+                       issp1996$v206_num==6 | 
+                       issp1996$v206_num==7 |
+                       issp1996$v206_num==8 |
+                        issp1996$v206_num==9 |
+                        issp1996$v206_num==10 |
+                        issp1996$v206_num==11] <- 3 
+  issp1996$employment[issp1996$v206_num==4 ] <- 4
+  issp1996$employment <- factor(issp1996$employment, 
+                                labels = c("full-time", "part-time", "not active", 
+                                           "active unemployed"))
+  kable(table(issp1996$employment, issp1996$v206_num))  
+  
+
+  issp1996$id <- issp1996$v2
+
+  issp1996$country <- as.character(issp1996$v3)
+
+  issp1996 <- issp1996 %>% select(one_of("year", "id", "female", "age", "education",
+                                         "employment", "country", "old.age.care",
+                                         "unemployed", "reduce.income.differences",
+                                         "jobs.for.everyone", "age2"))
+```
+  
+
+  
+```{r issp2006, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+  issp2006 <- read.csv(file="ZA4700.csv")
+  
+
+  issp2006$old.age.care <- issp2006$V28
+  issp2006$old.age.care <- recode(issp2006$old.age.care,
+                                  "Definitely should be" = "1",
+                                  "Probably should be" = "1",
+                                  "Probably should not be" = "0",
+                                  "Definitely should not be" = "0",
+                                  .default = "NA")
+  issp2006$old.age.care <- as.numeric(as.character(issp2006$old.age.care))
+  kable(table(issp2006$old.age.care, issp2006$V28))
+
+  issp2006$unemployed <- issp2006$V30
+  issp2006$unemployed <- recode(issp2006$unemployed,
+                                  "Definitely should be" = "1",
+                                  "Probably should be" = "1",
+                                  "Probably should not be" = "0",
+                                  "Definitely should not be" = "0",
+                                  .default = "NA")
+  issp2006$unemployed <- as.numeric(as.character(issp2006$unemployed))
+  kable(table(issp2006$unemployed, issp2006$V30))
+
+  issp2006$reduce.income.differences <- issp2006$V31
+  issp2006$reduce.income.differences <- recode(issp2006$reduce.income.differences,
+                                  "Definitely should be" = "1",
+                                  "Probably should be" = "1",
+                                  "Probably should not be" = "0",
+                                  "Definitely should not be" = "0",
+                                  .default = "NA")
+  issp2006$reduce.income.differences <- as.numeric(as.character(issp2006$reduce.income.differences))
+  kable(table(issp2006$reduce.income.differences, issp2006$V31))
+
+  issp2006$jobs.for.everyone <- issp2006$V25
+  issp2006$jobs.for.everyone <- recode(issp2006$jobs.for.everyone,
+                                  "Definitely should be" = "1",
+                                  "Probably should be" = "1",
+                                  "Probably should not be" = "0",
+                                  "Definitely should not be" = "0",
+                                  .default = "NA")
+  issp2006$jobs.for.everyone <- as.numeric(as.character(issp2006$jobs.for.everyone))
+  kable(table(issp2006$jobs.for.everyone, issp2006$V25))
+  
+    issp2006$age2 <- issp2006$age^2
+  
+
+  issp2006$year <- 2006
+
+  issp2006$female <- if_else(issp2006$sex == "Female", 1, 0)
+  kable(table(issp2006$female, issp2006$sex))
+
+  issp2006$education <- NA
+  issp2006$degree_num <- as.numeric(issp2006$degree)
+
+  issp2006$education[issp2006$degree_num==2 | 
+                     issp2006$degree_num==3 | 
+                     issp2006$degree_num==4] <- 1
+  issp2006$education[issp2006$degree_num==5 ] <- 2
+  issp2006$education[issp2006$degree_num==6 | issp2006$degree_num==7 ] <- 3
+  issp2006$education <- factor(issp2006$education, 
+                             labels = c("primary or less", "secondary", 
+                                        "university or more"))
+  kable(table(issp2006$education, issp2006$degree_num))
+
+  issp2006$employment <- NA
+  issp2006$wrkst_num <- as.numeric(issp2006$wrkst)
+
+  issp2006$employment[issp2006$wrkst_num==2] <- 1
+  issp2006$employment[issp2006$wrkst_num==3] <- 2
+  issp2006$employment[issp2006$wrkst_num== 4 |
+                       issp2006$wrkst_num==5 | 
+                       issp2006$wrkst_num==7 |
+                       issp2006$wrkst_num==8 |
+                        issp2006$wrkst_num==9 |
+                        issp2006$wrkst_num==10 |
+                        issp2006$wrkst_num==11] <- 3 
+  issp2006$employment[issp2006$wrkst_num==6 ] <- 4
+  issp2006$employment <- as.factor(issp2006$employment)
+  issp2006$employment <- factor(issp2006$employment, 
+                                labels = c("full-time", "part-time", "not active", 
+                                           "active unemployed"))
+  kable(table(issp2006$employment, issp2006$wrkst_num))
+
+
+  issp2006$id <- issp2006$V2
+
+  issp2006$country <- as.character(issp2006$V3)
+
+  issp2006 <- issp2006 %>% select(one_of("year", "id", "female", "age", "education",
+                                         "employment", "country", "old.age.care",
+                                         "unemployed", "reduce.income.differences",
+                                         "jobs.for.everyone", "age2"))
+
+
+```
+
+
+```{r rename-countries}
+  issp1996$country <- recode(issp1996$country,
+                             "aus" = "Australia",
+                             "cdn" = "Canada",
+                             "ch" = "Switzerland",
+                             "D-E" = "Germany", 
+                             "D-W" = "Germany",
+                             "e" = "Spain",
+                             "f" = "France",
+                             "gb" = "United Kingdom",
+                             "IL-A" = "Israel", 
+                             "IL-J" = "Israel",
+                             "n" = "Norway",
+                             "nz" = "New Zealand",
+                             "usa" = "United States",
+                             "s" = "Sweden",
+                             "j" = "Japan",
+                             "nirl" = "Northern Ireland",
+                             "a" = "Austria",
+                             "h" = "Hungary",
+                             "i" = "Italy",
+                             "irl" = "Ireland",
+                             "nl" = "Netherland",
+                             "cz" = "Czech Republic",
+                             "slo" = "Slovenia",
+                             "pl" = "Poland",
+                             "bg" = "Bulgaria",
+                             "rus" = "Russia",
+                             "rp" = "Philippines",
+                             "lv" = "Latvia",
+                             "cy" = "Cyprus")
+
+  issp2006$country <- sub(".*-", "", issp2006$country)
+  issp2006$country <- recode(issp2006$country,
+                             "276.1" = "Germany",
+                             "276.2" = "Germany",
+                             "826.1" = "United Kingdom",
+                             "376.1" = "Israel", 
+                             "376.2" = "Israel") # (arabs and jews)
+```
+
+
+```{r country-sample}
+  country.sample <- c("Australia", "Canada", "Switzerland",
+                     "Germany", "Spain", "France", 
+                     "United Kingdom", "Israel", "Norway",
+                     "New Zealand", "Ireland",
+                     "Sweden", "Japan")
+```
+
+
+```{r subset-countries}
+
+  issp1996 <- issp1996 %>% filter(country %in% country.sample)
+  issp2006 <- issp2006 %>% filter(country %in% country.sample)
+```
+
+
+
+```{r rename-subset-countries}
+  issp.data <- bind_rows(issp1996, issp2006)
+```
+
+
+
+```{r import-level2-data}
+  countrylevel.data <- read.csv(file="L2data.csv")
+  countrylevel.data$country_chr <- as.character(countrylevel.data$country)
+
+  countrylevel.data <- countrylevel.data %>% filter(country_chr %in% country.sample)
+  
+  countrylevel.data <- countrylevel.data %>% rename("employment.rate" = "emprate",
+                          "immigrant.stock" = "foreignpct",
+                          "social.expenditures" = "socx",
+                          "immigrant.stock.change" = "netmigpct")
+
+
+```
+
+
+
+```{r merge-datasets, message=FALSE, warning=FALSE, paged.print=FALSE}
+  issp.data$year.lvl1 <- issp.data$year
+  countrylevel.data$year.lvl2 <- countrylevel.data$year
+  data <- left_join(issp.data, countrylevel.data, by = c("country","year"))
+  table(data$country)
+```
+
+
+```{r table-summary-stats-1996, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+  summary.stats  <- data %>% select(-year.lvl1, -year.lvl2, - country, -id, -cntry) %>% filter(year == 1996)
+  stargazer::stargazer(summary.stats, 
+                       summary = TRUE, 
+                       type="latex",
+                       label = "tab:summary1996", 
+                       font.size="footnotesize", 
+                       table.placement="H",
+                       #column.sep.width = "5pt", 
+                       title = "Summary statistics 1996", 
+                       digits = 2,
+                       rownames = FALSE,
+                       header=FALSE,
+                       notes = "\\parbox[t]{7cm}{Note: Summary statistics for numeric variables.}",  #\\textwidth
+                       notes.append = FALSE, 
+                       notes.align = "l")
+```
+
+
+```{r table-summary-stats-2006, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+  summary.stats  <- data %>% select(-year.lvl1, -year.lvl2, - country, -id, -cntry) %>% filter(year == 2006)
+  stargazer::stargazer(summary.stats, 
+                       summary = TRUE, 
+                       type="latex",
+                       label = "tab:summary2006", 
+                       font.size="footnotesize", 
+                       table.placement="H",
+                       #column.sep.width = "5pt", 
+                       title = "Summary statistics 2006", 
+                       digits = 2,
+                       rownames = FALSE,
+                       header=FALSE,
+                       notes = "\\parbox[t]{7cm}{Note: Summary statistics for numeric variables.}",  #\\textwidth
+                       notes.append = FALSE, 
+                       notes.align = "l")
+```
+
+
+
+
+```{r table-employment-qwraps, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+
+  data.summary <- data %>% na.omit(employment) %>% select(employment, year)
+
+  library(qwraps2)
+
+  options(qwraps2_markup = "markdown")
+  
+  our_summary1 <-
+    list("Employment" =
+         list("full-time" = ~ qwraps2::n_perc0(employment == "full-time"),
+              "part-time"  = ~ qwraps2::n_perc0(employment == "part-time"),
+              "not active"  = ~ qwraps2::n_perc0(employment == "not active"),
+              "active unemployed"  = ~ qwraps2::n_perc0(employment == "active unemployed"))
+         )
+  summary_table(dplyr::group_by(data.summary, year), our_summary1)
+```
+
+
+```{r table-education-qwraps, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+
+  data.summary <- data %>% na.omit(education) %>% select(education, year)
+
+  library(qwraps2)
+
+  options(qwraps2_markup = "markdown")
+  
+  our_summary1 <-
+    list("education" =
+         list("primary or less" = ~ qwraps2::n_perc0(education == "primary or less"),
+              "secondary"  = ~ qwraps2::n_perc0(education == "secondary"),
+              "university or more"  = ~ qwraps2::n_perc0(education == "university or more"))
+         )
+
+  summary_table(dplyr::group_by(data.summary, year), our_summary1)
+```
+
+
+
+
+```{r estimation-logit-model}
+  data$country.fac <- as.factor(data$country)
+  data$year.fac <- as.factor(data$year)
+  outcomes <- c("old.age.care", "unemployed", "reduce.income.differences", "jobs.for.everyone")
+  individual.level.vars <- "+ female + age + age2 + education + employment"
+  context.level.vars.m1_4 <- "immigrant.stock"
+  context.level.vars.m5_8 <- "immigrant.stock + social.expenditures"
+  context.level.vars.m9_12 <- "immigrant.stock + employment.rate"
+  context.level.vars.m13_16 <- "immigrant.stock.change"
+  context.level.vars.m17_20 <- "immigrant.stock.change + social.expenditures"
+  context.level.vars.m21_24 <- "immigrant.stock.change + employment.rate"
+  fixed.effect.vars <- "+ country.fac + year.fac"
+
+  m1_4 <- paste(outcomes, " ~ ", context.level.vars.m1_4, 
+                individual.level.vars, fixed.effect.vars, sep = "")
+  m5_8 <- paste(outcomes, " ~ ", context.level.vars.m5_8, 
+                individual.level.vars, fixed.effect.vars, sep = "")
+  m9_12 <- paste(outcomes, " ~ ", context.level.vars.m9_12, 
+                 individual.level.vars, fixed.effect.vars, sep = "")
+  m13_16 <- paste(outcomes, " ~ ", context.level.vars.m13_16, 
+                  individual.level.vars, fixed.effect.vars, sep = "")
+  m17_20 <- paste(outcomes, " ~ ", context.level.vars.m17_20, 
+                  individual.level.vars, fixed.effect.vars, sep = "")
+  m21_24 <- paste(outcomes, " ~ ", context.level.vars.m21_24, 
+                  individual.level.vars, fixed.effect.vars, sep = "")
+  models <- c(m1_4, m5_8, m9_12, m13_16, m17_20, m21_24)
+  names(models) <- paste0("M", 1:24, " - ", rep(outcomes, 6))
+
+for (i in 1:24){
+  assign(paste0("M", 1:24)[i], glm(as.formula(models[i]), data = data, family = "binomial"))
+  }
+```
+
+
+
+```{r M1-4, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+library(stargazer)
+stargazer(M1, M2, M3, M4,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results1", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          #dep.var.labels   = rep("lala", 10),
+          column.labels = names(models)[1:4],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+```
+
+
+
+```{r M5-8, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+
+stargazer(M5, M6, M7, M8,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results2", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          #dep.var.labels   = rep("lala", 10),
+          column.labels = names(models)[5:8],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+```
+
+
+
+```{r M9-12, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+stargazer(M9, M10, M11, M12,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results3", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          #dep.var.labels   = rep("lala", 10),
+          column.labels = names(models)[9:12],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+```
+
+
+
+
+```{r M13-16, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+stargazer(M13, M14, M15, M16,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results4", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          #dep.var.labels   = rep("lala", 10),
+          column.labels = names(models)[13:16],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+```
+
+
+
+```{r M17-20, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+stargazer(M17, M18, M19, M20,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results5", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          #dep.var.labels   = rep("lala", 10),
+          column.labels = names(models)[17:20],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+```
+
+
+
+```{r M21-24, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
+stargazer(M21, M22, M23, M24,
+          type="latex", 
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results6", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          dep.var.labels   = "",
+          column.labels = names(models)[21:24],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;", "Country and year fixed effects,", "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+
+```
+
+
+```{r produce-html-tables, message=FALSE, warning=FALSE, echo=T, results='hide', paged.print=FALSE}
+stargazer(M1, M2, M3, M4, M5, M6, M7, M8,
+          M9, M10, M11, M12, M13, M14, M15, M16, M17, M18,
+          M19, M20, M21, M22, M23, M24,
+          type="html", 
+          out="Table-M1-M24-odds-ratios.html",
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results6", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          dep.var.labels   = "",
+          column.labels = names(models)[1:24],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;",
+                    "Country and year fixed effects,", 
+                    "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize",
+          apply.coef = exp 
+          )
+
+
+stargazer(M1, M2, M3, M4, M5, M6, M7, M8,
+          M9, M10, M11, M12, M13, M14, M15, M16, M17, M18,
+          M19, M20, M21, M22, M23, M24,
+          type="html", 
+          out="Table-M1-M24-log-odds.html",
+          title = "Immigration and welfare state attitudes",
+          omit.stat=c("LL","ser","f","adj.rsq"), 
+          t.auto=F, p.auto=F, report = "vct*",
+          omit = c("country.fac", "year.fac"),
+          dep.var.caption = "Outcomes",
+          ci=FALSE, 
+          digits=2, 
+          ci.level=0.95,
+          single.row=FALSE, 
+          label = "tab:results6", 
+          table.placement="H", 
+          column.sep.width = "-7pt",
+          align = TRUE,
+          dep.var.labels   = "",
+          column.labels = names(models)[1:24],
+          model.names = FALSE,
+          model.numbers = FALSE,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = c("* Data: International Social Survey Programme 1996 and 2006;",
+                    "Country and year fixed effects,", 
+                    "Respective coefficients are ommitted from the table;"),
+          header=FALSE,
+          no.space=TRUE,
+          font.size = "footnotesize"
+          # apply.coef = exp
+          )
+
+```
+
+
+
+

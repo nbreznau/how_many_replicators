@@ -1,0 +1,843 @@
+TEAM: 71
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+capture log close
+log using cridata.log,replace
+
+
+version 14.2
+clear all
+set more off
+set matsize 800
+
+
+use za4700,clear
+rename *,lower
+
+egen insamp = anymatch(v3a),  ///
+     values(36 124 208 246 250 276 372 392 528 554 578 620 724 752 756 826 840)
+keep if insamp
+gen year=2006
+
+
+local iso   "au  ca  dk  fi  fr  de  ie jp   nl  nz  no  pt  es  se  ch  gb  us"
+local cntry "36 124 208 246 250 276 372 392 528 554 578 620 724 752 756 826 840"
+gen region=0
+gen hhinc=.
+gen rinc=.
+forvalues i=1/17 {
+   local x:word `i' of `cntry'
+   local c:word `i' of `iso'
+   di `x'
+   di "`c'"
+   replace region=`c'_reg if v3a==`x'
+   replace hhinc= `c'_inc if v3a==`x'
+   replace rinc=  `c'_rinc if v3a==`x'  
+  }
+
+
+recode region (1 2=1) (3 4=2) (5=3)(6=4)(7 8=5) (9=6) if v3==392
+tab jp_reg region if v3==392,m 
+
+replace region= v3a*100+region    
+
+
+
+rename	v1	study
+rename	v2	id
+rename	v3	xcountry
+rename	v3a	cntry
+rename	v4	obey
+rename	v5	okmeet
+rename	v6	okprotest
+rename	v7	okstrike
+rename	v8	okrevmeet
+rename	v9	okrevbooks
+rename	v10	guilty
+rename	v11	favspendcut
+rename	v12	favjobs
+rename	v13	favdereg
+rename	v14	favtech
+rename	v15	favoldind
+rename	v16	favhrscap
+rename	v17	spndenv
+rename	v18	spndhlth
+rename	v19	spndlaw
+rename	v20	spnded
+rename	v21	spnddef
+rename	v22	spndret
+rename	v23	spndunemp
+rename	v24	spndarts
+rename	v25	govjobs
+rename	v26	govprice
+rename	v27	govsick
+rename	v28	govelder
+rename	v29	govindus
+rename	v30	govunemp
+rename	v31	govineq
+rename	v32	govfinaid
+rename	v33	govhouse
+rename	v34	govenv
+rename	v44	intpolitics
+rename	v45	noinfluence
+rename	v46	avinfluence
+rename	v47	undissues
+rename	v48	othme
+rename	v49	polpromises
+rename	v50	civtrusted
+rename	v51	taxhi
+rename	v52	taxmid
+rename	v53	taxlo
+
+foreach var of varlist * {
+     cap assert mi(`var')
+     if _rc==0 {
+        drop `var'
+     }
+ }
+numlabel _all,add
+
+
+alpha govjobs govsick govelder govunemp govineq govhouse, std    
+alpha govjobs govsick govelder govunemp govineq govhouse, std c  
+
+foreach var of new jobs sick elder unemp ineq house {
+   gen `var'=gov`var'
+   recode `var' 2=1 3 4=0
+   }
+
+sum age
+gen agesq=age^2
+
+tab marital,gen(married)
+rename married1 married
+rename married2 widow
+rename married3 divorce
+recode divorce 0=1 if married4==1
+rename married5 single
+
+tab marital married,m
+tab marital widow,m
+tab marital divorce,m
+tab marital single,m
+
+
+gen female=sex-1
+
+gen hhsz=hompop
+
+gen child=hhcycle
+label var child "Any child in hh?"
+recode child 1 5 9 11 13 15 17 19 21 95=0 2/4 6/8 10 12 14 16 18 20=1  
+tab hhcycle child,m
+
+gen suburb=urbrural
+label var suburb "Suburb or town (vs, urban/rural)"
+recode suburb 1 4 5=0 2 3=1
+gen rural=urbrural
+label var rural "Rural (vs. Urban/Suburb)"
+recode rural  1 2 3=0 4 5=1
+
+tab urbrural suburb,m
+tab urbrural rural,m
+
+gen lths=degree
+label var lths "Less than secondary"
+recode lths 0 1 2=1 3 4 5=0
+gen uni=degree
+label var uni "Completed university"
+recode uni 0 1 2 3 4=0 4 5=1   
+tab degree lths,m
+tab degree uni,m
+
+gen emppt=wrkst>=2 & wrkst<=4 if wrkst<.
+label var emppt "Part-time"
+gen empun=wrkst==5 if wrkst<.
+label var empun "Unemployed"
+gen empnilf= wrkst
+recode empnilf 1/5=0  6/10=1    
+label var empnilf "Not in labor force"
+gen empself=wrktyp==4 if wrkst<.
+label var empself "Self-employed"
+gen emppub=wrktyp>=1 & wrktyp<=2 if wrkst<.
+label var emppub "Public sector"
+
+
+sum id hhinc rinc    
+
+gen zincwgt=.
+label var zincwgt "Std Income (weighted)"
+gen zinc=.
+label var zinc "Std Income (unweighted)"
+gen zrincwgt=.
+label var zrincwgt "Std Own Income (weighted)"
+gen zrinc=.
+label var zrinc "Std Own Income (unweighted)"
+
+foreach x in 36 124 208 246 250 276 372 392 528 554 578 620 724 752 756 826 840 {
+  qui sum hhinc if cntry==`x' [aw=weight]
+  replace zincwgt=(hhinc-r(mean))/r(sd) if cntry ==`x'
+  qui sum hhinc if cntry==`x'
+  replace zinc=(hhinc-r(mean))/r(sd) if cntry==`x'
+  qui sum rinc if cntry==`x' [aw=weight]
+  replace zrincwgt=(rinc-r(mean))/r(sd) if cntry ==`x'
+  qui sum rinc if cntry==`x'
+  replace zrinc=(rinc-r(mean))/r(sd) if cntry==`x'
+  }
+     
+ gen relhi=attend
+ recode relhi 1 2 3 4 5=1 6 7 8=0
+ label var relhi "Hi religious attendance"
+ gen rello=attend
+ recode rello 1 2 3 4 5 8=0 6 7=1
+ label var rello "Lo or no religious attendance"
+ tab attend relhi,m
+ tab attend rello,m
+ 
+  
+merge m:1 cntry year using bradyfinnigan2014countrydata.dta,nolabel
+tab country year if _merge<3,sum(_merge)
+keep if _merge==3
+drop _merge
+gen chforpct=cforborn/(foreignpct-cforborn)
+label var chforpct "Decade chg in %Foreign-born"
+
+
+local depvar "jobs unemp ineq elder house sick"
+local rvar   "age agesq female single divorce widow hhsz child rural suburb lths uni emppt empun empnilf empself emppub zinc* rello relhi"
+local source "sex age marital hompop hhcycle urbrural degree wrkst attend"
+local macro  "foreignpct netmigpct chforpct socx socdem liberal emprate mcp"
+
+markout insamp  `rvar' 
+
+
+egen ninc=count(ineq) if insamp,by(cntry)
+tabstat `depvar' ninc if insamp,by(cntry) s(mean) format(%9.3g)
+foreach var of varlist `depvar' {
+  di "`var' =>"
+  qui meqrlogit `var' || cntry: if insamp
+  estat icc
+  }
+
+
+sum `depvar' if insamp,sep(0) 
+sum `macro' `rvar' if ineq<. & insamp,sep(0)
+
+foreach x of numlist 3/6 {
+  drop v`x'*
+  }
+  
+  
+drop ninc 
+save cridata,replace
+
+pause
+
+use za2900.dta, clear
+egen insamp96 = anymatch(v3), values(1 2 3 4 6 10 12 13 19 20 24 25 27 30)
+keep if insamp96
+gen year=1996
+
+
+gen cntry=v3
+recode cntry 1=36 2 3=276 4=826 6=840 10=372 12=578 13=752 19=554 20=124 24=392 25=724 27=250 30=756
+
+gen region=0
+replace region= v302 if v3==20   
+replace region= v308 if v3==27   
+replace region= v306 if v3== 2 | v3==3  
+*replace region= v313 if v3==10   
+replace region= v314 if v3==24   
+replace region= v317 if v3==19   
+replace region= v316 if v3==12   
+replace region= v307 if v3==25   
+replace region= v321 if v3==13   
+replace region= v303 if v3==30   
+replace region= v309 if v3== 4  
+replace region= v323 if v3== 6   
+
+
+recode region .=0
+recode region (1=4) (2 12 13 19=3) (3/7 9=6) (8 14/18 20=5) (10 11 24 26=2)  ///
+              (22 23 25=1) (21=7) if v3==30 
+tab v303 region if v3==30,m                                   
+
+recode region (1=4) (2=3) (3=7) (4=8) (5=5) (6=1) (7=2) (8=1)  
+tab v321 region if v3==13,m
+
+recode region .=0
+
+replace region= cntry*100+region    
+
+
+rename	v1	study
+rename	v2	id
+rename	v4	obey
+rename	v5	okmeet
+rename	v6	okprotest
+rename	v7	okstrike
+rename	v8	umeet
+rename	v9	uprotest
+rename	v10	umeet5
+rename	v11	uprotest5
+rename	v12	okrevmeet
+rename	v13	okrevbooks
+rename	v14	guilty
+rename	v15	privacy
+rename	v16	wealth
+rename	v17	favwages
+rename	v18	favprices
+rename	v19	favspendcut
+rename	v20	favjobs
+rename	v21	favdereg
+rename	v22	favtech
+rename	v23	favoldind
+rename	v24	favhrscap
+rename	v25	spndenv
+rename	v26	spndhlth
+rename	v27	spndlaw
+rename	v28	spnded
+rename	v29	spnddef
+rename	v30	spndret
+rename	v31	spndunemp
+rename	v32	spndarts
+rename	v33	powunions
+rename	v34	powindustry
+rename	v35	powgovernment
+rename	v36	govjobs
+rename	v37	govprice
+rename	v38	govsick
+rename	v39	govelder
+rename	v40	govindus
+rename	v41	govunemp
+rename	v42	govineq
+rename	v43	govfinaid
+rename	v44	govhouse
+rename	v45	govenv
+rename	v46	intpolitics
+rename	v47	noinfluence
+rename	v48	avinfluence
+rename	v49	polimpact
+rename	v50	undissues
+rename	v51	eleattentiom
+rename	v52	othme
+rename	v53	polpromises
+rename	v54	civtrusted
+rename	v55	satdemoc
+rename	v56	taxchg
+rename	v57	taxhi
+rename	v58	taxmid
+rename	v59	taxlo
+rename	v60	pubutility
+rename	v61	pubhosp
+rename	v62	pubbank
+rename	v63	tradeoffue
+rename	v64	tradeofftx
+rename	v65	taxwages
+rename	v66	taxb
+rename	v67	taxc
+rename	v68	taxd
+rename	v200 sex
+rename	v201 age
+rename	v202 marital
+rename	v203 cohab
+rename	v204 educyrs
+rename	v205 degree
+rename	v206 wrkst
+rename	v207 spwrkst
+rename	v208 isco88
+rename	v209 occ
+rename	v210 spisco88
+rename	v211 spocc
+rename	v212 privpub
+rename	v213 selfemp
+rename	v214 nemploy
+rename	v215 wrkhrs
+rename	v216 wrksup
+rename	v217 earn
+rename	v218 faminc
+rename	v219 relig
+rename	v220 attend
+rename	v221 class
+rename	v222 union
+rename	v223 leftright
+rename	v272 whyvote
+rename	v273 hompop
+rename	v274 hhcycle 	
+rename	v275 urbrural
+rename	v276	sizAustralia
+rename	v278	sizCanada
+rename	v282	sizGermany
+rename	v283	sizSpain
+rename	v284	sizFrance
+rename	v285	sizBritain
+rename	v289	sizIreland
+rename	v290	sizJapan
+rename	v292	sizNorway
+rename	v293	sizZealand
+rename	v297	sizSweden
+rename	v299	sizUSA
+rename	v324	orilanguage
+rename	v325	weight
+
+rename *, lower
+foreach var of varlist * {
+     cap assert mi(`var')
+     if _rc==0 {
+        drop `var'
+     }
+ }
+numlabel _all,add
+
+
+alpha govjobs govsick govelder govunemp govineq govhouse, std
+
+foreach var of new jobs sick elder unemp ineq house {
+   gen `var'=gov`var'
+   recode `var' 2=1 3 4=0
+   }
+
+
+sum age
+gen agesq=age^2
+
+gen female=sex-1
+
+gen hhsz=hompop
+
+tab marital,gen(married)
+rename married1 married
+rename married2 widow
+rename married3 divorce
+recode divorce 0=1 if married4==1
+rename married5 single
+
+gen child=hhcycle
+label var child "Any child in hh?"
+recode child 1 5 9 11 13 15 17 19 21 95=0 2/4 6/8 10 12 14 16 18 20=1  
+tab hhcycle child,m
+
+
+gen suburb=urbrural
+label var suburb "Suburb or town (vs, urban/rural)"
+recode suburb 1 3=0 2=1
+gen rural=urbrural
+label var rural "Rural (vs. Urban/Suburb)"
+recode rural  1 2=0 3=1
+
+tab urbrural suburb,m
+tab urbrural rural,m
+
+gen lths=degree
+label var lths "Less than secondary"
+recode lths 1/4=1 5/7=0 
+
+gen uni=degree
+label var uni "Completed university"
+recode uni 1/6=0   7=1   
+tab degree lths,m
+tab degree uni,m
+
+
+gen emppt=wrkst>=2 & wrkst<=4  
+label var emppt "Part-time"
+gen empun=wrkst==5
+label var empun "Unemployed"
+gen empnilf= wrkst
+recode empnilf 1/5=0  6/10=1    
+label var empnilf "Not in labor force"
+gen empself=selfemp==1 
+label var empself "Self-employed"
+gen emppub= privpub>=1 & privpub<=2
+label var emppub "Public sector"
+
+
+gen zincwgt=.
+label var zincwgt "Std Income (weighted)"
+gen zinc=.
+label var zinc "Std Income (unweighted)"
+foreach x of numlist 36 124 250 276 372 392 554 578 724 752 756 826 840 {
+  qui sum faminc if cntry==`x' [aw=weight]
+  replace zincwgt=(faminc-r(mean))/r(sd) if cntry ==`x'
+  qui sum faminc if cntry==`x'
+  replace zinc=(faminc-r(mean))/r(sd) if cntry==`x'
+  }
+ 
+ 
+ gen relhi=attend
+ recode relhi 1/4=1 5 6=0   
+ label var relh "Hi religious attendance (vs Lo/no)"
+ gen rello=attend
+ recode rello 1/4 6=0 5=1      
+ label var rello "Lo religious attendance (vs hi/no)"
+ 
+ 
+merge m:1 cntry year using bradyfinnigan2014countrydata.dta,nolabel
+tab country year if _merge<3,sum(_merge)
+keep if _merge==3
+drop _merge
+
+
+drop v2* v3* 
+
+  
+tempfile temp
+save `temp',replace
+use cridata, clear
+append using `temp'
+save cridata,replace
+describe
+
+quietly {
+ label define region 3600    "NAP, other countries"  
+ label define region 3601    "New South Wales"  , modify 
+ label define region 3602    "Victoria"  , modify 
+ label define region 3603    "Queensland"  , modify 
+ label define region 3604    "South Australia"  , modify 
+ label define region 3605    "Western Australia"  , modify 
+ label define region 3606    "Tasmania"  , modify 
+ label define region 3607    "Australian Capital Territory"  , modify 
+ label define region 3608    "Northern Territory"  , modify 
+ label define region 3699    "na"  , modify 
+ label define region 12499    "na"  , modify 
+ label define region 12400    "nav"  , modify 
+ label define region 12401    "Newfoundland"  , modify 
+ label define region 12402    "Nova Scotia"  , modify 
+ label define region 12403    "P E I"  , modify 
+ label define region 12404    "New Brunswick"  , modify 
+ label define region 12405    "Quebec"  , modify 
+ label define region 12406    "Ontario"  , modify 
+ label define region 12407    "Manitoba"  , modify 
+ label define region 12408    "Saskatchewan"  , modify 
+ label define region 12409    "Alberta"  , modify 
+ label define region 12410    "British Colombia"  , modify 
+ label define region 20800    "NAP, other countries"  , modify 
+ label define region 20801    "Capital Region of Denmark"  , modify 
+ label define region 20802    "Region Sealand"  , modify 
+ label define region 20803    "Region of Southern Denmark"  , modify 
+ label define region 20804    "Central Denmark Region"  , modify 
+ label define region 20805    "Region North Jutland"  , modify 
+ label define region 20806    "Copenhagen municipality"  , modify 
+ label define region 20807    "Frederiksberg municipality", modify 
+ label define region 24600    "NAP, other countries"  , modify 
+ label define region 24601    "Uusimaa"  , modify 
+ label define region 24602    "Varsinais-Suomi"  , modify 
+ label define region 24604    "Satakunta"  , modify 
+ label define region 24605    "Kanta-Haeme"  , modify 
+ label define region 24606    "Pirkanmaa"  , modify 
+ label define region 24607    "Paeijaet-Haeme"  , modify 
+ label define region 24608    "Kymenlaakso"  , modify 
+ label define region 24609    "South Karelia"  , modify 
+ label define region 24610    "Etelae-Savo"  , modify 
+ label define region 24611    "Pohjois-Savo"  , modify 
+ label define region 24612    "North Karelia"  , modify 
+ label define region 24613    "Central Finland"  , modify 
+ label define region 24614    "South Ostrobothnia"  , modify 
+ label define region 24615    "Ostrobothnia"  , modify 
+ label define region 24616    "Central Ostrobothnia"  , modify 
+ label define region 24617    "North Ostrobothnia"  , modify 
+ label define region 24618    "Kainuu"  , modify 
+ label define region 24619    "Lapland"  , modify 
+ label define region 24620    "Itae-Uusimaa"  , modify 
+ label define region 24621    "Aland"  , modify 
+ label define region 24698    "dk"  , modify 
+ label define region 25000    "nav"  , modify 
+ label define region 25001    "Ain"  , modify 
+ label define region 25002    "Aisne"  , modify 
+ label define region 25003    "Allier"  , modify 
+ label define region 25004    "Alpes-Hte-Provence"  , modify 
+ label define region 25005    "Hautes-Alpes"  , modify 
+ label define region 25006    "Alpes-Maritimes"  , modify 
+ label define region 25007    "Ardeche"  , modify 
+ label define region 25008    "Ardennes"  , modify 
+ label define region 25009    "Ariege"  , modify 
+ label define region 25010    "Aube"  , modify 
+ label define region 25011    "Aude"  , modify 
+ label define region 25012    "Aveyron"  , modify 
+ label define region 25013    "Bouche-du-Rhone"  , modify 
+ label define region 25014    "Calvados"  , modify 
+ label define region 25015    "Cantal"  , modify 
+ label define region 25016    "Charente"  , modify 
+ label define region 25017    "Charente-Maritime"  , modify 
+ label define region 25018    "Cher"  , modify 
+ label define region 25019    "Correze"  , modify 
+ label define region 25020    "Haute-Corse"  , modify 
+ label define region 25021    "Cote-d Or"  , modify 
+ label define region 25022    "Cotes-d Armor"  , modify 
+ label define region 25023    "Creuse"  , modify 
+ label define region 25024    "Dordogne"  , modify 
+ label define region 25025    "Doubs"  , modify 
+ label define region 25026    "Drome"  , modify 
+ label define region 25027    "Eure"  , modify 
+ label define region 25028    "Eure-et-Loir"  , modify 
+ label define region 25029    "Finistere"  , modify 
+ label define region 25030    "Gard"  , modify 
+ label define region 25031    "Haute-Garonne"  , modify 
+ label define region 25032    "Gers"  , modify 
+ label define region 25033    "Gironde"  , modify 
+ label define region 25034    "Herault"  , modify 
+ label define region 25035    "Ille-et-Vilaine"  , modify 
+ label define region 25036    "Indre"  , modify 
+ label define region 25037    "Indre-et-Loire"  , modify 
+ label define region 25038    "Isere"  , modify 
+ label define region 25039    "Jura"  , modify 
+ label define region 25040    "Landes"  , modify 
+ label define region 25041    "Loir-et-Cher"  , modify 
+ label define region 25042    "Loire"  , modify 
+ label define region 25043    "Haute-Loire"  , modify 
+ label define region 25044    "Loire-Atlantique"  , modify 
+ label define region 25045    "Loiret"  , modify 
+ label define region 25046    "Lot"  , modify 
+ label define region 25047    "Lot-et-Garonne"  , modify 
+ label define region 25048    "Lozere"  , modify 
+ label define region 25049    "Maine-et-Loire"  , modify 
+ label define region 25050    "Manche"  , modify 
+ label define region 25051    "Marne"  , modify 
+ label define region 25052    "Haute-Marne"  , modify 
+ label define region 25053    "Mayenne"  , modify 
+ label define region 25054    "Meurthe-et-Moselle"  , modify 
+ label define region 25055    "Meuse"  , modify 
+ label define region 25056    "Morbihan"  , modify 
+ label define region 25057    "Moselle"  , modify 
+ label define region 25058    "Nievre"  , modify 
+ label define region 25059    "Nord"  , modify 
+ label define region 25060    "Oise"  , modify 
+ label define region 25061    "Orne"  , modify 
+ label define region 25062    "Pas-de-Calais"  , modify 
+ label define region 25063    "Puy-de-Dome"  , modify 
+ label define region 25064    "Pyrenees-Atlantiques"  , modify 
+ label define region 25065    "Hautes-Pyrenees"  , modify 
+ label define region 25066    "Pyrenees-Orientales"  , modify 
+ label define region 25067    "Bas-Rhin"  , modify 
+ label define region 25068    "Haut-Rhin"  , modify 
+ label define region 25069    "Rhone"  , modify 
+ label define region 25070    "Haute-Saone"  , modify 
+ label define region 25071    "Saone-et-Loire"  , modify 
+ label define region 25072    "Sarthe"  , modify 
+ label define region 25073    "Savoie"  , modify 
+ label define region 25074    "Haute-Savoie"  , modify 
+ label define region 25075    "Ville de Paris"  , modify 
+ label define region 25076    "Seine-Maritime"  , modify 
+ label define region 25077    "Seine-et-Marne"  , modify 
+ label define region 25078    "Yvelines"  , modify 
+ label define region 25079    "Deux-Sevres"  , modify 
+ label define region 25080    "Somme"  , modify 
+ label define region 25081    "Tarn"  , modify 
+ label define region 25082    "Tarn-et-Garonne"  , modify 
+ label define region 25083    "Var"  , modify 
+ label define region 25084    "Vaucluse"  , modify 
+ label define region 25085    "Vendee"  , modify 
+ label define region 25086    "Vienne"  , modify 
+ label define region 25087    "Haute-Vienne"  , modify 
+ label define region 25088    "Vosges"  , modify 
+ label define region 25089    "Yonne"  , modify 
+ label define region 25090    "Belfort (Territoire)"  , modify 
+ label define region 25091    "Essone"  , modify 
+ label define region 25092    "Hauts-de-Seine"  , modify 
+ label define region 25093    "Seine-Saint-Denis"  , modify 
+ label define region 25094    "Val-de-Marne"  , modify 
+ label define region 25095    "Val-d Oise"  , modify 
+ label define region 25096    "Corse-Sud"  , modify 
+ label define region 25097    "D O M"  , modify 
+ label define region 25098    "T O M"  , modify 
+ label define region 25099    "na"  , modify 
+ label define region 27600    "nav"  , modify 
+ label define region 27601    "Schleswig-Holstein"  , modify 
+ label define region 27602    "Hamburg"  , modify 
+ label define region 27603    "Niedersachsen"  , modify 
+ label define region 27604    "Bremen"  , modify 
+ label define region 27605    "Nordrhein-Westfalen"  , modify 
+ label define region 27606    "Hessen"  , modify 
+ label define region 27607    "Rheinland-Pfalz"  , modify 
+ label define region 27608    "Baden-Wuerttemberg"  , modify 
+ label define region 27609    "Bayern"  , modify 
+ label define region 27610    "Saarland"  , modify 
+ label define region 27611    "Berlin-Ost"  , modify 
+ label define region 27612    "Mecklbg-Vorpommern"  , modify 
+ label define region 27613    "Brandenburg"  , modify 
+ label define region 27614    "Sachsen-Anhalt"  , modify 
+ label define region 27615    "Thueringen"  , modify 
+ label define region 27616    "Sachsen"  , modify 
+ label define region 27617    "Berlin-West"  , modify 
+ label define region 37200    "NAP, other countries"  , modify 
+ label define region 37201    "Border"  , modify 
+ label define region 37202    "Dublin"  , modify 
+ label define region 37203    "Mid-East"  , modify 
+ label define region 37204    "Midland"  , modify 
+ label define region 37205    "Mid-West"  , modify 
+ label define region 37206    "South-East"  , modify 
+ label define region 37207    "South-West"  , modify 
+ label define region 37208    "West"  , modify 
+ label define region 39200    "nav"  , modify 
+ label define region 39201    "Hokkaido, Tohoku"  , modify 
+ label define region 39202    "Kanto, Koshin-etsu"  , modify 
+ label define region 39203    "Chubu"  , modify 
+ label define region 39204    "Kinki"  , modify 
+ label define region 39205    "Chugoku, Shikoku"  , modify 
+ label define region 39206    "Kyushu"  , modify 
+ label define region 52800    "NAP, other countries"  , modify 
+ label define region 52801    "Groningen"  , modify 
+ label define region 52802    "Friesland"  , modify 
+ label define region 52803    "Drente"  , modify 
+ label define region 52804    "Overijssel"  , modify 
+ label define region 52805    "Gelderland"  , modify 
+ label define region 52806    "Utrecht"  , modify 
+ label define region 52807    "Noord-Holland"  , modify 
+ label define region 52808    "Zuid-Holland"  , modify 
+ label define region 52809    "Zeeland"  , modify 
+ label define region 52810    "Noord-Brabant"  , modify 
+ label define region 52811    "Limburg"  , modify 
+ label define region 52812    "Flevoland"  , modify 
+ label define region 52813    "Abroad, foreign country (Buitenland)"  , modify 
+ label define region 55400    "nav"  , modify 
+ label define region 55401    "Northland"  , modify 
+ label define region 55402    "Auckland"  , modify 
+ label define region 55403    "Thames Valley"  , modify 
+ label define region 55404    "Bay of Plenty"  , modify 
+ label define region 55405    "Waikato"  , modify 
+ label define region 55406    "Tongariro"  , modify 
+ label define region 55407    "East Cape"  , modify 
+ label define region 55408    "Hawkes Bay"  , modify 
+ label define region 55409    "Taranaki"  , modify 
+ label define region 55410    "Wanganui"  , modify 
+ label define region 55411    "Manawatu"  , modify 
+ label define region 55412    "Horowhenua"  , modify 
+ label define region 55413    "Wellington"  , modify 
+ label define region 55414    "Wairarapa"  , modify 
+ label define region 55415    "Nelson Bays"  , modify 
+ label define region 55416    "Marlborough"  , modify 
+ label define region 55417    "West Coast"  , modify 
+ label define region 55418    "Canterbury"  , modify 
+ label define region 55419    "Aorangi"  , modify 
+ label define region 55420    "Clutha-Centr Otago"  , modify 
+ label define region 55421    "Coastal-North Otago"  , modify 
+ label define region 55422    "Southland"  , modify 
+ label define region 55499    "na"  , modify 
+ label define region 57800    "nav"  , modify 
+ label define region 57801    "Central east"  , modify 
+ label define region 57802    "East"  , modify 
+ label define region 57803    "South"  , modify 
+ label define region 57804    "West"  , modify 
+ label define region 57805    "Middle"  , modify 
+ label define region 57806    "North"  , modify 
+ label define region 62000    "NAP, other countries"  , modify 
+ label define region 62001    "North"  , modify 
+ label define region 62002    "Centre"  , modify 
+ label define region 62003    "Lisbon and Tagus Valley"  , modify 
+ label define region 62004    "Alentejo"  , modify 
+ label define region 62005    "Algarve"  , modify 
+ label define region 72400    "nav"  , modify 
+ label define region 72401    "Andalucia"  , modify 
+ label define region 72402    "Aragon"  , modify 
+ label define region 72403    "Asturias"  , modify 
+ label define region 72404    "Baleares"  , modify 
+ label define region 72405    "Canarias"  , modify 
+ label define region 72406    "Cantabria"  , modify 
+ label define region 72407    "Castilla-La Mancha"  , modify 
+ label define region 72408    "Castilla-Leon"  , modify 
+ label define region 72409    "Cataluna"  , modify 
+ label define region 72410    "Pais Valenciano"  , modify 
+ label define region 72411    "Extremadura"  , modify 
+ label define region 72412    "Galicia"  , modify 
+ label define region 72413    "Madrid"  , modify 
+ label define region 72414    "Region de Murcia"  , modify 
+ label define region 72415    "Navarra"  , modify 
+ label define region 72416    "Pais Vasco"  , modify 
+ label define region 72417    "La Rioja"  , modify 
+ label define region 75200    "nav"  , modify 
+ label define region 75201    "North"  , modify 
+ label define region 75202    "North mid"  , modify 
+ label define region 75203    "East mid"  , modify 
+ label define region 75204    "Stockholm"  , modify 
+ label define region 75205    "West"  , modify 
+ label define region 75206    "Mid North"  , modify 
+ label define region 75207    "Smaaland Gotland"  , modify 
+ label define region 75208    "South"  , modify 
+ label define region 75209    "Malmoe"  , modify 
+ label define region 75600    "NAP, other countries"  , modify 
+ label define region 75601    "Region Lemanique"  , modify 
+ label define region 75602    "Espace Mittelland"  , modify 
+ label define region 75603    "Nordschweiz"  , modify 
+ label define region 75604    "Zuerich"  , modify 
+ label define region 75605    "Ostschweiz"  , modify 
+ label define region 75606    "Zentralschweiz"  , modify 
+ label define region 75607    "Ticino"  , modify 
+ label define region 82600    "nav"  , modify 
+ label define region 82601    "Scotland"  , modify 
+ label define region 82602    "North,North West,Yorkshire Hbs"  , modify 
+ label define region 82603    "West, East Midlands"  , modify 
+ label define region 82604    "Wales"  , modify 
+ label define region 82605    "East Anglia,South West,S-E"  , modify 
+ label define region 82606    "Greater London"  , modify 
+ label define region 84000    "nav"  , modify 
+ label define region 84001    "New England"  , modify 
+ label define region 84002    "Middle Atlantic"  , modify 
+ label define region 84003    "East North Central"  , modify 
+ label define region 84004    "West North Central"  , modify 
+ label define region 84005    "South Atlantic"  , modify 
+ label define region 84006    "East South Central"  , modify 
+ label define region 84007    "West South Central"  , modify 
+ label define region 84008    "Mountain"  , modify 
+ label define region 84009    "Pacific"  , modify 
+
+ label val region region
+}
+
+
+local depvar "jobs unemp ineq elder house sick"
+local macro  "foreignpct netmigpct socx emprate mcp"
+local rvar   "age agesq female lths uni emppt empun empnilf empself zinc" 
+
+
+mark s2samp if year==1996
+markout s2samp marital attend
+recode s2samp 0=1 if cntry==724 & year==1996
+
+markout s2samp  `rvar' 
+
+egen ninc=count(ineq) if s2samp,by(cntry)
+local depvar "jobs unemp ineq elder house sick"
+tabstat `depvar' ninc if s2samp,by(cntry) s(mean) format(%9.3g)
+
+egen inpool=anymatch(cntry),values(36 124 250 276 372 392 554 578 724 752 756 826 840)
+markout inpool `rvar'
+tab year inpool if ineq<. 
+
+sum `depvar' if inpool,sep(0) 
+sum `macro' `rvar' if ineq<. & inpool,sep(0)
+
+logit jobs `rvar' i.cntry i.year if inpool
+   
+
+compress
+recode insamp .=0
+order cntry year
+save cridata,replace
+
+
+egen count=sum(inpool),by(cntry year)
+bysort country: gen totcount= count[1] + count[_N]
+gen cweight=weight*totcount/count
+sum ineq if inpool [aw=cweight]
+drop count totcount
+
+
+sum ineq if insamp | (inpool & year==1996)   
+sum age if insamp | (inpool & year==1996)   
+
+sum ineq if insamp | s2samp                  
+sum  age if insamp | s2samp                  
+
+gen byte insampx=insamp|s2samp
+recode insampx 1=0 if cntry==724 & year==1996
+sum ineq if insampx & cntry==724                 
+sum  age if (insamp | s2samp)                 
+
+sum ineq if s2samp | (inpool & year==2006)
+sum  age if s2samp | (inpool & year==2006)
+
+
+
+
+log close

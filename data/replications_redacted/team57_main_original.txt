@@ -1,0 +1,75 @@
+TEAM: 57
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+
+global path "/"
+global w1 ZA2900
+global w2 ZA4700
+global l2 L2data_13
+
+
+
+use "${path}/${w1}.dta", clear
+do "${path}/1996.do"
+save "${path}/${w1}_prep.dta", replace
+
+
+
+use "${path}/${w2}.dta", clear
+do "${path}/2006.do"
+save "${path}/${w2}_prep.dta", replace
+
+
+use "${path}/${w2}_prep.dta", clear
+append using "${path}/${w1}_prep.dta"
+order v2 V2 year age_care unemp inc_diff jobs female age age_2 edu emp_cat cntry 
+
+bysort cntry: egen year_mean = mean(year)
+keep if year_mean>1996 & year_mean<2006
+
+merge m:1 cntry year using "${path}/data/${l2}.dta", keep(3)
+
+label var foreignpct "Immigrant Stock"
+label var netmigpct "Change in Immigrant Stock"
+label var socx "Social Welfare Expenditures"
+label var emprate "Employment Rate"
+
+save "${path}/data_prep.dta", replace
+
+
+use "${path}/data_prep.dta", clear
+
+
+reg emprate-netmigpct
+keep if e(sample)
+
+loc av age_care unemp inc_diff jobs
+
+loc i=1
+foreach x of loc av {
+	logit `x' foreignpct female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m1`i'
+	logit `x' foreignpct socx female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m2`i'
+	logit `x' foreignpct emprate female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m3`i'	
+	logit `x' netmigpct female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m4`i'
+	logit `x' netmigpct socx female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m5`i'
+	logit `x' netmigpct emprate female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m6`i'	
+	
+	loc ++i
+}
+
+foreach x of numlist 1/6 {
+	esttab m`x'1 m`x'2 m`x'3 m`x'4, eform label z cons
+}
+
+
+* output
+esttab m11 m12 m13 m14 m21 m22 m23 m24 m31 m32 m33 m34 m41 m42 m43 m44 m51 m52 m53 m54 m61 m62 m63 m64 using "$path\results", eform z label nobase  scsv replace cons order(foreignpct socx emprate netmigpct) nogap
+

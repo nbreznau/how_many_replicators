@@ -1,0 +1,119 @@
+TEAM: 71
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+capture log close
+log using crianalysis.log,replace
+
+version 14.2
+pause off
+clear all
+set more off
+set matsize 800
+
+
+use cridata,clear
+drop insamp inpool s2samp 
+
+
+
+local depvar    "jobs unemp ineq elder house sick"
+local macro     "foreignpct netmigpct          socx                emprate"
+local macro06   "foreignpct netmigpct chforpct socx socdem liberal emprate mcp"
+local rvar      "age agesq female                                              lths uni emppt empun empnilf empself        zinc" 
+local rvar06    "age agesq female single divorce widow hhsz child rural suburb lths uni emppt empun empnilf empself emppub zinc rello relhi"
+local source06 "sex age degree wrkst  faminc marital hompop hhcycle urbrural attend faminc"
+      
+
+egen insamp = anymatch(cntry),  ///
+     values(36 124 208 246 250 276 372 392 528 554 578 620 724 752 756 826 840)
+keep if insamp
+	
+markout insamp `rvar'  
+tab year insamp,m
+
+gen byte inpool=insamp     
+recode inpool 1=0 if cntry==208 | cntry==246 | cntry==528 | cntry==620 
+label var inpool "Pooled sample"
+tab year inpool                 
+
+gen byte s2samp=inpool   
+label var s2samp "S2 Drops missing on relig attendance and marital status X Spain"
+
+recode s2samp 1=0 if year==2006
+recode s2samp 1=0 if attend==. & cntry !=724
+recode s2samp 1=0 if marital==.  & cntry !=724
+tab year s2samp
+
+
+recode insamp 1=0 if year==1996
+markout insamp `rvar06'
+tab year insamp
+sum `depvar' if insamp
+
+
+egen ninc06=count(ineq) if insamp,by(cntry)
+tabstat `depvar' ninc06 if insamp,by(cntry) s(mean) format(%9.3g)
+foreach var of varlist `depvar' {
+  di "`var' =>"
+  qui meqrlogit `var' || cntry: if insamp
+  estat icc
+  }
+  
+
+egen ninc96=count(ineq) if s2samp,by(cntry)
+tabstat `depvar' ninc96 if s2samp,by(cntry) s(mean) format(%9.3g)
+
+
+
+
+
+tab insamp if ineq<.               
+sum `depvar' if insamp,sep(0)      
+sum `macro06' `rvar06' if insamp & ineq<.,sep(0)
+
+
+tab inpool if ineq<.             
+sum `depvar' if inpool,sep(0)    
+sum `macro' `rvar' if inpool & ineq<.,sep(0)
+
+
+local depvar  "jobs unemp ineq elder house sick"
+local macro   "foreignpct netmigpct          socx                emprate"
+local macro06 "foreignpct netmigpct chforpct socx socdem liberal emprate mcp"
+local rvar    "age agesq female                                              lths uni emppt empun empnilf empself        zinc" 
+local rvar06  "age agesq female single divorce widow hhsz child rural suburb lths uni emppt empun empnilf empself emppub zinc rello relhi"
+
+
+qui foreach var of varlist `depvar' {
+  eststo S6_`var':logistic `var' `rvar' i.cntry i.year if inpool
+}
+
+esttab S6* using S6.csv, replace eform b(3) z(3) drop(*.cntry *.year)
+
+
+
+qui foreach var of varlist `depvar' {
+  eststo T4_1`var':logistic `var' foreignpct         `rvar' i.cntry i.year if inpool
+  eststo T4_2`var':logistic `var' foreignpct socx    `rvar' i.cntry i.year if inpool
+  eststo T4_3`var':logistic `var' foreignpct emprate `rvar' i.cntry i.year if inpool
+  }
+esttab T4_1* using T4.csv, replace nogaps noobs nonotes nonumbers          eform b(3) z(3) keep(foreignpct)
+esttab T4_2* using T4.csv, append  nogaps noobs nonotes nonumbers nomtitle eform b(3) z(3) keep(foreignpct socx)
+esttab T4_3* using T4.csv, append  nogaps       nonotes nonumbers nomtitle eform b(3) z(3) keep(foreignpct emprate)
+
+
+qui foreach var of varlist `depvar' {
+  eststo T5_1`var':logistic `var' netmigpct         `rvar' i.cntry i.year if inpool
+  eststo T5_2`var':logistic `var' netmigpct socx    `rvar' i.cntry i.year if inpool
+  eststo T5_3`var':logistic `var' netmigpct emprate `rvar' i.cntry i.year if inpool
+  eststo T5_4`var':logistic `var' netmigpct foreignpct `rvar' i.cntry i.year if inpool  
+  }
+ 
+esttab T5_1* using T5.csv, replace nogaps noobs nonotes nonumbers eform b(3) z(3) keep(netmigpct)
+esttab T5_2* using T5.csv, append  nogaps noobs nonotes nonumbers  eform b(3) z(3) keep(netmigpct socx)
+esttab T5_3* using T5.csv, append  nogaps noobs nonotes nonumbers  eform b(3) z(3) keep(netmigpct emprate)
+esttab T5_4* using T5.csv, append  nogaps               nonumbers  eform b(3) z(3) keep(netmigpct foreignpct)
+
+
+log close

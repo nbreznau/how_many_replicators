@@ -1,0 +1,17 @@
+TEAM: 69
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+version 15.1
+set more off
+ssc install estout, replace
+
+cd "\"
+
+log using logfile, replace
+do "1dataprep.do"
+do "2analysis.do"
+log close 
+
+

@@ -1,0 +1,273 @@
+TEAM: 65
+SOFTWARE: SPSS
+VERSION: ORIGINAL 
+
+
+GET FILE='merged_analyses.sav'.
+
+DESCRIPTIVES gov_jobs gov_unempl gov_income gov_retire gov_housing gov_health . 
+DESCRIPTIVES foreignpct netmigpct socwelex emplrate . 
+DESCRIPTIVES age agesq female edu_lesssec edu_highersec 
+ occ_parttime occ_unempl occ_notinlabm selfemp zrelincome .
+
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr 
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5). 
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER foreignpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5). 
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER foreignpct socwelex age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER foreignpct emplrate age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+ 
+   LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5). 
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5). 
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER socwelex netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER emplrate netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_jobs
+  /METHOD=ENTER foreignpct netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_unempl
+  /METHOD=ENTER foreignpct netmigpct  age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_income
+  /METHOD=ENTER foreignpct netmigpct  age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_retire
+  /METHOD=ENTER foreignpct netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_housing
+  /METHOD=ENTER foreignpct netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+  LOGISTIC REGRESSION VARIABLES gov_health
+  /METHOD=ENTER foreignpct netmigpct age agesq female edu_lesssec edu_highersec occ_parttime occ_unempl occ_notinlabm 
+    selfemp zrelincome cntr  
+  /CONTRAST (cntr)=Indicator
+  /CRITERIA=PIN(0.05) POUT(0.10) ITERATE(20) CUT(0.5).
+
+
+

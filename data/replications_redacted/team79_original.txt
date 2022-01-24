@@ -1,0 +1,213 @@
+TEAM: 79
+SOFTWARE: R
+VERSION: ORIGINAL
+
+rm(list=ls())
+options(scipen=999)
+
+setwd("\")
+
+cntry <- haven::read_dta("L2data.dta")
+issp1996 <- haven::read_dta("ZA2900.dta")
+issp2006 <- haven::read_dta("ZA4700.dta")
+
+
+issp1996$old <- ifelse(issp1996$v39==1 | issp1996$v39==2, 1, 0)
+issp1996$unempl <- ifelse(issp1996$v41==1 | issp1996$v41==2, 1, 0)
+issp1996$income <- ifelse(issp1996$v42==1 | issp1996$v42==2, 1, 0)
+issp1996$jobs <- ifelse(issp1996$v36==1 | issp1996$v36==2, 1, 0)
+
+issp2006$old <- ifelse(issp2006$V28==1 | issp2006$V28==2, 1, 0)
+issp2006$unempl <- ifelse(issp2006$V30==1 | issp2006$V30==2, 1, 0)
+issp2006$income <- ifelse(issp2006$V31==1 | issp2006$V31==2, 1, 0)
+issp2006$jobs <- ifelse(issp2006$V25==1 | issp2006$V25==2, 1, 0)
+
+
+issp1996$cntry <- as.character(issp1996$v3)
+issp1996$cntry <- haven::zap_labels(issp1996$cntry)
+issp1996$cntry[issp1996$cntry==1] <-36
+issp1996$cntry[issp1996$cntry==2] <-276
+issp1996$cntry[issp1996$cntry==3] <-276
+issp1996$cntry[issp1996$cntry==4] <-826
+issp1996$cntry[issp1996$cntry==5] <-826
+issp1996$cntry[issp1996$cntry==6] <-840
+issp1996$cntry[issp1996$cntry==8] <-348
+issp1996$cntry[issp1996$cntry==10] <-372
+issp1996$cntry[issp1996$cntry==11] <-528
+issp1996$cntry[issp1996$cntry==12] <-578
+issp1996$cntry[issp1996$cntry==13] <-752
+issp1996$cntry[issp1996$cntry==14] <-203
+issp1996$cntry[issp1996$cntry==15] <-705
+issp1996$cntry[issp1996$cntry==16] <-616
+issp1996$cntry[issp1996$cntry==18] <-643
+issp1996$cntry[issp1996$cntry==19] <-554
+issp1996$cntry[issp1996$cntry==20] <-124
+issp1996$cntry[issp1996$cntry==22] <-376
+issp1996$cntry[issp1996$cntry==23] <-376
+issp1996$cntry[issp1996$cntry==24] <-392
+issp1996$cntry[issp1996$cntry==25] <-724
+issp1996$cntry[issp1996$cntry==26] <-428
+issp1996$cntry[issp1996$cntry==27] <-250
+issp1996$cntry[issp1996$cntry==30] <-756
+                  
+issp2006$cntry <- as.character(issp2006$V3a)
+
+
+issp1996$year <- "1996"
+issp2006$year <- "2006"
+
+issp1996$female <- ifelse(issp1996$v200==1, 0, 
+                          ifelse(issp1996$v200==2, 1, NA))
+issp2006$female <- ifelse(issp2006$sex==1, 0, 
+                          ifelse(issp2006$sex==2, 1, NA))
+
+
+issp1996$age <- issp1996$v201
+issp1996$ageSQ <- issp1996$age*issp1996$age
+
+issp2006$ageSQ <- issp2006$age*issp2006$age
+
+
+
+issp1996$education <- ifelse(issp1996$v205==1 | issp1996$v205==2 | issp1996$v205==3 | issp1996$v205==4, "Primary or less", 
+                             ifelse(issp1996$v205==5 | issp1996$v205==6, "Secondary",
+                                    ifelse(issp1996$v205==7, "University or more", NA)))
+issp1996$education <- relevel(as.factor(issp1996$education), ref = 2)
+
+issp2006$education <- ifelse(issp2006$degree==0 | issp2006$degree==1 | issp2006$degree==2, "Primary or less",
+                             ifelse(issp2006$degree==3 | issp2006$degree==4, "Secondary",
+                                    ifelse(issp2006$degree==5, "University or more", NA)))
+issp2006$education <- relevel(as.factor(issp2006$education), ref = 2)
+
+
+
+issp1996$employment <- ifelse(issp1996$v206==2, "Part-time",
+                              ifelse(issp1996$v206==4 | issp1996$v206==6 | issp1996$v206==7 | issp1996$v206==8 | issp1996$v206==9 | issp1996$v206==10, "Not active",
+                                     ifelse(issp1996$v206==5 | issp1996$v206==3, "Active unemployed",
+                                            ifelse(issp1996$v206==1, "Full-time", NA))))
+issp1996$employment <- relevel(as.factor(issp1996$employment), ref = 2)
+
+
+issp2006$employment <- ifelse(issp2006$wrkst==2, "Part-time",
+                              ifelse(issp2006$wrkst==4 | issp2006$wrkst==6 | issp2006$wrkst==7 | issp2006$wrkst==8 | issp2006$wrkst==9 | issp2006$wrkst==10, "Not active",
+                                     ifelse(issp2006$wrkst==5 | issp2006$wrkst==3, "Active unemployed",
+                                            ifelse(issp2006$wrkst==1, "Full-time", NA))))
+issp2006$employment <- relevel(as.factor(issp2006$employment), ref = 2)
+
+
+
+issp1996 <- issp1996[c("old", "unempl", "income", "jobs",
+                       "female", "age", "ageSQ", "education", "employment",
+                       "cntry", "year"
+)]
+
+issp2006 <- issp2006[c("old", "unempl", "income", "jobs",
+                       "female", "age", "ageSQ", "education", "employment",
+                       "cntry", "year"
+                       )]
+
+
+issp <- rbind(issp1996, issp2006)
+
+dat <- merge(issp, cntry, by = c("cntry", "year"), all=F)
+
+
+# readstata13::save.dta13(dat, "dat.dta")
+
+
+# dat <- haven::read_dta("dat.dta")
+
+
+
+m1 <- glm(old ~ foreignpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m2 <- glm(unempl ~ foreignpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m3 <- glm(income ~ foreignpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m4 <- glm(jobs ~ foreignpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+m5 <- glm(old ~ foreignpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m6 <- glm(unempl ~ foreignpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m7 <- glm(income ~ foreignpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m8 <- glm(jobs ~ foreignpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+m9 <- glm(old ~ foreignpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m10 <- glm(unempl ~ foreignpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m11 <- glm(income ~ foreignpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m12 <- glm(jobs ~ foreignpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+m13 <- glm(old ~ netmigpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m14 <- glm(unempl ~ netmigpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m15 <- glm(income ~ netmigpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m16 <- glm(jobs ~ netmigpct + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+m17 <- glm(old ~ netmigpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m18 <- glm(unempl ~ netmigpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m19 <- glm(income ~ netmigpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m20 <- glm(jobs ~ netmigpct + socx + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+m21 <- glm(old ~ netmigpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m22 <- glm(unempl ~ netmigpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m23 <- glm(income ~ netmigpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+m24 <- glm(jobs ~ netmigpct + emprate + female + age + ageSQ + education + employment + cntry + year, family = binomial(link = "logit"), data = dat)
+
+
+
+texreg::htmlreg(list(m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,m12,
+                     m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24),
+                omit.coef = c("(cntry|year)"),
+                reorder.coef = c(2,11,12,13,3,4,5,6,7,8,9,10,1),
+                                override.coef = list(exp(m1$coefficients),
+                                     exp(m2$coefficients),
+                                     exp(m3$coefficients),
+                                     exp(m4$coefficients),
+                                     exp(m5$coefficients),
+                                     exp(m6$coefficients),
+                                     exp(m7$coefficients),
+                                     exp(m8$coefficients),
+                                     exp(m9$coefficients),
+                                     exp(m10$coefficients),
+                                     exp(m11$coefficients),
+                                     exp(m12$coefficients),
+                                     exp(m13$coefficients),
+                                     exp(m14$coefficients),
+                                     exp(m15$coefficients),
+                                     exp(m16$coefficients),
+                                     exp(m17$coefficients),
+                                     exp(m18$coefficients),
+                                     exp(m19$coefficients),
+                                     exp(m20$coefficients),
+                                     exp(m21$coefficients),
+                                     exp(m22$coefficients),
+                                     exp(m23$coefficients),
+                                     exp(m24$coefficients)),
+                override.se = list(coef(summary(m1))[,"z value"],
+                                   coef(summary(m2))[,"z value"],
+                                   coef(summary(m3))[,"z value"],
+                                   coef(summary(m4))[,"z value"],
+                                   coef(summary(m5))[,"z value"],
+                                   coef(summary(m6))[,"z value"],
+                                   coef(summary(m7))[,"z value"],
+                                   coef(summary(m8))[,"z value"],
+                                   coef(summary(m9))[,"z value"],
+                                   coef(summary(m10))[,"z value"],
+                                   coef(summary(m11))[,"z value"],
+                                   coef(summary(m12))[,"z value"],
+                                   coef(summary(m13))[,"z value"],
+                                   coef(summary(m14))[,"z value"],
+                                   coef(summary(m15))[,"z value"],
+                                   coef(summary(m16))[,"z value"],
+                                   coef(summary(m17))[,"z value"],
+                                   coef(summary(m18))[,"z value"],
+                                   coef(summary(m19))[,"z value"],
+                                   coef(summary(m20))[,"z value"],
+                                   coef(summary(m21))[,"z value"],
+                                   coef(summary(m22))[,"z value"],
+                                   coef(summary(m23))[,"z value"],
+                                   coef(summary(m24))[,"z value"]),
+                file = "Replication.html")
+
+
+
+
+
+
+

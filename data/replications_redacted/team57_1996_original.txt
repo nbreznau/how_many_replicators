@@ -1,0 +1,72 @@
+TEAM: 57
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+*fre v39 
+recode v39 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(age_care)
+label var age_care "Old age care" 
+
+*fre v41
+recode v41 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(unemp)
+label var unemp "Unemployed" 
+
+*fre v42
+recode v42 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(inc_diff)
+label var inc_diff "Reduce Income Differences" 
+
+*fre v36 
+recode v36 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(jobs)
+label var jobs "Jobs" 
+
+*fre v200
+recode v200 (1 = 0 "male")(2 = 1 "female"), gen(female)
+label var female "Female"
+tab v200 female, m
+
+*fre v201
+gen age = v201
+label var age "Age"
+
+gen age_2 = age*age
+label var age_2 "Age-squared"
+
+
+*fre v205
+recode v205 (1 2 3 = 1 "primary or less") (4 5 = 0 "secondary") ///
+			(6 7 = 2 "university"), gen(edu)
+*fre edu
+
+*fre v206
+
+recode v206 (1 = 0 "full time") (2 3 = 1 "part time") (5 = 2 "active unemployed") ///
+			(4 6 7 8 9 10 = 3 "not active") , gen(emp_cat)
+	
+*fre v3
+recode v3   (1 = 36 "AU-Australia") ///       			
+			(20 = 124 "CA-Canada") ///            			
+			(14 = 203 "CZ-Czech Republic") ///     
+			(27 = 250 "FR-France") ///             
+			(2 3 = 276 "DE-Germany") ///            
+			(8 = 348 "HU-Hungary") ///            
+			(10 = 372 "IE-Ireland") ///            
+			(22 23 = 376 "IL-Israel") ///             
+			(24 = 392 "JP-Japan") ///               
+			(26 = 428 "LV-Latvia") ///                   
+			(19 = 554 "NZ-New Zealand") ///        
+			(12 = 578 "NO-Norway") ///             
+			(21 = 608 "PH-Philippines") ///        
+			(16 = 616 "PL-Poland") ///                     
+			(18 = 643 "RU-Russia") ///             
+			(15 = 705 "SI-Slovenia") ///           
+			(25 = 724 "ES-Spain") ///              
+			(13 = 752 "SE-Sweden") ///             
+			(30 = 756 "CH-Switzerland") ///        
+			(4 = 826 "GB-Great Britain") ///      
+			(6 = 840 "US-United States") ///     
+			(9 17 28 = .), gen(cntry)
+
+gen year=1996
+
+
+keep v2 age_care unemp inc_diff jobs female age age_2 edu emp_cat cntry year

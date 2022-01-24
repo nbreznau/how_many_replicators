@@ -1,0 +1,220 @@
+TEAM: 62
+SOFTWARE: R
+VERSION: CURATED
+
+library(foreign)
+library(dplyr)
+working_dir <- "/"
+setwd(working_dir)
+
+ISSP_96 <- read.dta('ZA2900.dta')
+ISSP_06 <- read.dta('ZA4700.dta')
+country <- read.csv('L2data.csv')
+
+
+
+ISSP_96 <- ISSP_96 %>%
+  select(c(v39, v41, v42, v36, v3,
+           v200, v201, v205, v206)) %>%
+  filter(as.numeric(v39) < 5) %>%
+  mutate(old = as.numeric(v39) < 3) %>%
+  select(-v39) %>%
+  filter(as.numeric(v41) < 5) %>%
+  mutate(unemployed = as.numeric(v41) < 3) %>%
+  select(-v41) %>%
+  filter(as.numeric(v42) < 5) %>%
+  mutate(income = as.numeric(v42) < 3) %>%
+  select(-v42) %>%
+  filter(as.numeric(v36) < 5) %>%
+  mutate(jobs = as.numeric(v36) < 3) %>%
+  select(-v36) %>%
+  filter(as.numeric(v200) < 3) %>%
+  mutate(female = as.numeric(v200) == 2) %>%
+  select(-v200) %>%
+  mutate(age = v201) %>%
+  select(-v201) %>%
+  mutate(age_squared = as.numeric(age)^2) %>%
+  mutate(education = NA) %>%
+  filter(as.numeric(v205) < 8) %>%
+  mutate(employment = "unactive") %>%
+  filter(as.numeric(v206) < 11) %>%
+  mutate(year = 1996) %>%
+  mutate(country = NA)
+
+ISSP_96[as.numeric(ISSP_96$v205) == 7, "education"] <- rep("univ", sum(as.numeric(ISSP_96$v205) == 7))
+ISSP_96[as.numeric(ISSP_96$v205) < 7, "education"] <- rep("secondary", sum(as.numeric(ISSP_96$v205) < 7))
+ISSP_96[as.numeric(ISSP_96$v205) < 4, "education"] <- rep("primary", sum(as.numeric(ISSP_96$v205) < 4))
+
+ISSP_96[as.numeric(ISSP_96$v206) == 1, "employment"] <- rep("full", sum(as.numeric(ISSP_96$v206) == 1))
+ISSP_96[as.numeric(ISSP_96$v206) == 2, "employment"] <- rep("part", sum(as.numeric(ISSP_96$v206) == 2))
+ISSP_96[as.numeric(ISSP_96$v206) == 5, "employment"] <- rep("unemployed", sum(as.numeric(ISSP_96$v206) == 5))
+
+ISSP_96[ISSP_96$v3 == "aus", "country"] <- rep("Australia", sum(ISSP_96$v3 == "aus"))
+ISSP_96[ISSP_96$v3 == "D-W", "country"] <- rep("Germany", sum(ISSP_96$v3 == "D-W"))
+ISSP_96[ISSP_96$v3 == "D-E", "country"] <- rep("Germany", sum(ISSP_96$v3 == "D-E"))
+ISSP_96[ISSP_96$v3 == "gb", "country"] <- rep("United Kingdom", sum(ISSP_96$v3 == "gb"))
+ISSP_96[ISSP_96$v3 == "usa", "country"] <- rep("United States", sum(ISSP_96$v3 == "usa"))
+ISSP_96[ISSP_96$v3 == "h", "country"] <- rep("Hungary", sum(ISSP_96$v3 == "h"))
+ISSP_96[ISSP_96$v3 == "i", "country"] <- rep("Italy", sum(ISSP_96$v3 == "i"))
+ISSP_96[ISSP_96$v3 == "irl", "country"] <- rep("Ireland", sum(ISSP_96$v3 == "irl"))
+ISSP_96[ISSP_96$v3 == "n", "country"] <- rep("Norway", sum(ISSP_96$v3 == "n"))
+ISSP_96[ISSP_96$v3 == "s", "country"] <- rep("Sweden", sum(ISSP_96$v3 == "s"))
+ISSP_96[ISSP_96$v3 == "cz", "country"] <- rep("Czech Republic", sum(ISSP_96$v3 == "cz"))
+ISSP_96[ISSP_96$v3 == "slo", "country"] <- rep("Slovenia", sum(ISSP_96$v3 == "slo"))
+ISSP_96[ISSP_96$v3 == "pl", "country"] <- rep("Poland", sum(ISSP_96$v3 == "pl"))
+ISSP_96[ISSP_96$v3 == "bg", "country"] <- rep("Bulgaria", sum(ISSP_96$v3 == "bg"))
+ISSP_96[ISSP_96$v3 == "rus", "country"] <- rep("Russia", sum(ISSP_96$v3 == "rus"))
+ISSP_96[ISSP_96$v3 == "nz", "country"] <- rep("New Zealand", sum(ISSP_96$v3 == "nz"))
+ISSP_96[ISSP_96$v3 == "cdn", "country"] <- rep("Canada", sum(ISSP_96$v3 == "cdn"))
+ISSP_96[ISSP_96$v3 == "IL-J", "country"] <- rep("Isreal", sum(ISSP_96$v3 == "IL-J"))
+ISSP_96[ISSP_96$v3 == "IL-A", "country"] <- rep("Isreal", sum(ISSP_96$v3 == "IL-A"))
+ISSP_96[ISSP_96$v3 == "j", "country"] <- rep("Japan", sum(ISSP_96$v3 == "j"))
+ISSP_96[ISSP_96$v3 == "e", "country"] <- rep("Spain", sum(ISSP_96$v3 == "e"))
+ISSP_96[ISSP_96$v3 == "lv", "country"] <- rep("Latvia", sum(ISSP_96$v3 == "lv"))
+ISSP_96[ISSP_96$v3 == "f", "country"] <- rep("France", sum(ISSP_96$v3 == "f"))
+ISSP_96[ISSP_96$v3 == "cy", "country"] <- rep("Cyprus", sum(ISSP_96$v3 == "cy"))
+ISSP_96[ISSP_96$v3 == "ch", "country"] <- rep("Switzerland", sum(ISSP_96$v3 == "ch"))
+
+
+ISSP_06 <- ISSP_06 %>%
+  select(c(V3a, V28, V30, V31, V25,
+           sex, age, degree, wrkst)) %>%
+  filter(as.numeric(V28) < 5) %>%
+  mutate(old = as.numeric(V28) < 3) %>%
+  select(-V28) %>%
+  filter(as.numeric(V30) < 5) %>%
+  mutate(unemployed = as.numeric(V30) < 3) %>%
+  select(-V30) %>%
+  filter(as.numeric(V31) < 5) %>%
+  mutate(income = as.numeric(V31) < 3) %>%
+  select(-V31) %>%
+  filter(as.numeric(V25) < 5) %>%
+  mutate(jobs = as.numeric(V25) < 3) %>%
+  select(-V25) %>%
+  filter(as.numeric(sex) < 3) %>%
+  mutate(female = as.numeric(sex) == 2) %>%
+  select(-sex) %>%
+  mutate(age_squared = age^2) %>%
+  mutate(education = NA) %>%
+  filter(!is.na(degree)) %>%
+  filter(as.numeric(degree) < 7) %>%
+  mutate(employment = "unactive") %>%
+  filter(!is.na(wrkst)) %>%
+  filter(as.numeric(wrkst) < 11) %>%
+  mutate(year = 2006) %>%
+  mutate(country = NA)
+  
+ISSP_06[as.numeric(ISSP_06$degree) == 6, "education"] <- rep("univ", sum(as.numeric(ISSP_06$degree) == 6))
+ISSP_06[as.numeric(ISSP_06$degree) < 6, "education"] <- rep("secondary", sum(as.numeric(ISSP_06$degree) < 6))
+ISSP_06[as.numeric(ISSP_06$degree) < 4, "education"] <- rep("primary", sum(as.numeric(ISSP_06$degree) < 4))
+
+ISSP_06[as.numeric(ISSP_06$wrkst) == 1, "employment"] <- rep("full", sum(as.numeric(ISSP_06$wrkst) == 1))
+ISSP_06[as.numeric(ISSP_06$wrkst) == 2, "employment"] <- rep("part", sum(as.numeric(ISSP_06$wrkst) == 2))
+ISSP_06[as.numeric(ISSP_06$wrkst) == 5, "employment"] <- rep("unemployed", sum(as.numeric(ISSP_06$wrkst) == 5))
+
+
+ISSP_06[ISSP_06$V3a == "AU-Australia", "country"] <- rep("Australia", sum(ISSP_06$V3a == "AU-Australia"))
+ISSP_06[ISSP_06$V3a == "HR-Croatia", "country"] <- rep("Croatia", sum(ISSP_06$V3a == "HR-Croatia"))
+ISSP_06[ISSP_06$V3a == "DE-Germany", "country"] <- rep("Germany", sum(ISSP_06$V3a == "DE-Germany"))
+ISSP_06[ISSP_06$V3a == "GB-Great Britain", "country"] <- rep("United Kingdom", sum(ISSP_06$V3a == "GB-Great Britain"))
+ISSP_06[ISSP_06$V3a == "US-United States", "country"] <- rep("United States", sum(ISSP_06$V3a == "US-United States"))
+ISSP_06[ISSP_06$V3a == "HU-Hungary", "country"] <- rep("Hungary", sum(ISSP_06$V3a == "HU-Hungary"))
+ISSP_06[ISSP_06$V3a == "DK-Denmark", "country"] <- rep("Denmark", sum(ISSP_06$V3a == "DK-Denmark"))
+ISSP_06[ISSP_06$V3a == "IE-Ireland", "country"] <- rep("Ireland", sum(ISSP_06$V3a == "IE-Ireland"))
+ISSP_06[ISSP_06$V3a == "NO-Norway", "country"] <- rep("Norway", sum(ISSP_06$V3a == "NO-Norway"))
+ISSP_06[ISSP_06$V3a == "SE-Sweden", "country"] <- rep("Sweden", sum(ISSP_06$V3a == "SE-Sweden"))
+ISSP_06[ISSP_06$V3a == "CZ-Czech Republic", "country"] <- rep("Czech Republic", sum(ISSP_06$V3a == "CZ-Czech Republic"))
+ISSP_06[ISSP_06$V3a == "SI-Slovenia", "country"] <- rep("Slovenia", sum(ISSP_06$V3a == "SI-Slovenia"))
+ISSP_06[ISSP_06$V3a == "PL-Poland", "country"] <- rep("Poland", sum(ISSP_06$V3a == "PL-Poland"))
+ISSP_06[ISSP_06$V3a == "BG-Bulgaria", "country"] <- rep("Bulgaria", sum(ISSP_06$V3a == "BG-Bulgaria"))
+ISSP_06[ISSP_06$V3a == "RU-Russia", "country"] <- rep("Russia", sum(ISSP_06$V3a == "RU-Russia"))
+ISSP_06[ISSP_06$V3a == "NZ-New Zealand", "country"] <- rep("New Zealand", sum(ISSP_06$V3a == "NZ-New Zealand"))
+ISSP_06[ISSP_06$V3a == "CA-Canada", "country"] <- rep("Canada", sum(ISSP_06$V3a == "CA-Canada"))
+ISSP_06[ISSP_06$V3a == "IL-Isreal", "country"] <- rep("Isreal", sum(ISSP_06$V3a == "IL-Isreal"))
+ISSP_06[ISSP_06$V3a == "FI-Finland", "country"] <- rep("Finland", sum(ISSP_06$V3a == "FI-Finland"))
+ISSP_06[ISSP_06$V3a == "JP-Japan", "country"] <- rep("Japan", sum(ISSP_06$V3a == "JP-Japan"))
+ISSP_06[ISSP_06$V3a == "ES-Spain", "country"] <- rep("Spain", sum(ISSP_06$V3a == "ES-Spain"))
+ISSP_06[ISSP_06$V3a == "LV-Latvia", "country"] <- rep("Latvia", sum(ISSP_06$V3a == "LV-Latvia"))
+ISSP_06[ISSP_06$V3a == "FR-France", "country"] <- rep("France", sum(ISSP_06$V3a == "FR-France"))
+ISSP_06[ISSP_06$V3a == "CY-Cyprus", "country"] <- rep("Cyprus", sum(ISSP_06$V3a == "CY-Cyprus"))
+ISSP_06[ISSP_06$V3a == "CH-Switzerland", "country"] <- rep("Switzerland", sum(ISSP_06$V3a == "CH-Switzerland"))
+ISSP_06[ISSP_06$V3a == "KR-South Korea", "country"] <- rep("South Korea", sum(ISSP_06$V3a == "KR-South Korea"))
+
+
+ISSP_96 <- ISSP_96 %>%
+  select(-v3) %>%
+  select(-v205) %>%
+  select(-v206)
+
+ISSP_06 <- ISSP_06 %>%
+  select(-V3a) %>%
+  select(-degree) %>%
+  select(-wrkst)
+
+ISSP_complete <- ISSP_96 %>%
+  bind_rows(ISSP_06)
+
+
+displayResults <- function(model) { 
+  print("coefficeints")
+  print(coef(model)[1])
+  print("odds ratios")
+  print(exp(coef(model))[1:5])
+  print("z scores")
+  print(summary(model)$coefficients[1:5, 3])
+  }
+
+model_1 <- glm(old ~ foreignpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_1)
+model_2 <- glm(unemployed ~ foreignpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_2)
+model_3 <- glm(income ~ foreignpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_3)
+model_4 <- glm(jobs ~ foreignpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_4)
+
+model_5 <- glm(old ~ foreignpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_5)
+model_6 <- glm(unemployed ~ foreignpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_6)
+model_7 <- glm(income ~ foreignpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_7)
+model_8 <- glm(jobs ~ foreignpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_8)
+
+model_9 <- glm(old ~ foreignpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_9)
+model_10 <- glm(unemployed ~ foreignpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_10)
+model_11 <- glm(income ~ foreignpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_11)
+model_12 <- glm(jobs ~ foreignpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_12)
+
+model_13 <- glm(old ~ netmigpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_13)
+model_14 <- glm(unemployed ~ netmigpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_14)
+model_15 <- glm(income ~ netmigpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_15)
+model_16 <- glm(jobs ~ netmigpct + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_16)
+
+model_17 <- glm(old ~ netmigpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_17)
+model_18 <- glm(unemployed ~ netmigpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_18)
+model_19 <- glm(income ~ netmigpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_19)
+model_20 <- glm(jobs ~ netmigpct + socx + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_20)
+
+model_21 <- glm(old ~ netmigpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_21)
+model_22 <- glm(unemployed ~ netmigpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_22)
+model_23 <- glm(income ~ netmigpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_23)
+model_24 <- glm(jobs ~ netmigpct + emprate + factor(female) + age + age_squared + factor(education) + factor(employment) + year + factor(country), data = ISSP_complete, family = "binomial")
+displayResults(model_24)
+

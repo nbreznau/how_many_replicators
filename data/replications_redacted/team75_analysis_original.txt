@@ -1,0 +1,193 @@
+TEAM: 75
+SOFTWARE: MPLUS
+VERSION: ORIGINAL
+
+
+ TITLE: CRI Fixed Effects, Model 1-4 (Immigrant Stock only);
+        !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  sex aged age2d edup eduh emppt empna empau
+                      old une dif job istock yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML; 
+
+    MODEL:
+
+        old ON    istock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    istock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    istock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    istock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+ TITLE: CRI Fixed Effects, Model 5-8 (Immigrant Stock, Social Welfare);
+         !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  istock socx sex aged age2d edup eduh emppt empna empau
+                      old une dif job yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML; 
+
+    MODEL:
+
+        old ON    istock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    istock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    istock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    istock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+        
+ TITLE: CRI Fixed Effects, Model 9-12 (Immigrant Stock, Employment Rate);
+         !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  istock emprate sex aged age2d edup eduh emppt empna empau
+                      old une dif job yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML; 
+
+    MODEL:
+
+        old ON    istock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    istock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    istock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    istock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+ TITLE: CRI Fixed Effects, Model 13-16 (Chabge in Immigrant Stock only);
+         !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  chistock sex aged age2d edup eduh emppt empna empau
+                      old une dif job yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML; 
+
+    MODEL:
+
+        old ON    chistock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    chistock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    chistock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    chistock sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+        
+ TITLE: CRI Fixed Effects, Model 17-20 (Change in Immigrant Stock, Social Welfare);
+         !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  chistock socx sex aged age2d edup eduh emppt empna empau
+                      old une dif job yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML; 
+
+    MODEL:
+
+        old ON    chistock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    chistock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    chistock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    chistock socx sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+        
+ TITLE: CRI Fixed Effects, Model 20-24 (Change in Immigrant Stock, Employment Rate);
+         !Mplus Version 8.0
+
+    DATA: FILE IS 'CRI-Mplus.dat';
+
+    VARIABLE:
+    	NAMES        =  cntry sex age age2 aged age2d edup edus eduh emppt empna empau  
+                      empft old une dif job emprate socx istock chistock 
+                      year yrdm aust can fr de ir jp nz nw sp sw ch uk us;
+      MISSING      =  all (-99);
+    	USEVARIABLES =  chistock emprate sex aged age2d edup eduh emppt empna empau
+                      old une dif job yrdm 
+                      aust can fr de ir jp nz nw sp sw ch uk;  ! us control 
+    	CATEGORICAL  =  old une dif job;
+
+    ANALYSIS:  
+      ESTIMATOR IS ML;  
+
+    MODEL:
+
+        old ON    chistock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        une ON    chistock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        dif ON    chistock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;
+        job ON    chistock emprate sex aged age2d edup eduh emppt empna empau 
+                  yrdm aust can fr de ir jp nz nw sp sw ch uk;     
+
+
+        
+
+        
+
+        

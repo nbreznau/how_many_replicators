@@ -1,0 +1,314 @@
+TEAM: 81
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+clear
+
+
+clear
+use "L2data.dta"
+
+gen id=0
+replace id=1 if country== "Australia"
+replace id=2 if country== "Canada"
+replace id=4 if country== "France"
+replace id=5 if country== "Germany"
+replace id=8 if country== "Isreal"
+replace id=9 if country== "Japan"
+replace id=11 if country== "New Zealand"
+replace id=12 if country== "Norway"
+replace id=16 if country== "Spain"
+replace id=17 if country== "Sweden"
+replace id=18 if country== "Switzerland"
+replace id=19 if country== "United Kingdom"
+replace id=20 if country== "United States"
+
+recode id (0=.)(1=1 "Australia")(2=2 "Canada")(4=4 "France")(5=5 "Germany") ///
+(8=8 "Isreal")(9=9 "Japan")(11=11 "New Zealand")(12=12 "Norway") ///
+(16=16 "Spain")(17=17 "Sweden")(18=18 "Switzerland")(19=19 "United Kingdom")(20=20 "United States"),gen(id2)    	
+
+save "L2datav2.dta"
+
+
+clear
+use "ZA2900.dta"
+
+gen id=0
+replace id=1 if v3== 1
+replace id=2 if v3== 20
+replace id=4 if v3== 27
+replace id=5 if v3== 2
+replace id=5 if v3== 3
+replace id=8 if v3== 22
+replace id=8 if v3== 23
+replace id=9 if v3== 24
+replace id=11 if v3== 19
+replace id=12 if v3== 12
+replace id=16 if v3== 25
+replace id=17 if v3== 13
+replace id=18 if v3== 30
+replace id=19 if v3== 4
+replace id=20 if v3== 6
+
+recode id (0=.)(1=1 "Australia")(2=2 "Canada")(4=4 "France")(5=5 "Germany") ///
+(8=8 "Isreal")(9=9 "Japan")(11=11 "New Zealand")(12=12 "Norway") ///
+(16=16 "Spain")(17=17 "Sweden")(18=18 "Switzerland")(19=19 "United Kingdom")(20=20 "United States"),gen(id2)    	
+
+gen year=1996
+
+recode v36 (1=1)(2=1)(3=0)(4=0), gen(jobs)
+recode v38 (1=1)(2=1)(3=0)(4=0), gen(oldage)
+recode v41 (1=1)(2=1)(3=0)(4=0), gen(unemployed)
+recode v42 (1=1)(2=1)(3=0)(4=0), gen(Reduceincome)
+
+
+recode v200 (1=0)(2=1), gen(female)
+
+gen age=v201
+gen agesq=age*age
+
+recode v205 (1=.)(2=1 "primary")(3=1)(4=2 "secondary")(5=2)(6=3)(7=3 "university"),gen(edu)
+recode v206 (1=1 "FT")(8=1)(4=1)(2=2 "PT")(3=2)(5=3 "active unemployed")(10=4 "not active")(9=4)(7=4)(6=3),gen(employed)  //
+
+
+save "ZA2900v2.dta"
+
+clear
+use "ZA4700.dta"
+
+gen id=0
+replace id=1 if V3== 36
+replace id=2 if V3== 124
+replace id=4 if V3== 250
+replace id=5 if V3== 276.1
+replace id=5 if V3== 276.2
+replace id=8 if V3== 376.1
+replace id=8 if V3== 376.2
+replace id=9 if V3== 392
+replace id=11 if V3== 554
+replace id=12 if V3== 578
+replace id=16 if V3== 724
+replace id=17 if V3== 752
+replace id=18 if V3== 756
+replace id=19 if V3== 826.1
+replace id=20 if V3== 840
+
+gen year=2006
+
+recode id (0=.)(1=1 "Australia")(2=2 "Canada")(4=4 "France")(5=5 "Germany") ///
+(8=8 "Isreal")(9=9 "Japan")(11=11 "New Zealand")(12=12 "Norway") ///
+(16=16 "Spain")(17=17 "Sweden")(18=18 "Switzerland")(19=19 "United Kingdom")(20=20 "United States"),gen(id2)    	
+
+recode V25 (1=1)(2=1)(3=0)(4=0), gen(jobs)
+recode V28 (1=1)(2=1)(3=0)(4=0), gen(oldage)
+recode V30 (1=1)(2=1)(3=0)(4=0), gen(unemployed)
+recode V31 (1=1)(2=1)(3=0)(4=0), gen(Reduceincome)
+
+recode sex (1=0)(2=1), gen(female)
+
+gen agesq=age*age
+
+recode degree (0=.)(1=1 "primary")(1=1)(3=2 "secondary")(3=2)(5=3 "university"),gen(edu)
+recode wrkst (1=1 "FT")(8=1)(4=1)(2=2 "PT")(3=2)(5=3 "active unemployed")(10=4 "not active")(9=4)(7=4)(6=3),gen(employed)  //
+
+
+save "ZA4700v2.dta",replace
+
+
+clear
+
+use "ZA2900v2.dta", clear
+
+merge m:m id2 using "L2datav2.dta", force
+
+save "20180906_1996combine.dta", replace
+
+
+
+clear 
+
+use "L2datav2.dta", clear
+
+merge m:m id2 using "ZA4700v2.dta"
+
+save "20180906_2006combine.dta", replace
+
+
+
+clear
+use "20180906_1996combine.dta"
+xtset, clear 
+xtset id2
+
+
+cd "/"
+
+
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel append
+
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Oldage_96.xls", eform cti(odds ratio) dec(2) excel append
+
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Unemployment_96.xls", eform cti(odds ratio) dec(2) excel append
+
+
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Reduceincome_96.xls", eform cti(odds ratio) dec(2) excel append
+
+
+
+clear
+use "20180906_2006combine.dta",clear
+xtset, clear 
+xtset id2
+
+cd "/"
+
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit jobs female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel append
+
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit oldage female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Oldage_06.xls", eform cti(odds ratio) dec(2) excel append
+
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit unemployed female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Unemployment_06.xls", eform cti(odds ratio) dec(2) excel append
+
+
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel replace
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct socx, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed foreignpct emprate, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed netmigpct, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed socx netmigpct, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel append
+
+xtlogit Reduceincome female agesq b2.edu b1.employed emprate netmigpct, or
+outreg2 using "Reduceincome_06.xls", eform cti(odds ratio) dec(2) excel append
+
+
+
+
+
+ 

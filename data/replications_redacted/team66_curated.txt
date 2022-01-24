@@ -1,0 +1,403 @@
+TEAM: 66
+SOFTWARE: R (R-STUDIO)
+VERSION: CURATED
+
+
+```{r setup, include=FALSE}
+stopifnot(require(dplyr))
+stopifnot(require(ggplot2))
+stopifnot(require(readr))
+stopifnot(require(reshape2))
+stopifnot(require(forcats))
+stopifnot(require(readxl))
+stopifnot(require(plm))
+stopifnot(require(lme4))
+stopifnot(require(knitr))
+```
+
+
+```{r}
+cri_1996 <- read_csv('ZA2900.csv')
+#list rows of data that have missing values
+cri_1996[!complete.cases(cri_1996),]
+ndata <- na.omit(cri_1996) 
+nrow(ndata)
+         
+```
+
+
+```{r}
+positions <- c('v1', 'v2', 'v3','v36', 'v41', 'v42', 'v39', 'v44', 'v38')
+df <- cri_1996 %>% 
+    select(positions) %>% 
+    rename(jobs='v36') %>% 
+    rename(unemployment='v41') %>% 
+    rename(income='v42') %>% 
+    rename(retirement='v39') %>% 
+    rename(housing='v44') %>% 
+    rename(healthcare='v38') %>% 
+    rename(studyno='v1') %>% 
+    rename(country='v3') %>% 
+    rename(respondentid='v2') %>% 
+    na.omit()
+
+nrow(df)
+```
+
+
+```{r}
+fct_count(df$jobs)
+coltobinary <- c('jobs', 'unemployment', 'income', 'retirement', 'housing', 'healthcare')
+
+
+df$jobs <- fct_collapse(df$jobs,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+df$unemployment <- fct_collapse(df$unemployment,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+df$income <- fct_collapse(df$income,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+df$retirement <- fct_collapse(df$retirement,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+df$housing <- fct_collapse(df$housing,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+df$healthcare <- fct_collapse(df$healthcare,
+                         "0" = c("Definitely not", "Probably not"),
+                         "1" = c("Definitely should", "Probably should"))
+
+
+
+```
+
+
+
+```{r}
+indv <- read_csv('bradyfinnigan2014countrydata.csv')
+
+findv <- indv %>% 
+    select(1:7, "country") %>% 
+    filter(year==1996)
+
+```
+
+
+
+```{r}
+
+df$country <- df$country %>% 
+    recode('aus' = 'Australia') %>% 
+    recode('cdn' = 'Canada') %>% 
+    recode('f' = 'France') %>% 
+    fct_collapse('Germany' = c('D-E', 'D-W')) %>% 
+    recode('irl' = 'Ireland') %>% 
+    recode('j' = 'Japan') %>% 
+    recode('nz' = 'New Zealand') %>% 
+    recode('n'= 'Norway') %>% 
+    recode('e'= 'Spain') %>% 
+    recode('s' = 'Sweden') %>% 
+    recode('ch' = 'Switzerland') %>% 
+    recode('usa' = "United States") %>% 
+    recode('gb' = "United Kingdom") %>% # PI added
+    trimws()
+table(df$country)
+
+```
+
+
+
+```{r}
+cwc <-  c('Australia', 'United Kingdom', 'Canada', 'France','Germany', 'Ireland', 'Japan', 'New Zealand', 'Norway', 'Spain', 'Sweden', 'Switzerland', 'United States')
+df <- df[df$country %in% cwc,]
+
+```
+
+
+```{r}
+# setwd("/")
+finaldf <- inner_join(df, findv, by="country")
+write_csv(finaldf, "cri_df_1996.csv")
+```
+
+
+```{r}
+# setwd("/")
+cri_2006 <- read_csv('ZA4700.csv')
+
+```
+
+
+```{r}
+positions <- c('V1', 'V2', 'V3a','V25', 'V30', 'V31', 'V28', 'V33', 'V27')
+df <- cri_2006 %>% 
+    select(positions) %>% 
+    rename(jobs='V25') %>% 
+    rename(unemployment='V30') %>% 
+    rename(income='V31') %>% 
+    rename(retirement='V28') %>% 
+    rename(housing='V33') %>% 
+    rename(healthcare='V27') %>% 
+    rename(studyno='V1') %>% 
+    rename(country='V3a') %>% 
+    rename(respondentid='V2') %>% 
+    na.omit()
+
+nrow(df)
+```
+
+
+
+```{r}
+unique(df$jobs)
+fct_count(df$jobs)
+coltobinary <- c('jobs', 'unemployment', 'income', 'retirement', 'housing', 'healthcare')
+
+
+df$jobs <- fct_collapse(df$jobs,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+df$unemployment <- fct_collapse(df$unemployment,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+df$income <- fct_collapse(df$income,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+df$retirement <- fct_collapse(df$retirement,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+df$housing <- fct_collapse(df$housing,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+df$healthcare <- fct_collapse(df$healthcare,
+                         "0" = c("Definitely should not be", "Probably should not be"),
+                         "1" = c("Definitely should be", "Probably should be"))
+
+
+```
+
+
+```{r}
+indv <- read_csv('bradyfinnigan2014countrydata.csv')
+
+findv <- indv %>% 
+    select(1:7, "country") %>% 
+    filter(year==2006)
+```
+
+
+```{r}
+unique(df$country)
+df$country <- df$country %>% 
+    recode('AU-Australia' = 'Australia') %>% 
+    recode('CA-Canada' = 'Canada') %>% 
+    recode('FR-France' = 'France') %>% 
+    recode('DE-Germany' = 'Germany') %>% 
+    recode('IE-Irelan' = 'Ireland') %>% 
+    recode('JP-Japan' = 'Japan') %>% 
+    recode('NZ-New Zealand' = 'New Zealand') %>% 
+    recode('NO-Norway'= 'Norway') %>% 
+    recode('ES-Spain'= 'Spain') %>% 
+    recode('SE-Sweden' = 'Sweden') %>% 
+    recode('CH-Switzerland' = 'Switzerland') %>% 
+    recode('US-United States' = "United States") %>% 
+    recode("GB-Great Britain" = "United Kingdom") %>%
+    trimws()
+table(df$country)
+
+```
+
+
+```{r}
+cwc <-  c('Australia', 'Canada', 'France','Germany', 'Ireland', 'Japan', 'New Zealand', 'Norway', 'Spain', 'Sweden', 'Switzerland', 'United States', 'United Kingdom')
+df <- df[df$country %in% cwc,]
+nrow(df)
+```
+
+
+
+```{r}
+finaldf <- inner_join(df, findv, by="country")
+write_csv(finaldf, "cri_df_2006.csv")
+```
+
+
+
+```{r}
+cri_1996 <- read_csv('cri_df_1996.csv')
+
+cri_2006 <- read_csv('cri_df_2006.csv')
+
+cri_combined <- rbind(cri_1996, cri_2006)
+nrow(cri_combined)
+write_csv(cri_combined, "cri_df_combined.csv")
+```
+
+
+```{r}
+
+all <- read.csv("cri_df_combined.csv")
+```
+ 
+
+```{r}
+options(scipen=999)
+
+fe_1 = glmer(jobs ~ (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_2 = glmer(unemployment ~ (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_3 = glmer(income ~ (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_4 = glmer(retirement ~ (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_5 = glmer(housing ~  (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_6 = glmer(healthcare ~  (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
+
+
+fe_7 = glmer(jobs ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_8 = glmer(unemployment ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_9 = glmer(income ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_10 = glmer(retirement ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_11 = glmer(housing ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_12 = glmer(healthcare ~  (1 | country) + as.factor(year) + foreignpct + socx, data = all, family = binomial)
+
+
+fe_13 = glmer(jobs ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+fe_14 = glmer(unemployment ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+fe_15 = glmer(income ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+fe_16 = glmer(retirement ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+fe_17 = glmer(housing ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+fe_18 = glmer(healthcare ~  (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
+
+
+```
+
+
+```{r}
+
+all$netmig_pct <- (all$netmig / all$pop) * 100
+
+fe_19 = glmer(jobs ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_19)
+
+fe_20 = glmer(unemployment ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_20)
+
+fe_21 = glmer(income ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_21)
+
+fe_22 = glmer(retirement ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_22)
+
+fe_23 = glmer(housing ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_23)
+
+fe_24 = glmer(healthcare ~  (1 | country) + as.factor(year) + netmig_pct, data = all, family = binomial)
+summary(fe_24)
+
+fe_25 = glmer(jobs ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_25)
+
+fe_26 = glmer(unemployment ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_26)
+
+fe_27 = glmer(income ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_27)
+
+fe_28 = glmer(retirement ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_28)
+
+fe_29 = glmer(housing ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_29)
+
+fe_30 = glmer(healthcare ~  (1 | country) + as.factor(year) + netmig_pct + socx, data = all, family = binomial)
+summary(fe_30)
+
+fe_31 = glmer(jobs ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_31)
+
+fe_32 = glmer(unemployment ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_32)
+
+fe_33 = glmer(income ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_33)
+
+fe_34 = glmer(retirement ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_34)
+
+fe_35 = glmer(housing ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_35)
+
+fe_36 = glmer(healthcare ~  (1 | country) + as.factor(year) + netmig_pct + emprate, data = all, family = binomial)
+summary(fe_36)
+
+fe_37 = glmer(jobs ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_37)
+
+fe_38 = glmer(unemployment ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_38)
+
+fe_39 = glmer(income ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_39)
+
+fe_40 = glmer(retirement ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_40)
+
+fe_41 = glmer(housing ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_41)
+
+fe_42 = glmer(healthcare ~  (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
+summary(fe_42)
+
+```
+
+
+```{r}
+library(jtools)
+library(huxtable)
+
+export_summs(fe_1, fe_2, fe_3, fe_4,
+             fe_5, fe_6, fe_7, fe_8,
+             fe_9, fe_10, fe_11, fe_12,
+             fe_13, fe_14, fe_15, fe_16,
+             fe_17, fe_18, exp=T, r.squared=F, error_format = "{statistic}", 
+             to.file = 'xlsx', file.name = 'restab.xlsx', digits =3)
+export_summs(fe_19, fe_20,
+             fe_21, fe_22, fe_23, fe_24,
+             fe_25, fe_26, fe_27, fe_28,
+             fe_29, fe_30, fe_31, fe_32,
+             fe_33, fe_34, fe_35, fe_36,
+             fe_37, fe_38, fe_39, fe_40,
+             fe_41, fe_42, exp=T, r.squared=F, error_format = "{statistic}", 
+             to.file = 'xlsx', file.name = 'restab5.xlsx', digits =3)
+
+```

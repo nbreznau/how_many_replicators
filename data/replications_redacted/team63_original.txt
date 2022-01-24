@@ -1,0 +1,640 @@
+TEAM: 63
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+clear
+set matsize 4000
+set more off, perm
+
+cd "\"
+
+use "ZA2900.dta", clear
+
+
+recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
+label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values v3a cntrylbl
+
+recode v4 (2=0) (8/9=.) (0=.), gen(dobeylaws)
+
+recode v5 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgprotest)
+recode orgprotest (1/2=0) (3/4=1), gen(dorgprotest)
+
+recode v6 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgmarch)
+recode orgmarch (1/2=0) (3/4=1), gen(dmarch)
+
+recode v7 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgstrike)
+recode orgstrike (1/2=0) (3/4=1), gen(dorgstrike)
+
+recode v25 (1=5) (2=4) (4=2) (5=1), gen(spendenv)
+recode spendenv (1/3=0) (4/5=1), gen(dspendenv)
+
+recode v26 (1=5) (2=4) (4=2) (5=1), gen(spendhealth)
+recode spendhealth (1/3=0) (4/5=1), gen(dspendhealth)
+
+recode v27 (1=5) (2=4) (4=2) (5=1), gen(spendlaw)
+recode spendlaw (1/3=0) (4/5=1), gen(dspendlaw)
+
+recode v28 (1=5) (2=4) (4=2) (5=1), gen(spendedu)
+recode spendedu (1/3=0) (4/5=1), gen(dspendedu)
+
+recode v29 (1=5) (2=4) (4=2) (5=1), gen(spenddef)
+recode spenddef (1/3=0) (4/5=1), gen(dspenddef)
+
+recode v30 (1=5) (2=4) (4=2) (5=1), gen(spendret)
+recode spendret (1/3=0) (4/5=1), gen(dspendret)
+
+recode v31 (1=5) (2=4) (4=2) (5=1), gen(spendunemp)
+recode spendunemp (1/3=0) (4/5=1), gen(dspendunemp)
+
+recode v32 (1=5) (2=4) (4=2) (5=1), gen(spendart)
+recode spendart (1/3=0) (4/5=1), gen(dspendart)
+
+recode v36 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+recode govjobs (1/2=0) (3/4=1), gen(dgovjobs)
+
+recode v38 (1=4) (2=3) (3=2) (4=1), gen(govprices)
+recode govprices (1/2=0) (3/4=1), gen(dgovprices)
+
+recode v38 (1=4) (2=3) (3=2) (4=1), gen(govhcare)
+recode govhcare (1/2=0) (3/4=1), gen(dhcare)
+
+recode v39 (1=4) (2=3) (3=2) (4=1), gen(govretire)
+recode govretire (1/2=0) (3/4=1), gen(dgovretire)
+
+recode v39 (1=4) (2=3) (3=2) (4=1), gen(indgrow)
+recode indgrow (1/2=0) (3/4=1), gen(dindgrow)
+
+recode v41 (1=4) (2=3) (3=2) (4=1), gen(govunemp)
+recode govunemp (1/2=0) (3/4=1), gen(dgovunemp)
+
+recode v42 (1=4) (2=3) (3=2) (4=1), gen(govincdiff)
+recode govincdiff (1/2=0) (3/4=1), gen(dgovincdiff)
+
+recode v43 (1=4) (2=3) (3=2) (4=1), gen(govstudents)
+recode govstudents (1/2=0) (3/4=1), gen(dgovstud)
+
+recode v44 (1=4) (2=3) (3=2) (4=1), gen(govhousing)
+recode govhousing (1/2=0) (3/4=1), gen(dgovhous)
+
+recode v45 (1=4) (2=3) (3=2) (4=1), gen(lawsenv)
+recode lawsenv (1/2=0) (3/4=1), gen(dlawsenv)
+
+recode v19 (1=5) (2=4) (4=2) (5=1), gen(cutspend)
+recode cutspend (1/3=0) (4/5=1), gen(dcutspend)
+
+recode v20 (1=5) (2=4) (4=2) (5=1), gen(projjobs)
+recode projjobs (1/3=0) (4/5=1), gen(dprojjobs)
+
+recode v21 (1=5) (2=4) (4=2) (5=1), gen(regbus)
+recode regbus (1/3=0) (4/5=1), gen(dregbus)
+
+recode v22 (1=5) (2=4) (4=2) (5=1), gen(indnewprod)
+recode indnewprod (1/3=0) (4/5=1), gen(dindnewprod)
+
+recode v23 (1=5) (2=4) (4=2) (5=1), gen(decindjobs)
+recode decindjobs (1/3=0) (4/5=1), gen(ddecindjobs)
+
+recode v24 (1=5) (2=4) (4=2) (5=1), gen(workwk)
+recode workwk (1/3=0) (4/5=1), gen(dworkwk)
+
+
+rename v201 age
+gen agesq=age*age
+
+recode v200 (1=0) (2=1), gen(female)
+
+rename v202 marst
+recode marst (5=1) (nonmiss=0), gen(nevermar)
+recode marst (2/5=0), gen(married)
+recode marst (3/4=1) (nonmiss=0), gen(divorced)
+recode marst (2=1) (nonmiss=0), gen(widow)
+
+recode v203 (2=0), gen(partner)
+
+rename v273 hhsize
+
+recode v274 (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
+local i = 10
+while `i' < 27 {
+	replace kidshh=1 if v274==`i'
+	local i = `i' + 2
+}
+
+recode v275 (3=1) (nonmiss=0), gen(rural)
+recode v275 (2=1) (nonmiss=0), gen(suburb)
+
+rename v324 ETHNIC
+
+rename v204 edyears
+rename v205 edcat
+recode edcat (1/3=1) (4=2) (5=3) (6=4) (7=5), gen(degree)
+label define edlabels 1 "Primary/less" 2 "Some Secondary" 3 "Secondary" 4 "Some Higher Ed" 5 "University or higher"
+label values degree edlabels
+
+recode degree (1/2=1) (nonmiss=0), gen(lesshs)
+recode degree (3/4=1) (nonmiss=0), gen(hs)
+recode degree (5=1) (nonmiss=0), gen(univ)
+
+rename v208 isco
+rename v209 occ2
+rename v215 hourswrk
+
+recode v206 (2/10=0), gen(ftemp)
+recode v206 (2/4=1) (nonmiss=0), gen(ptemp)
+recode v206 (5=1) (nonmiss=0), gen(unemp)
+recode v206 (6/10=1) (nonmiss=0), gen(nolabor)
+
+gen selfemp=v213==1
+replace selfemp=. if v206==.
+gen pubemp=(v212==1 | v212==2)
+replace pubemp=. if v206==.
+gen pvtemp=(selfemp==0 & pubemp==0)
+replace pvtemp=. if v206==.
+
+rename v218 faminc
+
+gen inczscore=.
+levelsof v3a, local(cntries)
+foreach cntryval of local cntries {
+	zscore faminc if v3a==`cntryval', listwise
+	replace inczscore=z_faminc if v3a==`cntryval'
+	drop z_faminc
+}
+
+recode v222 (2=0), gen(union)
+
+rename v223 party
+
+recode v220 (1/2=1) (nonmiss=0), gen(highrel)
+recode v220 (3/5=1) (nonmiss=0), gen(lowrel)
+recode v220 (6=1) (nonmiss=0), gen(norel)
+rename v220 religion
+
+gen year=1996
+gen yr2006=0
+
+rename v3a cntry
+
+rename v325 wghts
+
+
+save "ISSP96recode.dta", replace
+
+
+use "ZA4700.dta", clear 
+
+
+recode V17 (1=5) (2=4) (4=2) (5=1), gen(spendenv)
+recode spendenv (1/3=0) (4/5=1), gen(dspendenv)
+
+recode V18 (1=5) (2=4) (4=2) (5=1), gen(spendhealth)
+recode spendhealth (1/3=0) (4/5=1), gen(dspendhealth)
+
+recode V19 (1=5) (2=4) (4=2) (5=1), gen(spendlaw)
+recode spendlaw (1/3=0) (4/5=1), gen(dspendlaw)
+
+recode V20 (1=5) (2=4) (4=2) (5=1), gen(spendedu)
+recode spendedu (1/3=0) (4/5=1), gen(dspendedu)
+
+recode V21 (1=5) (2=4) (4=2) (5=1), gen(spenddef)
+recode spenddef (1/3=0) (4/5=1), gen(dspenddef)
+
+recode V22 (1=5) (2=4) (4=2) (5=1), gen(spendret)
+recode spendret (1/3=0) (4/5=1), gen(dspendret)
+
+recode V23 (1=5) (2=4) (4=2) (5=1), gen(spendunemp)
+recode spendunemp (1/3=0) (4/5=1), gen(dspendunemp)
+
+recode V24 (1=5) (2=4) (4=2) (5=1), gen(spendart)
+recode spendart (1/3=0) (4/5=1), gen(dspendart)
+
+recode V35 (1=5) (2=4) (4=2) (5=1), gen(suchcare)
+recode suchcare (1/3=0) (4/5=1), gen(dsuchcare)
+
+recode V36 (1=5) (2=4) (4=2) (5=1), gen(sucret)
+recode sucret (1/3=0) (4/5=1), gen(dsucret)
+
+recode V37 (1=5) (2=4) (4=2) (5=1), gen(sucdef)
+recode sucdef (1/3=0) (4/5=1), gen(dsucdef)
+
+recode V38 (1=5) (2=4) (4=2) (5=1), gen(suclaw)
+recode suclaw (1/3=0) (4/5=1), gen(dsuclaw)
+
+recode V39 (1=5) (2=4) (4=2) (5=1), gen(sucunemp)
+recode sucunemp (1/3=0) (4/5=1), gen(dsucunemp)
+
+recode V40 (1=5) (2=4) (4=2) (5=1), gen(sucenv)
+recode sucenv (1/3=0) (4/5=1), gen(dsucenv)
+
+recode V25 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+recode govjobs (1/2=0) (3/4=1), gen(dgovjobs)
+
+recode V26 (1=4) (2=3) (3=2) (4=1), gen(govprices)
+recode govprices (1/2=0) (3/4=1), gen(dgovprices)
+
+recode V27 (1=4) (2=3) (3=2) (4=1), gen(govhcare)
+recode govhcare (1/2=0) (3/4=1), gen(dhcare)
+
+recode V28 (1=4) (2=3) (3=2) (4=1), gen(govretire)
+recode govretire (1/2=0) (3/4=1), gen(dgovretire)
+
+recode V29 (1=4) (2=3) (3=2) (4=1), gen(indgrow)
+recode indgrow (1/2=0) (3/4=1), gen(dindgrow)
+
+recode V30 (1=4) (2=3) (3=2) (4=1), gen(govunemp)
+recode govunemp (1/2=0) (3/4=1), gen(dgovunemp)
+
+recode V31 (1=4) (2=3) (3=2) (4=1), gen(govincdiff)
+recode govincdiff (1/2=0) (3/4=1), gen(dgovincdiff)
+
+recode V32 (1=4) (2=3) (3=2) (4=1), gen(govstudents)
+recode govstudents (1/2=0) (3/4=1), gen(dgovstud)
+
+recode V33 (1=4) (2=3) (3=2) (4=1), gen(govhousing)
+recode govhousing (1/2=0) (3/4=1), gen(dgovhous)
+
+recode V34 (1=4) (2=3) (3=2) (4=1), gen(lawsenv)
+recode lawsenv (1/2=0) (3/4=1), gen(dlawsenv)
+
+recode V11 (1=5) (2=4) (4=2) (5=1), gen(cutspend)
+recode cutspend (1/3=0) (4/5=1), gen(dcutspend)
+
+recode V12 (1=5) (2=4) (4=2) (5=1), gen(projjobs)
+recode projjobs (1/3=0) (4/5=1), gen(dprojjobs)
+
+recode V13 (1=5) (2=4) (4=2) (5=1), gen(regbus)
+recode regbus (1/3=0) (4/5=1), gen(dregbus)
+
+recode V14 (1=5) (2=4) (4=2) (5=1), gen(indnewprod)
+recode indnewprod (1/3=0) (4/5=1), gen(dindnewprod)
+
+recode V15 (1=5) (2=4) (4=2) (5=1), gen(decindjobs)
+recode decindjobs (1/3=0) (4/5=1), gen(ddecindjobs)
+
+recode V16 (1=5) (2=4) (4=2) (5=1), gen(workwk)
+recode workwk (1/3=0) (4/5=1), gen(dworkwk)
+
+rename V41 govdetain
+recode govdetain (1/2=1) (3/4=0), gen(dgovdetain)
+
+rename V42 govtapphone
+recode govtapphone (1/2=1) (3/4=0), gen(dgovtap)
+
+rename V43 govsearch
+recode govsearch (1/2=1) (3/4=0), gen(dgovsearch)
+
+rename V54 trustfew
+recode trustfew (1/2 = 0) (3/5 = 1), gen(dtrust)
+
+rename V55 takeadv
+recode takeadv (1/2 = 0) (3/5 = 1), gen(dtakeadv)
+
+
+* rename AGE age 
+gen agesq=age*age
+
+recode sex (1=0) (2=1), gen(female)
+
+rename marital marst
+recode marst (5=1) (nonmiss=0), gen(nevermar)
+recode marst (2/5=0), gen(married)
+recode marst (3/4=1) (nonmiss=0), gen(divorced)
+recode marst (2=1) (nonmiss=0), gen(widow)
+
+recode cohab (2=0), gen(partner)
+
+rename hompop hhsize
+
+recode hhcycle (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
+local i = 10
+while `i' < 29 {
+	replace kidshh=1 if hhcycle==`i'
+	local i = `i' + 2
+}
+
+recode urbrural (1/3=0) (4/5=1), gen(rural)
+recode urbrural (2/3=1) (nonmiss=0), gen(suburb)
+
+* recode edcat (0=1), gen(degree) 
+replace degree=1 if degree==0 
+label define edlabels 1 "Primary/less" 2 "Some Secondary" 3 "Secondary" 4 "Some Higher Ed" 5 "University or higher"
+label values degree edlabels
+
+recode degree (1/2=1) (nonmiss=0), gen(lesshs)
+recode degree (3/4=1) (nonmiss=0), gen(hs)
+recode degree (5=1) (nonmiss=0), gen(univ)
+
+rename wrkst empstat
+rename ISCO88 isco
+rename wrkhrs hourswrk
+
+recode empstat (2/10=0), gen(ftemp)
+recode empstat (2/4=1) (nonmiss=0), gen(ptemp)
+recode empstat (5=1) (nonmiss=0), gen(unemp)
+recode empstat (6/10=1) (nonmiss=0), gen(nolabor)
+
+gen selfemp=wrktype==4
+replace selfemp=. if empstat==.
+gen pubemp=(wrktype==1 | wrktype==2)
+replace pubemp=. if empstat==.
+gen pvtemp=(selfemp==0 & pubemp==0)
+replace pvtemp=. if empstat==.
+
+gen inczscore=.
+local incvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
+foreach incvar of local incvars {
+	zscore `incvar', listwise
+	replace inczscore=z_`incvar' if z_`incvar'!=.
+	drop z_`incvar'
+}
+
+ren union union2
+recode union2 (2/3=0), gen(union)
+
+rename PARTY_LR party
+
+recode attend (1/3=1) (nonmiss=0), gen(highrel)
+recode attend (4/7=1) (nonmiss=0), gen(lowrel)
+recode attend (8=1) (nonmiss=0), gen(norel)
+rename attend religion
+
+rename V3a cntry
+
+rename weight wghts
+
+gen year=2006
+gen yr2006=1
+
+gen mail=mode==34
+
+
+save "ISSP06recode.dta", replace
+
+
+use "ISSP06recode.dta", replace
+append using "ISSP96recode.dta"
+sort cntry year
+merge m:1 cntry year using "BradyFinnigan2014CountryData.dta"
+recode cntry (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig17)
+recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig13)
+save "data/ISSP9606.dta", replace
+
+
+global data "ISSP9606.dta"
+global regtable "excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) ctitle(`depvar') eform bdec(3) sdec(2) stats(coef tstat) onecol append"
+
+
+use $data, clear
+keep if year==2006
+keep if orig17
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "age agesq female nevermar divorced widow hhsize kidshh rural suburb lesshs univ ptemp unemp nolabor selfemp pubemp inczscore highrel lowrel"
+global cntryvars "foreignpct netmigpct cforborn socx socdem liberal emprate"
+
+egen allcontrols = rowmiss($controls)
+recode allcontrols (0=1) (nonmiss=0)
+keep if allcontrols
+
+preserve
+keep if allcontrols
+keep $depvars $cntryvars $controls
+outreg2 using "desc2006.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
+restore
+
+preserve
+keep if allcontrols
+collapse $depvars, by(cntry)
+outsheet cntry $depvars using "depvars2006", comma replace
+restore
+
+preserve
+keep if allcontrols
+keep cntry $depvars
+bysort cntry: outreg2 using "depvars2006.xls", append noaster excel sideway bdec(2) sdec(2) sum(detail) eqkeep(mean sd)
+restore
+
+collapse $depvars foreignpct netmigpct cforborn, by(cntry)
+corr foreignpct netmigpct cforborn $depvars
+
+label define cntrylab 36 "AUS" 124 "CAN" 191 "CRO" 203 "CZR" 208 "DEN" 246 "FIN" 250 "FRA" 276 "GER" 348 "HUN" 372 "IRE" 376 "ISR" 392 "JAP" 410 "KOR" 428 "LAT" 528 "NET" 554 "NEW" 578 "NOR" 616 "POL" 620 "POR" 705 "SLO" 724 "SPA" 752 "SWE" 756 "SWZ" 826 "UKM" 840 "USA"
+label values cntry cntrylab
+
+twoway scatter dgovretire foreignpct, msymbol(i) mlabel(cntry) || lfit dgovretire foreignpct, xtitle("% Foreign Born") legend(off) name(ret_fb, replace)
+twoway scatter dgovretire netmigpct, msymbol(i) mlabel(cntry) || lfit dgovretire netmigpct, xtitle("Net Migration") legend(off) name(ret_netmig, replace)
+graph combine ret_fb ret_netmig, row(1) xsize(9) ysize(5)
+graph export figure2.tif, width(2700) height(1500) replace
+
+twoway scatter dgovretire cforborn, msymbol(i) mlabel(cntry) mlabp(12) || lfit dgovretire cforborn, xtitle("Change in % Foreign Born") legend(off)
+graph export appendixV.tif, width(1650) height(1200) replace
+
+
+use $data, clear
+keep if year==2006
+keep if orig17
+
+
+foreach depvar in $depvars {
+	xtlogit `depvar' $controls, i(cntry) quad(30)
+	outreg2 using controls2006.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct $controls, i(cntry) quad(30)
+	outreg2 using forborn2006.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct socx $controls, i(cntry) quad(30)
+	outreg2 using forborn2006socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using forborn2006regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct emprate $controls, i(cntry) quad(30)
+	outreg2 using forborn2006emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct mcp $controls, i(cntry) quad(30)
+	outreg2 using forborn2006mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct $controls, i(cntry) quad(30)
+	outreg2 using netmig2006.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct socx $controls, i(cntry) quad(30)
+	outreg2 using netmig2006socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using netmig2006regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct emprate $controls, i(cntry) quad(30)
+	outreg2 using netmig2006emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct mcp $controls, i(cntry) quad(30)
+	outreg2 using netmig2006mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct foreignpct $controls, i(cntry) quad(30)
+	outreg2 using netmig2006forborn.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn socx $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn emprate $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn mcp $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a cforborn foreignpct $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006forborn.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`depvar')
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn netmigpct $controls, i(cntry) quad(30)
+	outreg2 using cforborn2006netmig.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+
+use $data, clear
+keep if orig13
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006"
+global cntryvars "foreignpct netmigpct socx emprate"
+
+egen allcontrols = rowmiss($controls)
+recode allcontrols (0=1) (nonmiss=0)
+
+quietly tab cntry, gen(cntryfe)
+
+
+preserve
+keep if allcontrols & year==1996 & dgovincdiff<.
+keep $depvars $cntryvars $controls
+outreg2 using "desc1996.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
+restore
+
+preserve
+keep if allcontrols & year==1996
+collapse $depvars, by(cntry)
+outsheet cntry $depvars using "depvars1996", comma replace
+restore
+
+
+foreach depvar in $depvars {
+	quietly logit `depvar' foreignpct $controls cntryfe*
+	est store `depvar'_foreignpct
+}
+esttab dgovjobs_foreignpct dgovunemp_foreignpct dgovincdiff_foreignpct dgovretire_foreignpct dgovhous_foreignpct dhcare_foreignpct using results/table4_foreignpct.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+
+foreach depvar in $depvars {
+	quietly logit `depvar' foreignpct socx $controls cntryfe*
+	est store `depvar'_foreignpctsocx	
+}
+esttab dgovjobs_foreignpctsocx dgovunemp_foreignpctsocx dgovincdiff_foreignpctsocx dgovretire_foreignpctsocx dgovhous_foreignpctsocx dhcare_foreignpctsocx using results/table4_foreignpctsocx.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform
+
+
+foreach depvar in $depvars {
+	quietly logit `depvar' foreignpct emprate $controls cntryfe*
+	est store `depvar'_foreignpcrate	
+}
+esttab dgovjobs_foreignpcrate dgovunemp_foreignpcrate dgovincdiff_foreignpcrate dgovretire_foreignpcrate dgovhous_foreignpcrate dhcare_foreignpcrate using results/table4_foreignpcrate.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+foreach depvar in $depvars {
+	quietly logit `depvar' netmigpct $controls cntryfe*
+	est store `depvar'_netmig9606
+}
+esttab dgovjobs_netmig9606 dgovunemp_netmig9606 dgovincdiff_netmig9606 dgovretire_netmig9606 dgovhous_netmig9606 dhcare_netmig9606 using results/table5_netmig9606.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+foreach depvar in $depvars {
+	quietly logit `depvar' netmigpct socx $controls cntryfe*
+	est store `depvar'_netmig9606socx	
+}
+esttab dgovjobs_netmig9606socx dgovunemp_netmig9606socx dgovincdiff_netmig9606socx dgovretire_netmig9606socx dgovhous_netmig9606socx dhcare_netmig9606socx using results/table5_netmig9606socx.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+foreach depvar in $depvars {
+	quietly logit `depvar' netmigpct emprate $controls cntryfe*
+	est store `depvar'_netmig9606rate		
+}
+esttab dgovjobs_netmig9606rate dgovunemp_netmig9606rate dgovincdiff_netmig9606rate dgovretire_netmig9606rate dgovhous_netmig9606rate dhcare_netmig9606rate using results/table5_netmig9606rate.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+foreach depvar in $depvars {
+	quietly logit `depvar' netmigpct foreignpct $controls cntryfe*
+	est store `depvar'_netmig9606born
+}
+esttab dgovjobs_netmig9606born dgovunemp_netmig9606born dgovincdiff_netmig9606born dgovretire_netmig9606born dgovhous_netmig9606born dhcare_netmig9606born using results/table5_netmig9606born.rtf, replace star compress b(%9.3f) z(%9.3f) nogaps nolines eform 
+
+
+foreach depvar in $depvars {
+	logit `depvar' $controls cntryfe*
+	outreg2 using "controls9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+
+xtset cntry V2
+
+foreach var of varlist $depvars {
+quietly xtlogit `var' foreignpct age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006
+eststo `var'xtlogit
+quietly logit `var' foreignpct age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 cntryfe*
+eststo `var'logit
+display "----------------------------------"
+display "`var'"
+esttab `var'xtlogit `var'logit
+}

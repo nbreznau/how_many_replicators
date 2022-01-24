@@ -1,0 +1,57 @@
+TEAM: 74
+SOFTWARE: STATA
+VERSION: ORIGINAL
+
+
+use L2data.dta, clear
+sort cntry year 
+
+keep if cntry==203|cntry==250|cntry==276|cntry==348|cntry==372|cntry==428|cntry==578|cntry==616 ///
+	|cntry==705|cntry==724|cntry==752|cntry==756|cntry==826
+
+tab cntry 
+
+sort cntry year
+save L2data_macro_v1.dta, replace
+
+
+use ISSP.dta, clear
+gen year=1996 if V1==2900
+replace year=2006 if V1!=2900
+
+sort cntry year
+merge m:1 cntry year using L2data_macro_v1.dta
+
+drop _merge
+
+save compl_v1.dta, replace
+
+use compl_v1.dta, clear
+
+label var foreignpct "Immigrant Stock"
+label var netmigpct "Change in Immigrant Stock"
+label var socx "Social Welfare Expenditures"
+label var emprate "Employment Rate"
+ere
+
+global indiv_level "sex age age_sq degree emplcat"
+
+
+
+
+foreach var of varlist Oldagecare Unemployment Redincomdiff Jobs {
+	xtmelogit `var' $indiv_level i.year foreignpct || cntry:, or
+	eststo m1_4_`var' 
+	xtmelogit `var' $indiv_level i.year foreignpct socx || cntry:, or  
+	eststo m5_8_`var' 
+	xtmelogit `var' $indiv_level i.year foreignpct emprate || cntry:, or   
+	eststo m9_12_`var' 
+	xtmelogit `var' $indiv_level i.year netmigpct || cntry:, or   
+	eststo m13_16_`var' 
+	xtmelogit `var' $indiv_level i.year netmigpct socx || cntry:, or  
+	eststo m17_20_`var' 
+	xtmelogit `var' $indiv_level i.year netmigpct emprate || cntry:, or   
+	eststo m21_24_`var' 
+}
+esttab m* using all24.rtf, replace eform cons
+

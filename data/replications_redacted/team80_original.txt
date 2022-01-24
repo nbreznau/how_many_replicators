@@ -1,0 +1,240 @@
+TEAM: 80
+SOFTWARE: R
+VERSION: ORIGINAL
+
+
+
+setwd("/")
+
+library(haven)
+library(dplyr)
+library(labelled)
+library(stargazer)
+
+data1 <- read_dta("ZA2900.dta")
+data2 <- read_dta("ZA4700.dta")
+data.country <- read_dta("L2data.dta")
+
+data1$year <- 1996
+data2$year <- 2006
+
+data1$wave1 <- 1
+data2$wave1 <- 1
+
+data1 <- remove_labels(data1, user_na_to_na = TRUE)
+data2 <- remove_labels(data2, user_na_to_na = TRUE)
+data.country <- remove_labels(data.country, user_na_to_na = TRUE)
+
+
+
+data1 <- data1 %>% mutate(old.age.care=v39,unemployed=v41,reduce.income.diff=v42,jobs=v36) %>%
+    mutate_at(c("old.age.care","unemployed","reduce.income.diff","jobs"),funs(case_when(. == 2 ~ 1,
+                                                                                   . == 3 ~ 0,
+                                                                                   . == 4 ~0,
+                                                                                   TRUE ~ .)))
+
+# gender (female == 1) (v200)
+data1$female<-case_when(data1$v200==2~1,data1$v200==1~0)
+
+
+data1$age <- data1$v201
+data1$age2 <- data1$age*data1$age
+data1$edu <- case_when(is.na(data1$v205)==F & data1$v205<5 ~ "primary or less",
+                       data1$v205 == 5 ~ "secondary",
+                       data1$v205 == 6 ~ "secondary",
+                       data1$v205 == 7 ~ "university or more")
+
+data1$edu.factor <- factor(data1$edu) %>% relevel(ref = "secondary")
+data1$employment <- NA
+data1$employment[data1$v206 == 1] <- "full-time" 
+data1$employment[data1$v206 == 2] <- "part-time" 
+data1$employment[data1$v206 == 3] <- "active unemployed" 
+data1$employment[data1$v206 == 5] <- "active unemployed" 
+data1$employment[data1$v206 == 4] <- "active unemployed"
+data1$employment[data1$v206 == 6] <- "not active" 
+data1$employment[data1$v206 == 7] <- "not active" 
+data1$employment[data1$v206 == 8] <- "not active" 
+data1$employment[data1$v206 == 9] <- "not active" 
+data1$employment[data1$v206 == 10] <- "not active" 
+
+data1$employment.factor <- factor(data1$employment) %>% relevel(ref = "full-time")
+
+
+data1$country <- ""
+data1$country[data1$v3 == 1] <- "Australia"
+data1$country[data1$v3 == 2] <- "Germany"
+data1$country[data1$v3 == 3] <- "Germany"
+data1$country[data1$v3 == 4] <- "United Kingdom"
+data1$country[data1$v3 == 5] <- "Northern Ireland"
+data1$country[data1$v3 == 6] <- "United States"
+data1$country[data1$v3 == 7] <- "Austria"
+data1$country[data1$v3 == 8] <- "Hungary"
+data1$country[data1$v3 == 9] <- "Italy"
+data1$country[data1$v3 == 10] <- "Ireland"
+data1$country[data1$v3 == 11] <- "Netherlands"
+data1$country[data1$v3 == 12] <- "Norway"
+data1$country[data1$v3 == 13] <- "Sweden"
+data1$country[data1$v3 == 14] <- "Czech Republic"
+data1$country[data1$v3 == 15] <- "Slovenia"
+data1$country[data1$v3 == 16] <- "Poland"
+data1$country[data1$v3 == 17] <- "Bulgaria"
+data1$country[data1$v3 == 18] <- "Russia"
+data1$country[data1$v3 == 19] <- "New Zealand"
+data1$country[data1$v3 == 20] <- "Canada"
+data1$country[data1$v3 == 21] <- "Philippines"
+data1$country[data1$v3 == 22] <- "Israel"
+data1$country[data1$v3 == 23] <- "Israel"
+data1$country[data1$v3 == 24] <- "Japan"
+data1$country[data1$v3 == 25] <- "Spain"
+data1$country[data1$v3 == 26] <- "Latvia"
+data1$country[data1$v3 == 27] <- "France"
+data1$country[data1$v3 == 28] <- "Cyprus"
+data1$country[data1$v3 == 30] <- "Switzerland"
+
+data1$id <- data1$v2
+
+
+data1 <- select(data1, old.age.care, unemployed, reduce.income.diff, jobs, year, country, id,
+                age, age2, female, edu, edu.factor, employment, employment.factor)
+
+
+
+
+data2 <- data2 %>% mutate(old.age.care=V28,unemployed=V30,reduce.income.diff=V31,jobs=V25) %>%
+    mutate_at(c("old.age.care","unemployed","reduce.income.diff","jobs"),funs(case_when(. == 2 ~ 1,
+                                                                                   . == 3 ~ 0,
+                                                                                   . == 4 ~0,
+                                                                                   TRUE ~ .)))
+
+data2$female<-case_when(data2$sex==2~1,data2$sex==1~0)
+
+
+data2$age2 <- data2$age*data2$age
+
+
+data2$edu <- case_when(is.na(data2$degree)==F & data2$degree<3 ~ "primary or less",
+                       data2$degree == 3 ~ "secondary",
+                       data2$degree == 4 ~ "secondary",
+                       data2$degree == 5 ~ "university or more")
+
+data2$edu.factor <- factor(data2$edu) %>% relevel(ref = "secondary")
+
+
+data2$employment <- NA
+data2$employment[data2$wrkst == 1] <- "full-time"
+data2$employment[data2$wrkst == 2] <- "part-time" 
+data2$employment[data2$wrkst == 3] <- "active unemployed" 
+data2$employment[data2$wrkst == 5] <- "active unemployed" 
+data2$employment[data2$wrkst == 4] <- "active unemployed" 
+data2$employment[data2$wrkst == 6] <- "not active" 
+data2$employment[data2$wrkst == 7] <- "not active" 
+data2$employment[data2$wrkst == 8] <- "not active" 
+data2$employment[data2$wrkst == 9] <- "not active" 
+data2$employment[data2$wrkst == 10] <- "not active"
+
+data2$employment.factor <- factor(data2$employment) %>% relevel(ref = "full-time")
+
+
+
+data2$country <- ""
+data2$country[data2$V3a == 36] <- "Australia"
+data2$country[data2$V3a == 124] <- 	"Canada"
+data2$country[data2$V3a == 152] <- 	"Chile"
+data2$country[data2$V3a == 158] <- 	"Taiwan"
+data2$country[data2$V3a == 191] <- 	"Croatia"
+data2$country[data2$V3a == 203] <- 	"Czech Republic"
+data2$country[data2$V3a == 208] <- 	"Denmark"
+data2$country[data2$V3a == 214] <- 	"Dominican Republic"
+data2$country[data2$V3a == 246] <- 	"Finland"
+data2$country[data2$V3a == 250] <- 	"France"
+data2$country[data2$V3a == 276] <- 	"Germany"
+data2$country[data2$V3a == 348] <- 	"Hungary"
+data2$country[data2$V3a == 372] <- 	"Ireland"
+data2$country[data2$V3a == 376] <- 	"Israel"
+data2$country[data2$V3a == 392] <- 	"Japan"
+data2$country[data2$V3a == 410] <- 	"South Korea"
+data2$country[data2$V3a == 428] <- 	"Latvia"
+data2$country[data2$V3a == 528] <- 	"Netherlands"
+data2$country[data2$V3a == 554] <- 	"New Zealand"
+data2$country[data2$V3a == 578] <- 	"Norway"
+data2$country[data2$V3a == 608] <- 	"Philippines"
+data2$country[data2$V3a == 616] <- 	"Poland"
+data2$country[data2$V3a == 620] <- 	"Portugal"
+data2$country[data2$V3a == 643] <- 	"Russia"
+data2$country[data2$V3a == 705] <- 	"Slovenia"
+data2$country[data2$V3a == 710] <- 	"South Africa"
+data2$country[data2$V3a == 724] <- 	"Spain"
+data2$country[data2$V3a == 752] <- 	"Sweden"
+data2$country[data2$V3a == 756] <- 	"Switzerland"
+data2$country[data2$V3a == 826] <- 	"United Kingdom"
+data2$country[data2$V3a == 840] <- 	"United States"
+data2$country[data2$V3a == 858] <- 	"Uruguay"
+data2$country[data2$V3a == 862] <- 	"Venezuela"
+
+data2$id <- data2$V2
+
+data2 <- select(data2, old.age.care, unemployed, reduce.income.diff, jobs, year, country, id,
+                age, age2, female, edu, edu.factor, employment, employment.factor)
+
+
+cri.data <- rbind.data.frame(data1, data2)
+cri.full <- left_join(cri.data, data.country)
+
+table(cri.full$country, cri.full$year)
+
+sample <- c("Norway", "Switzerland", "Sweden", "United States", "Ireland", "Japan", "United Kingdom", "Germany", "France", "Canada", "Australia", "New Zealand", "Spain") 
+cri.full <- cri.full %>% filter(country %in% sample)
+
+
+m1a <- glm(old.age.care ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m1b <- glm(unemployed ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m1c <- glm(reduce.income.diff ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m1d <- glm(jobs ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+m2a <- glm(old.age.care ~ foreignpct + socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m2b <- glm(unemployed ~ foreignpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m2c <- glm(reduce.income.diff ~ foreignpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m2d <- glm(jobs ~ foreignpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+m3a <- glm(old.age.care ~ foreignpct + emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m3b <- glm(unemployed ~ foreignpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m3c <- glm(reduce.income.diff ~ foreignpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m3d <- glm(jobs ~ foreignpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+
+m4a <- glm(old.age.care ~ netmigpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m4b <- glm(unemployed ~ netmigpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m4c <- glm(reduce.income.diff ~ netmigpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m4d <- glm(jobs ~ netmigpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+m5a <- glm(old.age.care ~ netmigpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m5b <- glm(unemployed ~ netmigpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m5c <- glm(reduce.income.diff ~ netmigpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m5d <- glm(jobs ~ netmigpct +  socx + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+m6a <- glm(old.age.care ~ netmigpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m6b <- glm(unemployed ~ netmigpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m6c <- glm(reduce.income.diff ~ netmigpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+m6d <- glm(jobs ~ netmigpct +  emprate + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
+
+
+stargazer2 <- function(model, odd.ratio = T, ...) {
+  if(!("list" %in% class(model))) model <- list(model)
+  
+  if (odd.ratio) {
+    coefOR2 <- lapply(model, function(x) exp(coef(x)))
+    seOR2 <- lapply(model, function(x) exp(coef(x)) * summary(x)$coef[, 2])
+    p2 <- lapply(model, function(x) summary(x)$coefficients[, 4])
+    stargazer(model, coef = coefOR2, se = seOR2, p = p2, ...)
+    
+  } else {
+    stargazer(model, ...)
+  }
+}
+
+stargazer2(m1a, m1b, m1c, m1d, m2a, m2b, m2c, m2d, m3a, m3b, m3c, m3d, odd.ratio=T, type ="html", out = "reg1_new.doc", no.space = T)
+stargazer2(m4a, m4b, m4c, m4d, m5a, m5b, m5c, m5d, m6a, m6b, m6c, m6d, odd.ratio=T, type ="html", out = "reg2_new.doc", no.space = T)
+
+
+
+

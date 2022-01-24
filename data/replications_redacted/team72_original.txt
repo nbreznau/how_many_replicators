@@ -1,0 +1,498 @@
+TEAM: 72
+SOFTWARE: R
+VERSION: ORIGINAL
+
+
+rm(list=ls())
+library(quanteda)
+library(ggplot2)
+library(stringr)
+library(tidyverse)
+library(hrbrthemes)
+library(ggrepel)
+library(dplyr)
+library(lme4)
+library(stargazer)
+
+
+data.1996 <- read.csv(file = "ZA2900.csv", header = TRUE, sep = ",", 
+                      stringsAsFactors = FALSE, na.strings=c("",".","NA"))
+data.2006 <- read.csv(file = "ZA4700.csv", header = TRUE, sep = ",", 
+                      stringsAsFactors = FALSE , colClasses = "character", na.strings=c("",".","NA"))
+country.data <- read.csv(file = "bradyfinnigan2014countrydata.csv", header = TRUE, sep = ",", 
+                      stringsAsFactors = FALSE, na.strings=c("",".","NA"))
+
+
+names(data.1996)[names(data.1996) == 'v3'] <- 'country'
+data.1996 <- data.1996[which(data.1996$country%in%(c("aus", 
+                                                     "cdn", 
+                                                     "D-W", 
+                                                     "D-E", 
+                                                     "f", 
+                                                     "irl", 
+                                                     "j", 
+                                                     "nz", 
+                                                     "n", 
+                                                     "ch", 
+                                                     "s", 
+                                                     "e",
+                                                     "gb", 
+                                                     "usa"))),]
+
+data.1996$country[data.1996$country == "aus"] <- "Australia"
+data.1996$country[data.1996$country == "cdn"] <- "Canada"
+data.1996$country[data.1996$country == "D-W" | data.1996$country == "D-E"] <- "Germany"
+data.1996$country[data.1996$country == "f"] <- "France"
+data.1996$country[data.1996$country == "irl"] <- "Ireland"
+data.1996$country[data.1996$country == "j"] <- "Japan"
+data.1996$country[data.1996$country == "nz"] <- "New Zealand"
+data.1996$country[data.1996$country == "n"] <- "Norway"
+data.1996$country[data.1996$country == "e"] <- "Spain"
+data.1996$country[data.1996$country == "s"] <- "Sweden"
+data.1996$country[data.1996$country == "ch"] <- "Switzerland"
+data.1996$country[data.1996$country == "gb"] <- "United Kingdom"
+data.1996$country[data.1996$country == "usa"] <- "United States"
+
+
+
+names(data.1996)[names(data.1996) == 'v36'] <- 'jobs'
+data.1996$jobs[data.1996$jobs == "Probably should" | data.1996$jobs == "Definitely should"] = 1
+data.1996$jobs[data.1996$jobs == "Probably not" | data.1996$jobs == "Definitely not"] = 0
+data.1996$jobs <- as.factor(data.1996$jobs)
+
+names(data.1996)[names(data.1996) == 'v41'] <- 'unemployment'
+data.1996$unemployment[data.1996$unemployment == "Probably should" | data.1996$unemployment == "Definitely should"] = 1
+data.1996$unemployment[data.1996$unemployment == "Probably not" | data.1996$unemployment == "Definitely not"] = 0
+data.1996$unemployment <- as.factor(data.1996$unemployment)
+
+names(data.1996)[names(data.1996) == 'v42'] <- 'income'
+data.1996$income[data.1996$income == "Probably should" | data.1996$income == "Definitely should"] = 1
+data.1996$income[data.1996$income == "Probably not" | data.1996$income == "Definitely not"] = 0
+data.1996$income <- as.factor(data.1996$income)
+
+names(data.1996)[names(data.1996) == 'v39'] <- 'retirement'
+data.1996$retirement[data.1996$retirement == "Probably should" | data.1996$retirement == "Definitely should"] = 1
+data.1996$retirement[data.1996$retirement == "Probably not" | data.1996$retirement == "Definitely not"] = 0
+data.1996$retirement <- as.factor(data.1996$retirement)
+
+names(data.1996)[names(data.1996) == 'v44'] <- 'housing'
+data.1996$housing[data.1996$housing == "Probably should" | data.1996$housing == "Definitely should"] = 1
+data.1996$housing[data.1996$housing == "Probably not" | data.1996$housing == "Definitely not"] = 0
+data.1996$housing <- as.factor(data.1996$housing)
+
+names(data.1996)[names(data.1996) == 'v38'] <- 'healthcare'
+data.1996$healthcare[data.1996$healthcare == "Probably should" | data.1996$healthcare == "Definitely should"] = 1
+data.1996$healthcare[data.1996$healthcare == "Probably not" | data.1996$healthcare == "Definitely not"] = 0
+data.1996$healthcare <- as.factor(data.1996$healthcare)
+
+names(data.1996)[names(data.1996) == 'v201'] <- 'age'
+data.1996$age[data.1996$age == "97 years"] <- "97"
+data.1996$age <- as.numeric(data.1996$age)
+data.1996$age_squared = data.1996$age^2
+
+names(data.1996)[names(data.1996) == 'v200'] <- 'female'
+data.1996$female <- ifelse(data.1996$female == "Female", 1, 0)
+names(data.1996)[names(data.1996) == 'v202'] <- 'marital'
+
+data.1996$never_married <- data.1996$marital
+data.1996$never_married <- ifelse(data.1996$never_married == "not married", 1, 0)
+
+data.1996$divorced <- data.1996$marital
+data.1996$divorced <- ifelse(data.1996$divorced == "divorced" |
+                                         data.1996$divorced == "separated", 1, 0)
+
+data.1996$widowed <- data.1996$marital
+data.1996$widowed <- ifelse(data.1996$widowed == "widowed", 1, 0)
+
+
+names(data.1996)[names(data.1996) == 'v273'] <- 'household_size'
+
+names(data.1996)[names(data.1996) == 'v274'] <- 'children_in_the_household'
+
+data.1996$children_in_the_household[data.1996$children_in_the_household == "Otherwise"] <- NA
+children <- grep("child", data.1996$children_in_the_household)
+data.1996$children_in_the_household[children] = 1
+data.1996$children_in_the_household[data.1996$children_in_the_household != "1"] = "0"
+data.1996$children_in_the_household <- as.numeric(data.1996$children_in_the_household)
+
+rm(children)
+
+names(data.1996)[names(data.1996) == 'v275'] <- 'urbrural'
+data.1996$suburban <- ifelse(data.1996$urbrural == "Suburbs, city-town", 1, 0)
+data.1996$rural <- ifelse(data.1996$urbrural == "Rural", 1, 0)
+
+
+names(data.1996)[names(data.1996) == 'v205'] <- 'education'
+
+data.1996$less_than_secondary <- data.1996$education
+data.1996$less_than_secondary <- ifelse(data.1996$less_than_secondary == "Incpl primary" |
+                                                    data.1996$less_than_secondary == "Incpl secondary" |
+                                                    data.1996$less_than_secondary == "None;still at school,uni" |
+                                                    data.1996$less_than_secondary == "Primary compl" , 1, 0)
+
+data.1996$university_or_above <- data.1996$education
+data.1996$university_or_above <- ifelse(data.1996$university_or_above == "University compl" , 1, 0)
+
+
+names(data.1996)[names(data.1996) == 'v206'] <- 'wrkst'
+
+data.1996$unemployed <- ifelse(data.1996$wrkst == "Unemployed", 1, 0)
+data.1996$part_time_employed <- ifelse(data.1996$wrkst == "P-t empl,main job" |
+                                                   data.1996$wrkst == "Less part-time"  , 1, 0)
+data.1996$not_in_labor_force <- ifelse(data.1996$wrkst == "Oth,n i lab force" |
+                                                   data.1996$wrkst == "Permanent disabled" |
+                                                   data.1996$wrkst == "Retired"  , 1, 0)
+data.1996$self_employed <- ifelse(data.1996$v213 == "Self-employed RP:informell" & !is.na(data.1996$wrkst), 1, 0)
+
+
+
+names(data.1996)[names(data.1996) == 'v218'] <- 'relative_income'
+temp <- str_extract_all(data.1996$relative_income, '\\d+', simplify = TRUE)
+temp[temp == ""]  <- NA 
+class(temp) <- "numeric"
+temp <- rowMeans(temp, na.rm = TRUE)
+temp <- data.frame(data.1996$country, temp)
+temp <- temp %>% group_by(data.1996.country) %>% mutate(temp = scale(temp))
+
+data.1996$relative_income <- temp$temp
+
+rm(temp)
+
+
+names(data.1996)[names(data.1996) == 'v220'] <- 'attend'
+
+data.1996$low_religous_attendance <- as.factor(ifelse(data.1996$attend == "Less frequently a year", 1, 0))
+data.1996$high_religous_attendance <- as.factor(ifelse(data.1996$attend == "Sev times a year" |
+                                                         data.1996$attend == "Once a week or more" |
+                                                         data.1996$attend == "Once a month" |
+                                                         data.1996$attend == "2-3 times a month", 1, 0))
+
+keep <- c("country", "jobs", "unemployment", "income", "retirement", "housing", "healthcare", "age", "age_squared", "less_than_secondary", "university_or_above", "female", "never_married", "divorced", "widowed","household_size", "children_in_the_household", "suburban", "rural", "unemployed", "part_time_employed", "not_in_labor_force", "self_employed", "relative_income", "low_religous_attendance", "high_religous_attendance")
+
+data.1996 <- data.1996[keep]
+data.1996$year <- 1996
+
+#data.1996 <- na.omit(data.1996)
+
+names(data.2006)[names(data.2006) == 'V3'] <- 'country'
+
+data.2006$country[data.2006$country == '276.1'] <- 'DE-Germany'
+data.2006$country[data.2006$country == '276.2'] <- 'DE-Germany'
+data.2006$country[data.2006$country == '826.1'] <- 'UK-United Kingdom'
+
+data.2006 <- data.2006[which(data.2006$country%in%(c("AU-Australia", 
+                                                     "CA-Canada", 
+                                                     "DK-Denmark", 
+                                                     "FI-Finland", 
+                                                     "FR-France",  
+                                                     "DE-Germany", 
+                                                     "IE-Ireland", 
+                                                     "JP-Japan", 
+                                                     "NL-Netherlands", 
+                                                     "NZ-New Zealand", 
+                                                     "NO-Norway", 
+                                                     "PT-Portugal", 
+                                                     "ES-Spain",
+                                                     "SE-Sweden",
+                                                     "CH-Switzerland",
+                                                     "UK-United Kingdom",
+                                                     "US-United States"))),]
+
+
+data.2006$country <- gsub(".*-","",data.2006$country)
+
+names(data.2006)[names(data.2006) == 'V25'] <- 'jobs'
+data.2006$jobs[data.2006$jobs == "Probably should be" | data.2006$jobs == "Definitely should be"] = 1
+data.2006$jobs[data.2006$jobs == "Probably should not be" | data.2006$jobs == "Definitely should not be"] = 0
+data.2006$jobs <- as.factor(data.2006$jobs)
+
+names(data.2006)[names(data.2006) == 'V30'] <- 'unemployment'
+data.2006$unemployment[data.2006$unemployment == "Probably should be" | data.2006$unemployment == "Definitely should be"] = 1
+data.2006$unemployment[data.2006$unemployment == "Probably should not be" | data.2006$unemployment == "Definitely should not be"] = 0
+data.2006$unemployment <- as.factor(data.2006$unemployment)
+
+names(data.2006)[names(data.2006) == 'V31'] <- 'income'
+data.2006$income[data.2006$income == "Probably should be" | data.2006$income == "Definitely should be"] = 1
+data.2006$income[data.2006$income == "Probably should not be" | data.2006$income == "Definitely should not be"] = 0
+data.2006$income <- as.factor(data.2006$income)
+
+names(data.2006)[names(data.2006) == 'V28'] <- 'retirement'
+data.2006$retirement[data.2006$retirement == "Probably should be" | data.2006$retirement == "Definitely should be"] = 1
+data.2006$retirement[data.2006$retirement == "Probably should not be" | data.2006$retirement == "Definitely should not be"] = 0
+data.2006$retirement <- as.factor(data.2006$retirement)
+
+names(data.2006)[names(data.2006) == 'V33'] <- 'housing'
+data.2006$housing[data.2006$housing == "Probably should be" | data.2006$housing == "Definitely should be"] = 1
+data.2006$housing[data.2006$housing == "Probably should not be" | data.2006$housing == "Definitely should not be"] = 0
+data.2006$housing <- as.factor(data.2006$housing)
+
+names(data.2006)[names(data.2006) == 'V27'] <- 'healthcare'
+data.2006$healthcare[data.2006$healthcare == "Probably should be" | data.2006$healthcare == "Definitely should be"] = 1
+data.2006$healthcare[data.2006$healthcare == "Probably should not be" | data.2006$healthcare == "Definitely should not be"] = 0
+data.2006$healthcare <- as.factor(data.2006$healthcare)
+
+data.2006$age <- as.numeric(data.2006$age)
+data.2006$age_squared = data.2006$age^2
+
+names(data.2006)[names(data.2006) == 'sex'] <- 'female'
+data.2006$female <- ifelse(data.2006$female == "Female", 1, 0)
+
+data.2006$never_married <- data.2006$marital
+data.2006$never_married <- ifelse(data.2006$never_married == "Never married,single", 1, 0)
+
+data.2006$divorced <- data.2006$marital
+data.2006$divorced <- ifelse(data.2006$divorced == "Divorced" |
+                                   data.2006$divorced == "Separated (married but sep./not living w legal spouse)", 1, 0)
+
+data.2006$widowed <- data.2006$marital
+data.2006$widowed <- ifelse(data.2006$widowed == "Widowed", 1, 0)
+
+names(data.2006)[names(data.2006) == 'hompop'] <- 'household_size'
+
+names(data.2006)[names(data.2006) == 'hhcycle'] <- 'children_in_the_household'
+
+data.2006$children_in_the_household[data.2006$children_in_the_household == "Other"] <- NA
+children <- grep("child", data.2006$children_in_the_household)
+data.2006$children_in_the_household[children] = 1
+data.2006$children_in_the_household[data.2006$children_in_the_household != "1"] = "0"
+data.2006$children_in_the_household <- as.numeric(data.2006$children_in_the_household)
+
+rm(children)
+
+data.2006$suburban <- ifelse(data.2006$urbrural == "Suburb,outskirt of a big city"|
+                             data.2006$urbrural == "Town or small city", 1, 0)
+
+data.2006$rural <- ifelse(data.2006$urbrural == "Farm or home in the country"|
+                          data.2006$urbrural == "Country village,other type of community" , 1, 0)
+
+names(data.2006)[names(data.2006) == 'degree'] <- 'education'
+
+data.2006$less_than_secondary <- data.2006$education
+data.2006$less_than_secondary <- ifelse(data.2006$less_than_secondary == "Above higher secondary level,other qualification" |
+                                           data.2006$less_than_secondary == "Above lowest qualification" |
+                                           data.2006$less_than_secondary == "Lowest formal qualification" |
+                                           data.2006$less_than_secondary == "No formal qualification, incomplete primary" , 1, 0)
+
+data.2006$university_or_above <- data.2006$education
+data.2006$university_or_above <- ifelse(data.2006$university_or_above == "University degree completed, graduate studies" , 1, 0)
+
+data.2006$unemployed <- ifelse(data.2006$wrkst == "Unemployed", 1, 0)
+data.2006$part_time_employed <- ifelse(data.2006$wrkst == "Employed, less than part-time" |
+                                                 data.2006$wrkst == "Employed, part-time,main job"  , 1, 0)
+data.2006$not_in_labor_force <- ifelse(data.2006$wrkst == "Other,not in labour force" |
+                                                 data.2006$wrkst == "Permanently disabled" |
+                                                 data.2006$wrkst == "Retired"|
+                                                data.2006$wrkst == "Helping family member" |
+                                                data.2006$wrkst == "Student,school,vocational training" |
+                                                data.2006$wrkst == "Housewife,-man,home duties"  , 1, 0)
+
+data.2006$self_employed <- ifelse(data.2006$wrktype == "Self employed" & !is.na(data.2006$wrkst), 1, 0)
+
+
+income.variables <- grep("_INC", names(data.2006))
+income.variables <- data.2006[income.variables] 
+
+for (i in 1:ncol(income.variables)) {
+  temp <- str_replace_all(income.variables[,i], "[.]", "")
+  temp <- str_extract_all(temp, '\\d+', simplify = TRUE)
+  temp[temp == ""]  <- NA 
+  class(temp) <- "numeric"
+  temp <- rowMeans(temp)
+  temp <- scale(temp)
+  income.variables[,i] <- temp
+  rm(temp, i)
+}
+
+data.2006$relative_income <- rowSums(income.variables, na.rm = TRUE)*ifelse(rowSums(is.na(income.variables)) == ncol(income.variables), NA, 1)
+
+rm(income.variables)
+
+data.2006$low_religous_attendance <- ifelse(data.2006$attend == "Once a year" |
+                                                      data.2006$attend == "Less frequently", 1, 0)
+
+data.2006$high_religous_attendance <- ifelse(data.2006$attend == "2 or 3 times a month" |
+                                                       data.2006$attend == "Once a month" |
+                                                       data.2006$attend == "Once a week,GB: once a week or more" |
+                                                       data.2006$attend == "Sev times a year" | 
+                                                       data.2006$attend == "Several times a week, IL: + every day", 1, 0)
+
+keep <- c("country", "jobs", "unemployment", "income", "retirement", "housing", "healthcare", "age", "age_squared", "less_than_secondary", "university_or_above", "female", "never_married", "divorced", "widowed","household_size", "children_in_the_household", "suburban", "rural", "unemployed", "part_time_employed", "not_in_labor_force", "self_employed", "relative_income", "low_religous_attendance", "high_religous_attendance")
+
+data.2006 <- data.2006[keep]
+data.2006$year <- 2006
+
+rm(keep)
+
+data.2006 <- merge(data.2006, country.data, by=c("country","year"))
+data.1996 <- merge(data.1996, country.data, by = c("country", "year"))
+
+data <- rbind(data.1996, data.2006)
+
+data.table.4 <- data[-which(data$country%in%(c("Denmark", "Finland", "Netherlands", "Portugal"))),]
+
+
+table.4.1 <- function(dv, data){# Supply DV, data frame
+fit  <- glm(dv ~ foreignpct +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+table.4.2 <- function(dv, data){
+fit  <- glm(dv ~ foreignpct + socx +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+table.4.3 <- function(dv, data){
+fit  <- glm(dv ~ foreignpct +  emprate +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+model4.1.jobs <- table.4.1(data.table.4$jobs, data.table.4)
+model4.2.jobs <- table.4.2(data.table.4$jobs, data.table.4)
+model4.3.jobs <- table.4.3(data.table.4$jobs, data.table.4)
+
+model4.1.unemployment <- table.4.1(data.table.4$unemployment, data.table.4)
+model4.2.unemployment <- table.4.2(data.table.4$unemployment, data.table.4)
+model4.3.unemployment <- table.4.3(data.table.4$unemployment, data.table.4)
+
+model4.1.income <- table.4.1(data.table.4$income, data.table.4)
+model4.2.income <- table.4.2(data.table.4$income, data.table.4)
+model4.3.income <- table.4.3(data.table.4$income, data.table.4)
+
+model4.1.retirement <- table.4.1(data.table.4$retirement, data.table.4)
+model4.2.retirement <- table.4.2(data.table.4$retirement, data.table.4)
+model4.3.retirement <- table.4.3(data.table.4$retirement, data.table.4)
+
+model4.1.housing <- table.4.1(data.table.4$housing, data.table.4)
+model4.2.housing <- table.4.2(data.table.4$housing, data.table.4)
+model4.3.housing <- table.4.3(data.table.4$housing, data.table.4)
+
+model4.1.healthcare <- table.4.1(data.table.4$healthcare, data.table.4)
+model4.2.healthcare <- table.4.2(data.table.4$healthcare, data.table.4)
+model4.3.healthcare <- table.4.3(data.table.4$healthcare, data.table.4)
+
+output <- stargazer(model4.1.jobs, model4.2.jobs, model4.3.jobs, 
+                    model4.1.unemployment, model4.2.unemployment, model4.3.unemployment,
+                    model4.1.income, model4.2.income, model4.3.income, 
+                    model4.1.retirement, model4.2.retirement, model4.3.retirement, 
+                    model4.1.housing, model4.2.housing, model4.3.housing, 
+                    model4.1.healthcare, model4.2.healthcare, model4.3.healthcare, 
+                    type = "text", title = "Table 4", no.space=TRUE, single.row = FALSE,
+                    column.labels = c("Model 1 jobs", "Model 2 jobs", "Model 3 jobs",
+                                      "Model 1 unemployment", "Model 2 unemployment", "Model 3 unemployment",
+                                      "Model 1 income", "Model 2 income", "Model 3 income",
+                                      "Model 1 retirement", "Model 2 retirement", "Model 3 retirement",
+                                      "Model 1 housing", "Model 2 housing", "Model 3 housing",
+                                      "Model 1 healthcare", "Model 2 healthcare", "Model 3 healthcare"), report=("vc*t"),
+                    t.auto=F, p.auto=F, apply.coef=exp,
+                    model.names = FALSE, dep.var.labels.include = FALSE, dep.var.caption = "XXX",
+                    notes = "",
+                    style = "apsr",
+                    star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+                    star.char = c("+", "*", "**", "***"),
+                    notes.append = FALSE)
+
+write(output, file = "Table4.txt")
+
+
+data.table.5 <- data[-which(data$country%in%(c("Denmark", "Finland", "Netherlands", "Portugal"))),]
+
+table.5.1 <- function(dv, data){
+fit  <- glm(dv ~ netmigpct +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+table.5.2 <- function(dv, data){
+fit  <- glm(dv ~ netmigpct + socx +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+table.5.3 <- function(dv, data){
+fit  <- glm(dv ~ netmigpct +  emprate +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+table.5.4 <- function(dv, data){
+fit  <- glm(dv ~ netmigpct +  foreignpct +
+                      age + age_squared + female + less_than_secondary + university_or_above +
+                      part_time_employed + unemployed + not_in_labor_force + self_employed + relative_income + 
+                      as.factor(year) + as.factor(country), 
+                      family = binomial, data = data)
+return(fit)
+}
+
+model5.1.jobs <- table.5.1(data.table.5$jobs, data.table.5)
+model5.2.jobs <- table.5.2(data.table.5$jobs, data.table.5)
+model5.3.jobs <- table.5.3(data.table.5$jobs, data.table.5)
+model5.4.jobs <- table.5.4(data.table.5$jobs, data.table.5)
+
+model5.1.unemployment <- table.5.1(data.table.5$unemployment, data.table.5)
+model5.2.unemployment <- table.5.2(data.table.5$unemployment, data.table.5)
+model5.3.unemployment <- table.5.3(data.table.5$unemployment, data.table.5)
+model5.4.unemployment <- table.5.4(data.table.5$unemployment, data.table.5)
+
+model5.1.income <- table.5.1(data.table.5$income, data.table.5)
+model5.2.income <- table.5.2(data.table.5$income, data.table.5)
+model5.3.income <- table.5.3(data.table.5$income, data.table.5)
+model5.4.income <- table.5.4(data.table.5$income, data.table.5)
+
+model5.1.retirement <- table.5.1(data.table.5$retirement, data.table.5)
+model5.2.retirement <- table.5.2(data.table.5$retirement, data.table.5)
+model5.3.retirement <- table.5.3(data.table.5$retirement, data.table.5)
+model5.4.retirement <- table.5.4(data.table.5$retirement, data.table.5)
+
+model5.1.housing <- table.5.1(data.table.5$housing, data.table.5)
+model5.2.housing <- table.5.2(data.table.5$housing, data.table.5)
+model5.3.housing <- table.5.3(data.table.5$housing, data.table.5)
+model5.4.housing <- table.5.4(data.table.5$housing, data.table.5)
+
+model5.1.healthcare <- table.5.1(data.table.5$healthcare, data.table.5)
+model5.2.healthcare <- table.5.2(data.table.5$healthcare, data.table.5)
+model5.3.healthcare <- table.5.3(data.table.5$healthcare, data.table.5)
+model5.4.healthcare <- table.5.4(data.table.5$healthcare, data.table.5)
+
+output <- stargazer(model5.1.jobs, model5.2.jobs, model5.3.jobs, model5.4.jobs,
+                    model5.1.unemployment, model5.2.unemployment, model5.3.unemployment, model5.4.unemployment,
+                    model5.1.income, model5.2.income, model5.3.income, model5.4.income,
+                    model5.1.retirement, model5.2.retirement, model5.3.retirement, model5.4.retirement,
+                    model5.1.housing, model5.2.housing, model5.3.housing, model5.4.housing,
+                    model5.1.healthcare, model5.2.healthcare, model5.3.healthcare, model5.4.healthcare,
+                    type = "text", title = "Table 4", no.space=TRUE, single.row = FALSE,
+                    column.labels = c("Model 1 jobs", "Model 2 jobs", "Model 3 jobs", "Model 4 jobs",
+                                      "Model 1 unemployment", "Model 2 unemployment", "Model 3 unemployment", "Model 4 unemployment",
+                                      "Model 1 income", "Model 2 income", "Model 3 income", "Model 4 income",
+                                      "Model 1 retirement", "Model 2 retirement", "Model 3 retirement", "Model 4 retirement",
+                                      "Model 1 housing", "Model 2 housing", "Model 3 housing", "Model 4 housing",
+                                      "Model 1 healthcare", "Model 2 healthcare", "Model 3 healthcare", "Model 4 healthcare"), report=("vc*t"),
+                    t.auto=F, p.auto=F, apply.coef=exp,
+                    model.names = FALSE, dep.var.labels.include = FALSE, dep.var.caption = "XXX",
+                    notes = "",
+                    style = "apsr",
+                    star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+                    star.char = c("+", "*", "**", "***"),
+                    notes.append = FALSE)
+
+write(output, file = "Table5.txt")
