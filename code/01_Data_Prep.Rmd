@@ -11,7 +11,7 @@ Datafiles needed
 |------|-------------|
 | cristageone.xlsx | Results of the CRI in raw format; odd-ratios, significance and deviance from original,  as the teams submitted them |
 | cristageone.cur1.xlsx | Results after code curation |
-| cri_survey_wide_public_nolabs.dta | Survey of the replicators |
+| cri_survey_wide_public_nolabs.dta | Survey of the replicators, with anonymized team numbers |
 | teamsize.csv | Datafile containing teamsize and primary software used |
 
 
@@ -40,20 +40,20 @@ Two teams submitted two different result sets,  therefore,  we need to give them
 
 ```{r rep_data}
 
-cri <- read_xlsx("data/cristageone.xlsx")
-cri_cur <- read_xlsx("data/cristageone.cur1.xlsx")
+cri <- read_xlsx(here::here("data","cristageone.xlsx"))
+cri_cur <- read_xlsx(here::here("data","cristageone.cur1.xlsx"))
 
 cri$u_teamid <- cri$`Team ID` 
 cri_cur$u_teamid <- cri_cur$`Team ID`
 
 # unique IDs for two-result teams
 cri <- cri %>%
-  mutate(u_teamid2 = ifelse(u_teamid == 70 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  701,  u_teamid), 
-         u_teamid2 = ifelse(u_teamid == 101 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  1001,  u_teamid2))
+  mutate(u_teamid2 = ifelse(u_teamid == 59 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  591,  u_teamid), 
+         u_teamid2 = ifelse(u_teamid == 81 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  8101,  u_teamid2))
 
 cri_cur <- cri_cur %>%
-  mutate(u_teamid2 = ifelse(u_teamid == 70 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  701,  u_teamid), 
-         u_teamid2 = ifelse(u_teamid == 101 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  1001,  u_teamid2))
+  mutate(u_teamid2 = ifelse(u_teamid == 59 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  591,  u_teamid), 
+         u_teamid2 = ifelse(u_teamid == 81 & (u_teamid - lag(u_teamid,  n = 1L)) == 0,  8101,  u_teamid2))
 
 
 ```
@@ -84,7 +84,7 @@ Required SPSS data files:
   W3_export.sav
   W4_export.sav
   
-The above files contain personal identifiers and are therefore not allowed for public use. 
+The above files contain personal identifiers and are therefore not permitted for public use. 
   
 Note that teams are now in wide format,  so that each variable has up to three values,  one for each team member. Also,  each result is attached to each team member,  thus there are N-results repeated observations of team members.
 
@@ -94,7 +94,7 @@ Note that teams are now in wide format,  so that each variable has up to three v
 
 # datafile merged into within-team wide format
 
-cri2 <- readstata13::read.dta13("data/cri_survey_wide_public_nolabs.dta")
+cri2 <- readstata13::read.dta13(here::here("data","cri_survey_wide_public_nolabs.dta"))
 
 ```
 
@@ -185,7 +185,7 @@ rm(cri2_nomis,  preds,  cfa)
 ```{r merge_two}
 
 # teamsize unfortunately not in these data, add it here
-teamsize <- read.csv(file = "data/teamsize.csv",  header = T)
+teamsize <- read.csv(file = here::here("data","teamsize.csv"),  header = T)
 
 cri2 <- left_join(cri2,  teamsize,  by = "u_teamid")
 
@@ -195,7 +195,7 @@ cri2 <- dplyr::select(cri2,  u_teamid,  u_expgroup1,  backgr_degree1, backgr_deg
 
 
 # add instances of routine researcher variability
-routine <- read.csv(file = "data/routine_var.csv", header = F)
+routine <- read.csv(file = here::here("data", "routine_var.csv"), header = F)
 
 colnames(routine) <- c("routine","u_teamid")
 routine$routine <- as.numeric("1")
@@ -225,7 +225,7 @@ rm(teamsize,  routine, cri2)
 
 ### Replication Results
 
-It is necessary to convert them into long form for plotting and analysis. Also, note that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 70 and 101)
+It is necessary to convert them into long form for plotting and analysis. Also, note that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 59 and 81)
 
 
 ```{r results}
@@ -428,11 +428,36 @@ cri_long$degree_soc <- ifelse(cri_long$degree_soc == 1, 1, 0)
 
 ```
 
+### Create dataout file
+
+For appendix
+
+```{r dataout}
+dataout <- dplyr::select(cri_long, Exp1, u_teamid, verif, deviance_abs)
+
+dataout <- dataout %>%
+  left_join(dplyr::select(ungroup(cri_cur_long), u_teamid, verif, deviance_abs, routine), by = "u_teamid") %>%
+  mutate(Exp1 = as.numeric(Exp1)) %>%
+  ungroup()
+
+datao <- dataout %>%
+  group_by(u_teamid) %>%
+  summarise_all(mean)
+
+datao <- datao %>%
+  mutate(verif.x = round(verif.x, 3),
+         verif.y = round(verif.y, 3),
+         deviance_abs.x = round(deviance_abs.x, 3),
+         deviance_abs.y = round(deviance_abs.y, 3)) %>%
+  arrange(Exp1, u_teamid)
+
+write.csv(datao, here::here("results","dataout.csv"), row.names = F)
+```
 
 ## Save Data
 
 ```{r save}
-save.image(file = "data/data.Rdata")
+save.image(file = here::here("data","data.Rdata"))
 ```
 
 ## Colophon

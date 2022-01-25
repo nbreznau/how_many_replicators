@@ -22,7 +22,7 @@ pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", 
 
 ```{r setup2, warning = F, message = F}
 # load data from 01_Data_Prep
-load(file = "data/data.Rdata")
+load(file = here::here("data","data.Rdata"))
 
 
 # disable scientific notation
@@ -131,9 +131,9 @@ P99 <- expression(paste(italic("P"), " > 99% confidence"))
 P95 <- expression(paste(italic("P"), " > 95%"))
 P90 <- expression(paste(italic("P"), " > 90%"))
 
-reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4) are successful in 99% of all potential\nreplication trials"
+reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4 of these 7) are successful in 99% of\nall potential replication trials"
 
-agg_png(filename = here::here("results/Fig1.png"), res = 144, width = 1000, height = 700)
+agg_png(filename = here::here("results","Fig1.png"), res = 144, width = 1000, height = 700)
 fig1_plot %>%
   mutate(P_90 = P_90 - 0.05,
          P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
@@ -166,7 +166,7 @@ fig1_plot %>%
         panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
 dev.off()
 
-knitr::include_graphics(here::here("results/Fig1.png"))
+knitr::include_graphics(here::here("results","Fig1.png"))
 ```
 
 ## Summary Statistics for Appendix
@@ -293,7 +293,7 @@ fig2a <- ggplot(data = fig2) +
 fig2a
 dev.off()
 
-knitr::include_graphics("results/Fig2a.png")
+knitr::include_graphics(here::here("results","Fig2a.png"))
 ```
 ### Part B. ICC
 
@@ -474,7 +474,7 @@ fig2bb <- ggplot(data = fig2b) +
 fig2bb
 dev.off()
 
-knitr::include_graphics("results/Fig2b.png")
+knitr::include_graphics(here::here("results","Fig2b.png"))
 ```
 ### Figure 2 Combined
 
@@ -666,7 +666,7 @@ desc[13,9:11] <- test2adfr
 desc[17,6:8] <- test1bdfr
 desc[17,9:11] <- test2bdfr
 
-write.csv(desc, file = "results/Tbl2.csv")
+write.csv(desc, file = here::here("results","Tbl2.csv"))
 
 # remove factor
 cri_long$Exp1 <- as.numeric(cri_long$Exp1)
@@ -762,9 +762,9 @@ mlm11_exact_orig <- glmer(exact ~ (1 | u_teamid2), family = binomial, data = cri
 
 mlm21_deviance_orig <- lmer(deviance_abs ~ (1 | u_teamid2), data = cri_long)
 
-tab_model(mlm01_verif, mlm01_verif_orig, mlm11_exact, mlm11_exact_orig, mlm21_deviance, mlm21_deviance_orig,show.ci = F, file = "results/mlm.htm")
+tab_model(mlm01_verif, mlm01_verif_orig, mlm11_exact, mlm11_exact_orig, mlm21_deviance, mlm21_deviance_orig,show.ci = F, file = here::here("results","mlm.htm"))
 
-mlm <- as.data.frame(read_html("results/mlm.htm") %>% html_table(fill=TRUE))
+mlm <- as.data.frame(read_html(here::here("results","mlm.htm")) %>% html_table(fill=TRUE))
 
 kable_styling(kable(mlm))
   
@@ -853,7 +853,7 @@ ggplot(cri_sum_plot) +
 
 ```{r bar2}
 
-agg_png(filename = "results/Fig2.png", width = 800, height = 600, res = 144)
+agg_png(filename = here::here("results","Fig2.png"), width = 800, height = 600, res = 144)
 ggplot(cri_sum_plot2) +
   geom_bar(aes(y=dev_stataex, x=stataF, fill=stataF), stat = 'identity') +
   geom_errorbar(aes(x=stataF, ymin=dev_stataex-(dev_stataex_sd/sqrt(dev_stataex_n)), ymax = dev_stataex+(dev_stataex_sd/sqrt(dev_stataex_n)), width = 0.4)) +
@@ -880,7 +880,7 @@ ggplot(cri_sum_plot2) +
   )
 dev.off()
 
-knitr::include_graphics("results/Fig2.png")
+knitr::include_graphics(here::here("results","Fig2.png"))
 ```
 
 A total of `r length(unique(cri_long$u_teamid[cri_long$routine == 1])) + 4` teams had routine searcher variability, but 4 of these teams also had mistakes that could not be counterfactually repaired. Thus, not counting these 4 teams, `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1])))/(length(unique(cri_long$u_teamid))-4),1)` percent of the CRI teams had routine researcher variability, but this was far more common in the opaque group which had `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "0"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "0"]))-4)),1)` percent of teams with routine variability compared to only `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "1"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "1"]))-4)),1)` percent in the transparent group.
@@ -899,7 +899,7 @@ r_vs_stata <- read_csv(here::here("data","r_vs_stata.csv"))
 ```{r bar4}
 
 
-agg_png(filename = "results/Fig3.png", width = 800, height = 600, res = 144)
+agg_png(filename = here::here("results","Fig3.png"), width = 800, height = 600, res = 144)
 ggplot(cri_sum_plot4) +
   geom_bar(aes(y=dev_routine, x=routine, fill=routine), stat = 'identity') +
   geom_errorbar(aes(x=routine, ymin=dev_routine-(dev_routine_sd/sqrt(dev_routine_n)), ymax = dev_routine+(dev_routine_sd/sqrt(dev_routine_n)), width = 0.4)) +
@@ -917,7 +917,7 @@ ggplot(cri_sum_plot4) +
   annotate(geom = "text", label = "Opaque Group", y = -0.001, x = 1.5, angle = 90, vjust = 0) +
   #annotate("text", label = "34%", y = 0.03, x = 4, fontface = 4) +
   geom_vline(xintercept = 2.5, color = "grey23") +
-  ylab(label = "Deviance from Original Results") +
+  ylab(label = "Replication Error\n(absolute difference from original)") +
   theme_classic() +
   theme(
     legend.position = "none",
@@ -927,7 +927,7 @@ ggplot(cri_sum_plot4) +
   )
 dev.off()
 
-knitr::include_graphics("results/Fig3.png")
+knitr::include_graphics(here::here("results","Fig3.png"))
 ```
 
 

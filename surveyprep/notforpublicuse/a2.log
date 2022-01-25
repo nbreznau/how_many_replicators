@@ -1,0 +1,457 @@
+( is not a valid command name
+r(199);
+
+end of do-file
+
+r(199);
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. asdoc ttest, by(r_user_dummy) replace stat(mean p) tzok
+varlist required
+r(100);
+
+end of do-file
+
+r(100);
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. asdoc ttest v_17, by(r_user_dummy) replace stat(mean p) tzok
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. Err.   Std. Dev.   [95% Conf. Interval]
+---------+--------------------------------------------------------------------
+       0 |     122    1.688525    .0781527    .8632245    1.533801    1.843248
+       1 |      44    1.272727    .0882268    .5852305    1.094801    1.450654
+---------+--------------------------------------------------------------------
+combined |     166    1.578313    .0635111    .8182832    1.452914    1.703712
+---------+--------------------------------------------------------------------
+    diff |            .4157973    .1406356                .1381074    .6934873
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   2.9566
+Ho: diff = 0                                     degrees of freedom =      164
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.9982         Pr(|T| > |t|) = 0.0036          Pr(T > t) = 0.0018
+
+                    Two-sample t test with equal variances
+
+--------------------------------------------------------------------
+                       |     Mean1      Mean2    p_value    p_value 
+-----------------------+--------------------------------------------
+v_17 by r_user_dummy   |                                            
+                   0 1 |    1.6885     1.2725      .0035          . 
+--------------------------------------------------------------------
+
+             |     Mean1      Mean2    p_value    p_value 
+-------------+--------------------------------------------
+v_17 by r_~y |                                            
+         0 1 |    1.6885     1.2725      .0035          . 
+  - mata: asdoctable("`save'", "`r(colnames)'", "`r(rownames)'", "T", "`r(ttitle)'", `fs', `abb', "`append'", "`noheader'", "`rowappend'", "," ,`frs',"", "`dec'", "`cmd'", "`label'", "`tzok'", "`font'
+> ", "`fhc'", "`fhr'", "`notes'", "`store'")
+  = mata: asdoctable("Myfile.doc", "Mean1 , Mean2 , p_value", "v_17 by r_user_dummy: 0 1,", "T", "Two-sample t test with equal variances", 20, 20, "", "", "", "," ,1400,"", "3", "", "", "tzok", "Garam
+> ond", "", "", "", "")
+            asdoctable():  3301  subscript invalid
+                 <istmt>:     -  function returned error
+    set trace off
+    }
+    else {
+    tempvar Groups
+    qui ds `by' `_byvars' , has(type string)
+    if "`r(varlist)'" == "" {
+    tempvar strby
+    ds `by' `_byvars' , has(vallabel)
+    if "`r(varlist)'" != "" decode `by' `_byvars', gen(`strby')
+    else qui tostring `by' `_byvars', gen(`strby')
+    qui encode `strby' `if' `in', gen(`Groups')
+    }
+    else qui encode `by' `_byvars' `if' `in', gen(`Groups')
+    qui sum `Groups' `if' `in'
+    if "`r(max)'" == "" loc maxGroups 0
+    else loc maxGroups = `r(max)'
+    bys `Groups' : asttomby `varlist' `poptions' sep(,) `title' `statsOptions'
+    mat T = r(T)
+    local colnames : colfullnames T
+    local rownames : rowfullnames T
+    mata: asdoctable("`save'", "`colnames'", "`rownames'", "T", "`r(ttitle)'", `fs', `abb', "`append'", "`noheader'", "`rowappend'", "" ,`frs',"", "`dec'", "`cmd'", "`label'", "`tzok'", "`font'", "`fh
+> c'", "`fhr'", "`notes'", "`store'")
+    set trace off
+    }
+    }
+    }
+r(3301);
+
+end of do-file
+
+r(3301);
+
+. sum v_17-v_21 v_100 v_101 reptime v_34 v_94 if r_user_dummy == 1
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        v_17 |         44    1.272727    .5852305          1          3
+        v_18 |         43    1.604651     .791007          1          3
+        v_19 |         43    1.255814    .5811738          1          3
+        v_20 |         44    1.409091    .7255529          1          3
+        v_21 |         44    2.090909    .8301914          1          3
+-------------+---------------------------------------------------------
+       v_100 |         36    1.861111    .8669413          1          4
+       v_101 |         36    1.305556    .5766625          1          3
+     reptime |         42    9.178571    5.258931          1         18
+        v_34 |         42    3.047619    .8249872          1          4
+        v_94 |         36    3.583333    1.105183          1          5
+
+. tab1 v_17 v_100 v_101 reptime v_34 v_94
+
+-> tabulation of v_17  
+
+              On (im)migration |      Freq.     Percent        Cum.
+-------------------------------+-----------------------------------
+                            No |        128       63.05       63.05
+                     Yes, once |         33       16.26       79.31
+Yes, more than one publication |         42       20.69      100.00
+-------------------------------+-----------------------------------
+                         Total |        203      100.00
+
+-> tabulation of v_100  
+
+   Not enough methods skills |      Freq.     Percent        Cum.
+-----------------------------+-----------------------------------
+        Did not constrain me |         65       41.40       41.40
+Constrained me only a little |         53       33.76       75.16
+     Constrained me somewhat |         30       19.11       94.27
+ Constrained me considerably |          9        5.73      100.00
+-----------------------------+-----------------------------------
+                       Total |        157      100.00
+
+-> tabulation of v_101  
+
+         Not enough software |
+          programming skills |      Freq.     Percent        Cum.
+-----------------------------+-----------------------------------
+        Did not constrain me |        110       70.06       70.06
+Constrained me only a little |         35       22.29       92.36
+     Constrained me somewhat |         12        7.64      100.00
+-----------------------------+-----------------------------------
+                       Total |        157      100.00
+
+-> tabulation of reptime  
+
+    reptime |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          1        0.55        0.55
+          1 |          2        1.10        1.65
+        1.5 |          2        1.10        2.75
+          2 |          5        2.75        5.49
+          3 |          9        4.95       10.44
+          4 |         16        8.79       19.23
+          5 |         17        9.34       28.57
+          6 |         22       12.09       40.66
+        6.5 |          1        0.55       41.21
+          7 |         20       10.99       52.20
+          8 |         23       12.64       64.84
+          9 |          4        2.20       67.03
+        9.5 |          1        0.55       67.58
+         10 |         25       13.74       81.32
+         11 |          3        1.65       82.97
+         12 |          4        2.20       85.16
+         14 |          2        1.10       86.26
+         15 |          7        3.85       90.11
+         16 |          4        2.20       92.31
+         18 |         14        7.69      100.00
+------------+-----------------------------------
+      Total |        182      100.00
+
+-> tabulation of v_34  
+
+              Difficulty of Replication |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+This replication was one of the most di |          6        3.30        3.30
+        This replication was difficult. |         18        9.89       13.19
+This replication was neither  too easy  |         80       43.96       57.14
+             This replication was easy. |         76       41.76       98.90
+This replication was one of the easiest |          2        1.10      100.00
+----------------------------------------+-----------------------------------
+                                  Total |        182      100.00
+
+-> tabulation of v_94  
+
+I expected to learn and to develop as a |
+                            researcher. |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Reason does not apply to me apply at al |          2        1.29        1.29
+          Reason applies to me a little |         14        9.03       10.32
+                            Neither nor |         19       12.26       22.58
+          Reason somewhat applies to me |         74       47.74       70.32
+             Reason applies to me a lot |         46       29.68      100.00
+----------------------------------------+-----------------------------------
+                                  Total |        155      100.00
+
+. gen pub_imm = v_17
+(10 missing values generated)
+
+. gen method_skill_constraint = v_100
+(56 missing values generated)
+
+. gen software_skill_constraint = v_101
+(56 missing values generated)
+
+. gen rep_easiness = v_34
+(31 missing values generated)
+
+. tab v_18
+
+         On statistics/methods |      Freq.     Percent        Cum.
+-------------------------------+-----------------------------------
+                            No |        119       58.91       58.91
+                     Yes, once |         39       19.31       78.22
+Yes, more than one publication |         44       21.78      100.00
+-------------------------------+-----------------------------------
+                         Total |        202      100.00
+
+. gen pub_stas = v_18
+(11 missing values generated)
+
+. tab v_19-v_21
+too many variables specified
+r(103);
+
+. tab1 v_19-v_21
+
+-> tabulation of v_19  
+
+    On public policy / welfare |
+                         state |      Freq.     Percent        Cum.
+-------------------------------+-----------------------------------
+                            No |        143       71.14       71.14
+                     Yes, once |         27       13.43       84.58
+Yes, more than one publication |         31       15.42      100.00
+-------------------------------+-----------------------------------
+                         Total |        201      100.00
+
+-> tabulation of v_20  
+
+On social policy preferences / |
+                public opinion |      Freq.     Percent        Cum.
+-------------------------------+-----------------------------------
+                            No |        125       61.88       61.88
+                     Yes, once |         26       12.87       74.75
+Yes, more than one publication |         51       25.25      100.00
+-------------------------------+-----------------------------------
+                         Total |        202      100.00
+
+-> tabulation of v_21  
+
+    Used multilevel regression |      Freq.     Percent        Cum.
+-------------------------------+-----------------------------------
+                            No |         73       35.96       35.96
+                     Yes, once |         52       25.62       61.58
+Yes, more than one publication |         78       38.42      100.00
+-------------------------------+-----------------------------------
+                         Total |        203      100.00
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen reptime = v_33
+variable reptime already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. drop reptime pub_imm pub_stats
+variable pub_stats not found
+r(111);
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen reptime = v_33
+variable reptime already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. drop reptime pub_imm
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen reptime = v_33
+(31 missing values generated)
+
+. recode reptime (18/300 = 18)
+(reptime: 13 changes made)
+
+. gen pub_imm = v_17
+(10 missing values generated)
+
+. gen pub_stats = v_18
+(11 missing values generated)
+
+. gen pub_welfstate = v_19
+(12 missing values generated)
+
+. gen pub_pubop = v_20
+(11 missing values generated)
+
+. gen used_mlm = v_21
+(10 missing values generated)
+
+. gen method_skill_constraint = v_100
+variable method_skill_constraint already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. drop method_skill_constraint
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen method_skill_constraint = v_100
+(56 missing values generated)
+
+. 
+end of do-file
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen software_skill_constraint = v_101
+variable software_skill_constraint already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. drop software_skill_constraint
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen software_skill_constraint = v_101
+(56 missing values generated)
+
+. gen rep_easiness = v_34
+variable rep_easiness already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. drop rep_easiness
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen rep_easiness = v_34
+(31 missing values generated)
+
+. 
+. sum reptime-rep_easiness if r_user_dummy == 1
+
+    Variable |        Obs        Mean    Std. Dev.       Min      
+>   Max
+-------------+----------------------------------------------------
+> -----
+     reptime |         42    9.178571    5.258931          1      
+>    18
+     pub_imm |         44    1.272727    .5852305          1      
+>     3
+   pub_stats |         43    1.604651     .791007          1      
+>     3
+pub_welfst~e |         43    1.255814    .5811738          1      
+>     3
+   pub_pubop |         44    1.409091    .7255529          1      
+>     3
+-------------+----------------------------------------------------
+> -----
+    used_mlm |         44    2.090909    .8301914          1      
+>     3
+method_ski~t |         36    1.861111    .8669413          1      
+>     4
+software_s~t |         36    1.305556    .5766625          1      
+>     3
+rep_easiness |         42    3.047619    .8249872          1      
+>     4
+
+. sum reptime-rep_easiness if r_user_dummy == 0
+
+    Variable |        Obs        Mean    Std. Dev.       Min      
+>   Max
+-------------+----------------------------------------------------
+> -----
+     reptime |        122    7.663934    4.153781          0      
+>    18
+     pub_imm |        122    1.688525    .8632245          1      
+>     3
+   pub_stats |        122    1.647541    .8422925          1      
+>     3
+pub_welfst~e |        121    1.545455    .8164966          1      
+>     3
+   pub_pubop |        121    1.735537    .8922686          1      
+>     3
+-------------+----------------------------------------------------
+> -----
+    used_mlm |        122    2.032787    .8807813          1      
+>     3
+method_ski~t |        104    1.846154     .889739          1      
+>     4
+software_s~t |        104    1.355769      .60609          1      
+>     3
+rep_easiness |        122    3.467213    .6825381          1      
+>     5
+
+. 
+end of do-file
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. gen rep_easiness = v_34
+variable rep_easiness already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\nbreznau\AppData\Local\Temp\STD2d00_000000.tmp"
+
+. sum reptime-rep_easiness if r_user_dummy == 1
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+     reptime |         42    9.178571    5.258931          1         18
+     pub_imm |         44    1.272727    .5852305          1          3
+   pub_stats |         43    1.604651     .791007          1          3
+pub_welfst~e |         43    1.255814    .5811738          1          3
+   pub_pubop |         44    1.409091    .7255529          1          3
+-------------+---------------------------------------------------------
+    used_mlm |         44    2.090909    .8301914          1          3
+method_ski~t |         36    1.861111    .8669413          1          4
+software_s~t |         36    1.305556    .5766625          1          3
+rep_easiness |         42    3.047619    .8249872          1          4
+
+. sum reptime-rep_easiness if r_user_dummy == 0
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+     reptime |        122    7.663934    4.153781          0         18
+     pub_imm |        122    1.688525    .8632245          1          3
+   pub_stats |        122    1.647541    .8422925          1          3
+pub_welfst~e |        121    1.545455    .8164966          1          3
+   pub_pubop |        121    1.735537    .8922686          1          3
+-------------+---------------------------------------------------------
+    used_mlm |        122    2.032787    .8807813          1          3
+method_ski~t |        104    1.846154     .889739          1          4
+software_s~t |        104    1.355769      .60609          1          3
+rep_easiness |        122    3.467213    .6825381          1          5
+
+. 
+end of do-file
+
+. exit, clear

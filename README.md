@@ -22,3 +22,10 @@ Muna Adem, Jule Adriaans, Esra Akdeniz, Amalia Alvarez-Benjumea, Henrik Andersen
 </details>
 
 ## Abstract
+
+
+## Working Notes
+
+Note that the following files had the team numbers anonymized, i.e., they've been changed. If anything is not working with the analysis it was probably in changing the u_teamid variable that caused it.
+
+teamsize, routine_var, cri_survey_wide_public_nolabs.dta, cristageone.xlsx, cristageone.cur1.xlsx

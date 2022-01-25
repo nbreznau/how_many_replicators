@@ -1,0 +1,246 @@
+Team: 3
+Software: R
+Version: ORIGINAL
+
+library(readxl)
+library(readr)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(lubridate)
+library(ggplot2)
+library(texreg)
+library(haven)
+library(plm)
+library(broom)
+
+rm(list = ls())
+setwd([redacted])
+
+countryData <- read_dta("bradyfinnigan2014countrydata.dta")
+issp1996 <- read_dta("ZA2900.dta")
+issp2006 <- read_dta("ZA4700.dta")
+
+issp1996_recode <- issp1996 %>% 
+  mutate(v3a = v3,
+         v3a = zap_labels(v3a),
+         v3a = recode(v3a,
+                      "1" = 36, "2" = 276, "3" = 276, "4" = 826, "6" = 840, "8" = 348, "9" = NaN, "10" = 372, "12" = 578, "13" = 752, "14" = 203, "15" = 705, "16" = 616, "17" = NaN, "18" = 643, "19" = 554, "20" = 124, "21" = 608, "22" = 376, "23" = 376, "24" = 392, "25" = 724, "26" = 428, "27" = 250, "30" = 756, .default = NaN)
+  ) %>% 
+  mutate(
+    dgovjobs = ifelse(v36 <=2, 1, ifelse(v36 >=3 , 0, NA  )),
+    dhcare = ifelse(v38 <=2, 1, ifelse(v38 >=3 , 0, NA  )),
+    dgovretire = ifelse(v39 <=2, 1, ifelse(v39 >=3 , 0, NA  )),
+    dgovunemp = ifelse(v41 <=2, 1, ifelse(v41 >=3 , 0, NA  )),
+    dgovincdiff = ifelse(v42 <=2, 1, ifelse(v42 >=3 , 0, NA  )),
+    dgovhous = ifelse(v44 <=2, 1, ifelse(v44 >=3 , 0, NA  ))
+  ) %>% 
+  mutate(
+    age = v201,
+    agesq = age * age,
+    female = v200 - 1,
+    lesshs = ifelse(v205 <= 4, 1, 0),
+    hs = ifelse(v205 == 5 | v205 == 6, 1, 0),
+    univ = ifelse(v205 == 7, 1, 0),
+    ptemp = ifelse(v206 >= 2 & v206 <= 4, 1, 0),
+    unemp = ifelse(v206 == 5, 1, 0),
+    nolabor = ifelse(v206 >= 6, 1, 0),
+    v213 = ifelse(is.na(v213), 0, v213),
+    selfemp = ifelse(v213 == 1, 1, 0),
+    selfemp = ifelse(is.na(v206), NA, selfemp),
+    year = 1996,
+    yr2006 = 0
+  ) %>% 
+  group_by(v3a) %>% 
+  mutate(inczscore = (v218-mean(v218, na.rm = TRUE))/sd(v218, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(cntry = v3a, year, dgovjobs, dhcare, dgovretire, dgovunemp, dgovincdiff, dgovhous, age, agesq, female, lesshs, hs, univ, ptemp, unemp, nolabor, selfemp, inczscore, yr2006)
+
+
+issp2006_recode <- issp2006 %>% 
+  mutate(
+    v3a = V3a,
+    dgovjobs = ifelse(V25 <=2, 1, ifelse(V25 >=3 , 0, NA  )),
+    dhcare = ifelse(V27 <=2, 1, ifelse(V27 >=3 , 0, NA  )),
+    dgovretire = ifelse(V28 <=2, 1, ifelse(V28 >=3 , 0, NA  )),
+    dgovunemp = ifelse(V30 <=2, 1, ifelse(V30 >=3 , 0, NA  )),
+    dgovincdiff = ifelse(V31 <=2, 1, ifelse(V31 >=3 , 0, NA  )),
+    dgovhous = ifelse(V33 <=2, 1, ifelse(V33 >=3 , 0, NA  ))
+  ) %>% 
+  mutate(
+    agesq = age * age,
+    female = sex - 1,
+    lesshs = ifelse(degree <= 2, 1, 0),
+    hs = ifelse(degree == 3 | degree == 4, 1, 0),
+    univ = ifelse(degree == 5, 1, 0),
+    ptemp = ifelse(wrkst >= 2 & wrkst <= 4, 1, 0),
+    unemp = ifelse(wrkst == 5, 1, 0),
+    nolabor = ifelse(wrkst >= 6, 1, 0),
+    wrktype = ifelse(is.na(wrktype), 0, wrktype),
+    selfemp = ifelse(wrktype == 4, 1, 0),
+    selfemp = ifelse(is.na(wrkst), NA, selfemp),
+    year = 2006,
+    yr2006 = 1
+  ) %>% 
+  mutate(
+    incvar = coalesce(AU_INC, CA_INC, CH_INC, CL_INC, CZ_INC, DE_INC, DK_INC, DO_INC, ES_INC, FI_INC, FR_INC, GB_INC, HR_INC, HU_INC, IE_INC, IL_INC, JP_INC, KR_INC, LV_INC, NL_INC, NO_INC, NZ_INC, PH_INC, PL_INC, PT_INC, RU_INC, SE_INC, SI_INC, TW_INC, US_INC, UY_INC, VE_INC, ZA_INC)
+  ) %>% 
+  group_by(v3a) %>% 
+  mutate(inczscore = (incvar-mean(incvar, na.rm = TRUE))/sd(incvar, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(cntry = v3a, year, dgovjobs, dhcare, dgovretire, dgovunemp, dgovincdiff, dgovhous, age, agesq, female, lesshs, hs, univ, ptemp, unemp, nolabor, selfemp, inczscore, yr2006)
+
+countryData_recode <- countryData %>% 
+  select(cntry, year, foreignpct, netmigpct, socx, emprate)
+
+issp9606 <- issp1996_recode %>% 
+  bind_rows(issp2006_recode) %>% 
+  left_join(countryData_recode, by = c("cntry", "year"))
+
+tomodel <- issp9606 %>% filter(cntry %in% c(36, 124, 250, 276, 372, 392, 554, 578, 724, 752, 756, 826, 840))
+
+depvars <- c("dgovjobs", "dgovunemp", "dgovincdiff", "dgovretire", "dgovhous", "dhcare")
+
+m4.base <- lapply(depvars, function(x) {
+  glm(substitute(i ~ foreignpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+      )
+  })
+
+m4.base.ex <- lapply(m4.base, function(x){extract(x)})
+
+m4.welfare <- lapply(depvars, function(x) {
+  glm(substitute(i ~ foreignpct + socx + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m4.welfare.ex <- lapply(m4.welfare, function(x){extract(x)})
+
+m4.employment <- lapply(depvars, function(x) {
+  glm(substitute(i ~ foreignpct + emprate + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m4.employment.ex <- lapply(m4.employment, function(x){extract(x)})
+
+
+htmlreg(l = list(m4.base[[1]], m4.base[[2]], m4.base[[3]], m4.base[[4]], m4.base[[5]], m4.base[[6]]                       
+          , m4.welfare[[1]], m4.welfare[[2]], m4.welfare[[3]], m4.welfare[[4]], m4.welfare[[5]], m4.welfare[[6]]
+          , m4.employment[[1]], m4.employment[[2]], m4.employment[[3]], m4.employment[[4]], m4.employment[[5]], m4.employment[[6]]
+          )
+          
+        , override.coef = list(exp(m4.base.ex[[1]]@coef), exp(m4.base.ex[[2]]@coef), exp(m4.base.ex[[3]]@coef), exp(m4.base.ex[[4]]@coef), exp(m4.base.ex[[5]]@coef), exp(m4.base.ex[[6]]@coef)
+               , exp(m4.welfare.ex[[1]]@coef), exp(m4.welfare.ex[[2]]@coef), exp(m4.welfare.ex[[3]]@coef), exp(m4.welfare.ex[[4]]@coef), exp(m4.welfare.ex[[5]]@coef), exp(m4.welfare.ex[[6]]@coef)
+               , exp(m4.employment.ex[[1]]@coef), exp(m4.employment.ex[[2]]@coef), exp(m4.employment.ex[[3]]@coef), exp(m4.employment.ex[[4]]@coef), exp(m4.employment.ex[[5]]@coef), exp(m4.employment.ex[[6]]@coef)
+          )  
+          
+        , override.se = list(summary(m4.base[[1]])$coefficients[,3], summary(m4.base[[2]])$coefficients[,3], summary(m4.base[[3]])$coefficients[,3], summary(m4.base[[4]])$coefficients[,3], summary(m4.base[[5]])$coefficients[,3], summary(m4.base[[6]])$coefficients[,3]
+              , summary(m4.welfare[[1]])$coefficients[,3], summary(m4.welfare[[2]])$coefficients[,3], summary(m4.welfare[[3]])$coefficients[,3], summary(m4.welfare[[4]])$coefficients[,3], summary(m4.welfare[[5]])$coefficients[,3], summary(m4.welfare[[6]])$coefficients[,3]
+              , summary(m4.employment[[1]])$coefficients[,3], summary(m4.employment[[2]])$coefficients[,3], summary(m4.employment[[3]])$coefficients[,3], summary(m4.employment[[4]])$coefficients[,3], summary(m4.employment[[5]])$coefficients[,3], summary(m4.employment[[6]])$coefficients[,3]
+          )
+        , file = "table4.html"
+        , digits = 3
+          )
+
+
+m5.base <- lapply(depvars, function(x) {
+  glm(substitute(i ~ netmigpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m5.base.ex <- lapply(m5.base, function(x){extract(x)})
+
+m5.welfare <- lapply(depvars, function(x) {
+  glm(substitute(i ~ netmigpct + socx + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m5.welfare.ex <- lapply(m5.welfare, function(x){extract(x)})
+
+m5.employment <- lapply(depvars, function(x) {
+  glm(substitute(i ~ netmigpct + emprate + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m5.employment.ex <- lapply(m5.employment, function(x){extract(x)})
+
+m5.foreignborn <- lapply(depvars, function(x) {
+  glm(substitute(i ~ netmigpct + foreignpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor + selfemp + inczscore + as.factor(cntry) + as.factor(year)
+                 , list(i = as.name(x)))
+      , data   = tomodel 
+      , family=binomial(link="logit")
+  )
+})
+m5.foreignborn.ex <- lapply(m5.foreignborn, function(x){extract(x)})
+
+htmlreg(l = list(m5.base[[1]], m5.base[[2]], m5.base[[3]], m5.base[[4]], m5.base[[5]], m5.base[[6]]                       
+                 , m5.welfare[[1]], m5.welfare[[2]], m5.welfare[[3]], m5.welfare[[4]], m5.welfare[[5]], m5.welfare[[6]]
+                 , m5.employment[[1]], m5.employment[[2]], m5.employment[[3]], m5.employment[[4]], m5.employment[[5]], m5.employment[[6]]
+                 , m5.foreignborn[[1]], m5.foreignborn[[2]], m5.foreignborn[[3]], m5.foreignborn[[4]], m5.foreignborn[[5]], m5.foreignborn[[6]]
+)
+
+, override.coef = list(exp(m5.base.ex[[1]]@coef), exp(m5.base.ex[[2]]@coef), exp(m5.base.ex[[3]]@coef), exp(m5.base.ex[[4]]@coef), exp(m5.base.ex[[5]]@coef), exp(m5.base.ex[[6]]@coef)
+                       , exp(m5.welfare.ex[[1]]@coef), exp(m5.welfare.ex[[2]]@coef), exp(m5.welfare.ex[[3]]@coef), exp(m5.welfare.ex[[4]]@coef), exp(m5.welfare.ex[[5]]@coef), exp(m5.welfare.ex[[6]]@coef)
+                       , exp(m5.employment.ex[[1]]@coef), exp(m5.employment.ex[[2]]@coef), exp(m5.employment.ex[[3]]@coef), exp(m5.employment.ex[[4]]@coef), exp(m5.employment.ex[[5]]@coef), exp(m5.employment.ex[[6]]@coef)
+                       , exp(m5.foreignborn.ex[[1]]@coef), exp(m5.foreignborn.ex[[2]]@coef), exp(m5.foreignborn.ex[[3]]@coef), exp(m5.foreignborn.ex[[4]]@coef), exp(m5.foreignborn.ex[[5]]@coef), exp(m5.foreignborn.ex[[6]]@coef)
+)  
+
+, override.se = list(summary(m5.base[[1]])$coefficients[,3], summary(m5.base[[2]])$coefficients[,3], summary(m5.base[[3]])$coefficients[,3], summary(m5.base[[4]])$coefficients[,3], summary(m5.base[[5]])$coefficients[,3], summary(m5.base[[6]])$coefficients[,3]
+                     , summary(m5.welfare[[1]])$coefficients[,3], summary(m5.welfare[[2]])$coefficients[,3], summary(m5.welfare[[3]])$coefficients[,3], summary(m5.welfare[[4]])$coefficients[,3], summary(m5.welfare[[5]])$coefficients[,3], summary(m5.welfare[[6]])$coefficients[,3]
+                     , summary(m5.employment[[1]])$coefficients[,3], summary(m5.employment[[2]])$coefficients[,3], summary(m5.employment[[3]])$coefficients[,3], summary(m5.employment[[4]])$coefficients[,3], summary(m5.employment[[5]])$coefficients[,3], summary(m5.employment[[6]])$coefficients[,3]
+                     , summary(m5.foreignborn[[1]])$coefficients[,3], summary(m5.foreignborn[[2]])$coefficients[,3], summary(m5.foreignborn[[3]])$coefficients[,3], summary(m5.foreignborn[[4]])$coefficients[,3], summary(m5.foreignborn[[5]])$coefficients[,3], summary(m5.foreignborn[[6]])$coefficients[,3]
+)
+, file = "table5.html"
+, digits = 3
+)
+
+
+# Interpretation (as in the text) -------------------
+# ---------------------------------------------------
+
+# difference in odds =  odd.ratio ^number of intervals
+
+# Table 4
+# jobs
+1/.945^(sd(tomodel$foreignpct, na.rm = TRUE))
+# income
+1/.947^(sd(tomodel$foreignpct, na.rm = TRUE))
+# healthcare
+1/.895^(sd(tomodel$foreignpct, na.rm = TRUE))
+# retirement
+1.091^(sd(tomodel$foreignpct, na.rm = TRUE))
+
+# Table 5 
+
+# Net Migration
+# jobs
+1.088^(sd(tomodel$netmigpct, na.rm = TRUE))
+# retirement
+1.163^(sd(tomodel$netmigpct, na.rm = TRUE))
+# housing 
+1.108^(sd(tomodel$netmigpct, na.rm = TRUE))
+# healthcare
+1.122^(sd(tomodel$netmigpct, na.rm = TRUE))
+
+# Percent Foreign Born
+# jobs
+1/.910^(sd(tomodel$foreignpct, na.rm = TRUE))
+# income
+1/.935^(sd(tomodel$foreignpct, na.rm = TRUE))
+# retirement
+1.110^(sd(tomodel$foreignpct, na.rm = TRUE))
+# healthcare
+1/.869^(sd(tomodel$foreignpct, na.rm = TRUE))
+
