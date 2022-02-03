@@ -1,0 +1,166 @@
+Team: 26
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta", clear 
+
+decode v3, gen(temp)
+
+gen V3a = .
+replace V3a = 36    if temp == "aus"
+replace V3a = 2761 if temp == "D-W"
+replace V3a = 2762 if temp == "D-E"
+replace V3a = 826 if temp == "gb"
+replace V3a = 840   if temp == "usa"
+replace V3a = 348   if temp == "h"
+replace V3a = 380   if temp == "i"
+replace V3a = 372   if temp == "irl"
+replace V3a = 578   if temp == "n"
+replace V3a = 752   if temp == "s"
+replace V3a = 203   if temp == "cz"
+replace V3a = 705   if temp == "slo"
+replace V3a = 616   if temp == "pl"
+replace V3a = 100   if temp == "bg"
+replace V3a = 643   if temp == "rus"
+replace V3a = 554   if temp == "nz"
+replace V3a = 124   if temp == "cdn"
+replace V3a = 608   if temp == "rp"
+replace V3a = 3761 if temp == "IL-J"
+replace V3a = 3762 if temp == "IL-A"
+replace V3a = 392   if temp == "j"
+replace V3a = 724   if temp == "e"
+replace V3a = 428   if temp == "lv"
+replace V3a = 250   if temp == "f"
+replace V3a = 196   if temp == "cy"
+replace V3a = 756   if temp == "ch"
+
+gen oldagecare = v39
+gen unemp = v41
+gen redincdif = v42
+gen jobs = v36
+
+gen female = v200-1
+gen age = v201
+
+gen education = .
+replace education = 1 if v205 == 1 & v204==97
+replace education =1 if v205 == 2 | v205 == 3 //primary or below education
+replace education =2 if v205 == 4 | v205 == 5 | v205 == 6 //secondary
+replace education = 3 if v205 == 7 //University
+
+gen empstatus = .
+replace empstatus = 1 if v206 == 1 //Full
+replace empstatus =2 if v206 == 2 | v206 == 3 //part time
+replace empstatus =3 if v206 == 4 | v206 == 6 | v206 == 7 | v206 == 8 | v206 == 9 | v206 == 10 //not active
+replace empstatus = 4 if v206 == 5 //Unem
+
+_crcslbl oldagecare v39
+_crcslbl unemp v41
+_crcslbl redincdif v42
+_crcslbl jobs v36
+_crcslbl female v200
+_crcslbl age v201
+
+label define emplabel 1 "Full-time" 2 "Part-time" 3 "not-active" 4 "Unemployed"
+label values empstatus emplabel
+
+label define educlab 1 "Primary or Below" 2 "Completed Secondary" 3 "University +"
+label values education educlab
+
+keep V3a oldagecare unemp redincdif jobs female age education empstatus weight
+
+gen year= 1996
+
+save "ZA2900_clean.dta", replace  
+
+use "ZA4700.dta", clear 
+
+gen oldagecare = V28
+gen unemp = V30
+gen redincdif = V31
+gen jobs = V25
+
+gen female = sex-1
+
+gen education = .
+replace education = 1 if degree == 0 | degree == 1 
+replace education = 2 if degree == 2 | degree == 3 | degree == 4
+replace education = 3 if degree == 5 
+
+gen empstatus = .
+replace empstatus = 1 if wrkst == 1 //Full
+replace empstatus = 2 if wrkst == 2 | wrkst == 3 //part time
+replace empstatus = 3 if wrkst == 4 | wrkst == 6 | wrkst == 7 | wrkst == 8 | wrkst == 9 | wrkst == 10 //not active
+replace empstatus = 4 if wrkst == 5 //Unem
+
+keep V3a oldagecare unemp redincdif jobs female age education empstatus weight
+
+gen year = 2006
+
+save "ZA4700_clean.dta", replace 
+
+use "data/L2data.dta", clear
+drop if emprate == .
+drop if socx == .
+
+save "data/L2data_clean.dta", replace
+
+use "data/ZA2900_clean.dta", clear 
+append using "data/ZA4700_clean.dta"
+
+recode V3a (2761 = 276) (2762 = 276)
+
+foreach var of varlist oldagecare unemp redincdif jobs {
+	recode `var' (2 = 1) (3 = 0) (4 = 0)
+}
+
+gen age2 = age*age
+
+save "ISSP_clean.dta", replace
+
+use "ISSP_clean.dta", clear
+
+rename V3a cntry
+
+merge m:1 cntry year using "L2data_clean.dta"
+keep if _merge == 3
+drop _merge
+
+drop if country == "Denmark" | country == "Finland" | country == "Netherlands" | country == "Portugal" //these countries don't have data for both years
+
+save "CleanData.dta", replace
+
+use "CleanData.dta", clear
+
+estimates clear
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' foreignpct i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' foreignpct socx i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' foreignpct emprate i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' netmigpct i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' netmigpct socx i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+foreach var of varlist oldage unemp redinc jobs {
+	qui eststo: logit `var' netmigpct emprate i.female age age2  ib2.education ib1.empstatus i.cntry i.year, or robust
+}
+
+esttab est* using "results_table.csv", ///
+	transform(exp(@) exp(@)) keep(foreignpct socx emprate netmigpct 1.female age age2 1.education 3.education 2.empstatus 3.empstatus 4.empstatus _cons)  ///
+	label replace nogaps
+	
+

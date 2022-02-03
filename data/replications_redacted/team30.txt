@@ -1,0 +1,186 @@
+Team: 30
+Software: Stata
+Version: ORIGINAL
+
+version 14.0
+set more off
+
+use ZA2900.dta , clear
+gen year = 1996
+
+recode v39 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_old)
+recode v41 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_unemp)
+recode v42 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_incdiff)
+recode v36 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_jobs)
+
+recode v200 (2=1)(1=0), gen(female)
+rename v201 age
+gen age_sq = age * age
+
+recode v205 (1/4=0)(5 6=1)(7=2), gen(education)
+lab def education 0 "Primary or less" 1 "Secondary" 2 "University"
+lab values education education
+
+recode v206 (1=3)(2=0)(3=1)(4=1)(5=2)(6/10=1), gen(employ)
+lab def employ 0 "Part time" 1 "Not active" 2 "Active unemployed" 3 "Full time"
+lab values employ employ
+
+gen cntry =.
+	replace cntry = 36  if v3 == 1	/* Australia 36 */	
+	replace cntry = 276 if v3 == 2 	/* West Germany */	
+	replace cntry = 276 if v3 == 3 	/* East Germany */	
+	replace cntry = 124 if v3 == 20	/* Canada 124 */
+	replace cntry = 250	if v3 == 27	/* France */
+	replace cntry = 372	if v3 == 10	/* Ireland */
+	replace cntry = 392	if v3 == 24	/* Japan */
+	replace cntry = 554	if v3 == 19	/* New Zealand */
+	replace cntry = 578	if v3 == 12	/* Norway */
+	replace cntry = 724	if v3 == 25	/* Spain */
+	replace cntry = 752	if v3 == 13	/* Sweden */
+	replace cntry = 756	if v3 == 30	/* Switzerland */
+	replace cntry = 826	if v3 == 4	/* Great Britain */
+	replace cntry = 840	if v3 == 6	/* US */
+drop if cntry==.	/* keep the relevant 13 countries */
+
+save ISSP_1996.dta , replace
+	
+use ZA4700.dta , clear
+gen year = 2006
+
+recode V28 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_old)
+recode V30 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_unemp)
+recode V31 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_incdiff)
+recode V25 (8 9=.)(1 2=1)(2 3 4 =0), gen(outc_jobs)
+
+recode sex (2=1)(1=0), gen(female)
+gen age_sq = age * age
+
+recode degree (0 1 2=0)(3 4=1)(5=2), gen(education)
+lab def education 0 "Primary or less" 1 "Secondary" 2 "University"
+lab values education education
+
+recode wrkst (1=3)(2=0)(3=1)(4=1)(5=2)(6/10=1), gen(employ)
+lab def employ 0 "Part time" 1 "Not active" 2 "Active unemployed" 3 "Full time"
+lab values employ employ
+
+rename V3 cntry
+keep if ///
+	cntry == 36  | ///
+	cntry == 276 | ///
+	cntry == 124 | ///
+	cntry == 250 | ///
+	cntry == 372 | ///
+	cntry == 392 | ///
+	cntry == 554 | ///
+	cntry == 578 | ///
+	cntry == 724 | ///
+	cntry == 752 | ///
+	cntry == 756 | ///
+	cntry == 826 | ///
+	cntry == 840
+
+append using ISSP_1996.dta	
+save ISSP.dta , replace
+
+use L2data.dta , clear
+
+egen miss = rowmiss(foreignpct netmigpct socx emprate)
+keep if miss==0
+drop miss
+bysort cntry: keep if _N==2
+merge 1:m cntry year using ISSP.dta
+	assert _merge!=2	
+	drop if _merge==1	
+
+bysort year: summarize year cntry female age age_sq education employ foreignpct netmigpct emprate socx outc_old outc_unemp outc_incdiff outc_jobs
+
+
+egen miss = rowmiss (year cntry female age age_sq education employ foreignpct netmigpct emprate socx outc_old outc_unemp outc_incdiff outc_jobs)	
+keep if miss==0
+
+global indctrls = "female c.age c.age_sq ib1.education ib3.employ"
+global twowayfe = "i.year i.cntry"
+
+gen byte constant = 1	
+
+logit outc_old foreignpct $indctrls $twowayfe constant, or nocons
+	est sto m1
+	
+qui logit outc_unemp foreignpct $indctrls $twowayfe constant, or nocons
+	est sto m2
+
+qui logit outc_incdiff foreignpct $indctrls $twowayfe constant, or nocons
+	est sto m3
+
+qui logit outc_jobs foreignpct $indctrls $twowayfe constant, or nocons
+	est sto m4
+
+qui logit outc_old foreignpct socx $indctrls $twowayfe constant, or nocons
+	est sto m5
+
+qui logit outc_unemp foreignpct socx $indctrls $twowayfe constant, or nocons
+	est sto m6
+
+qui logit outc_incdiff foreignpct socx $indctrls $twowayfe constant, or nocons
+	est sto m7
+
+qui logit outc_jobs foreignpct socx $indctrls $twowayfe constant, or nocons
+	est sto m8
+	
+qui logit outc_old foreignpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m9
+
+qui logit outc_unemp foreignpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m10
+	
+qui logit outc_incdiff foreignpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m11
+	
+qui logit outc_jobs foreignpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m12
+	
+qui logit outc_old netmigpct $indctrls $twowayfe constant, or nocons
+	est sto m13
+
+qui logit outc_unemp netmigpct $indctrls $twowayfe constant, or nocons
+	est sto m14
+
+qui logit outc_incdiff netmigpct $indctrls $twowayfe constant, or nocons
+	est sto m15
+
+qui logit outc_jobs netmigpct $indctrls $twowayfe constant, or nocons
+	est sto m16
+	
+	
+qui logit outc_old netmigpct socx $indctrls $twowayfe constant, or nocons
+	est sto m17
+
+qui logit outc_unemp netmigpct socx $indctrls $twowayfe constant, or nocons
+	est sto m18
+
+qui logit outc_incdiff netmigpct socx $indctrls $twowayfe constant, or nocons
+	est sto m19
+	
+qui logit outc_jobs netmigpct socx $indctrls $twowayfe constant, or nocons
+	est sto m20	
+	
+qui logit outc_old netmigpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m21
+	
+qui logit outc_unemp netmigpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m22
+
+qui logit outc_incdiff netmigpct emprate $indctrls $twowayfe constant, or nocons
+	est sto m23
+
+qui logit outc_jobs netmigpct emprate $indctrls $twowayfe constant, or
+	est sto m24
+	
+	
+esttab m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20 m21 m22 m23 m24 ///
+	using exactrep.csv /// 	
+	, eform star z mtitles nonumbers plain replace /// 
+	order(foreignpct socx emprate netmigpct constant) keep(foreignpct netmigpct emprate socx constant) 
+
+
+

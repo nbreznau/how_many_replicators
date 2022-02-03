@@ -1,0 +1,412 @@
+Team: 42
+Software: Stata
+Version: ORIGINAL
+
+#delimit ;
+
+global countries9606 "36 124 250 276 372 392 554 578 724 752 756 826 840";
+
+global dv    " Jobs Unemp Income Retirement Housing Healthcare ";
+
+global idv   " age age_sq female lessthansecondary university 
+               parttime unemp notinlabor selfemp inc_z"; 
+			 // currently taken from table S6 of online supplement;
+			 
+			 
+
+capture net install zscore.pkg;
+
+
+#delimit cr;			   
+
+
+use "ZA2900", clear
+
+	gen year=1996
+	rename v2 id1996
+
+
+	gen 	cntry = .            // labels in V3A from 2006 dataset		In
+	replace cntry = 36 if v3== 1 // AU-Australia 						*
+	replace cntry =276 if v3== 2 // DE-Germany 							*
+	replace cntry =276 if v3== 3 // DE-Germany
+	replace cntry =826 if v3== 4 // GB-Great Britain					* *
+	replace cntry =840 if v3== 6 // US-United States					*
+	replace cntry =348 if v3== 8 // HU-Hungary
+	replace cntry =380 if v3== 9 // IT-Italy  // looked up cntry code
+	replace cntry =372 if v3==10 // IE-Ireland							*	
+	replace cntry =578 if v3==12 // NO-Norway							*
+	replace cntry =752 if v3==13 // SE-Sweden							*
+	replace cntry =203 if v3==14 // CZ-Czech Republic
+	replace cntry =705 if v3==15 // SI-Slovenia
+	replace cntry =616 if v3==16 // PL-Poland
+	replace cntry =100 if v3==17 // BG-Bulgaria
+	replace cntry =643 if v3==18 // RU-Russia
+	replace cntry =554 if v3==19 // NZ-New Zealand						*
+	replace cntry =124 if v3==20 // CA-Canada							*
+	replace cntry =608 if v3==21 // PH-Philippines
+	replace cntry =376 if v3==22 // IL-Israel
+	replace cntry =376 if v3==23 // IL-Israel
+	replace cntry =392 if v3==24 // JP-Japan							*
+	replace cntry =724 if v3==25 // ES-Spain							*
+	replace cntry =428 if v3==26 // LV-Latvia
+	replace cntry =250 if v3==27 // FR-France							*
+	replace cntry =196 if v3==28 // CY-Cyprus
+	replace cntry =756 if v3==30 // CH-Switzerland						*
+	assert  cntry != .                                  
+
+		gen		keep=0
+	foreach country of global countries9606 {
+		replace keep=1 if cntry==`country'
+	}
+
+	keep if keep==1
+	drop    keep
+
+	gen Jobs = v36
+		recode Jobs (1/2=1) (3/4=0)
+		lab var Jobs "Jobs for all"
+	gen Unemp = v41
+		recode Unemp (1/2=1) (3/4=0)
+		lab var Unemp "Decent living for Unemployed"
+	gen Income = v42
+		recode Income (1/2=1) (3/4=0)
+		lab var Income "Reduce Income differences"
+	gen Retirement = v39
+		recode Retirement (1/2=1) (3/4=0)
+		lab var Retirement "Decent living for old"
+	gen Housing = v44
+		recode Housing (1/2=1) (3/4=0)
+		lab var Housing "Decent housing for poor"
+	gen Healthcare = v38
+		recode Healthcare (1/2=1) (3/4=0)
+		lab var Healthcare "Health care for sick"
+
+	recode v200 (1=0) (2=1), gen(female)
+	gen age = v201
+	gen age_sq = age * age
+
+	recode v202 (3 4 = 3) (5=4), gen(marstat) 
+	ta marstat, gen(marstat_bin) 							
+	rename marstat_bin1 married
+	rename marstat_bin2 widowed
+	rename marstat_bin3 divorced
+	rename marstat_bin4 notmarried
+
+	rename v273 hhsize
+
+	gen 	childreninhh = v274
+	replace childreninhh = . if v274 == 95 					
+	recode 	childreninhh (1 5 9 11 13 15 17 19 21 = 0)
+	recode 	childreninhh (2 3 4 6 7 8 10 12 14 16 18 20 = 1)
+
+
+	ta v275, gen(urban_bin) 
+	rename urban_bin1 urban
+	rename urban_bin2 suburb
+	rename urban_bin3 rural 
+
+	recode v205 (1/4 = 1) (5/6=2) (7=3), gen(educ) 
+	ta educ, gen(educ_bin)
+	rename educ_bin1 lessthansecondary
+	rename educ_bin2 secondary
+	rename educ_bin3 university
+
+	recode v206 (2/10=0), gen(fulltime)
+	recode v206 (2/4=1)  (nonmiss=0), gen(parttime)
+	recode v206 (5=1) 	 (nonmiss=0), gen(unemp)
+	recode v206 (6/10=1) (nonmiss=0), gen(notinlabor)
+	
+	recode v212 (1/2=1) (3/.=0), gen(public)
+	recode v212 (3=1) (1 2/.=0), gen(private) 
+	recode v213 (2/.=0), gen(selfemp)			
+	
+	gen inc_z=.
+	levelsof cntry, local(ct)
+	foreach cntryval of local ct {
+		zscore v218 if cntry==`cntryval', listwise
+		replace inc_z=z_v218 if cntry==`cntryval'
+		drop z_v218
+	}
+
+	recode v220 (1/4=1) (5=2) (6=3) (nonmiss=0), gen(religion)
+	ta religion, gen(religion_bin)
+	rename religion_bin1 high_rel
+	rename religion_bin2 low_rel
+	rename religion_bin3 not_rel
+
+
+
+order id cntry year $dv $idv
+keep  id cntry year $idv $dv
+
+save "issp1996.dta", replace
+
+
+use "ZA4700", clear
+
+	gen year=2006
+	rename V2 id2006
+	
+
+	rename V3a cntry
+
+		gen		keep=0
+	foreach country of global countries9606 {
+		replace keep=1 if cntry==`country'
+	}
+
+	keep if keep==1
+	drop    keep
+
+
+	gen Jobs = V25
+		recode 	Jobs (1/2=1) (3/4=0)
+		lab var Jobs "Jobs for all"
+	gen Unemp = V30
+		recode 	Unemp (1/2=1) (3/4=0)
+		lab var Unemp "Decent living for Unemployed"
+	gen Income = V31
+		recode 	Income (1/2=1) (3/4=0)
+		lab var Income "Reduce Income differences"
+	gen Retirement = V28
+		recode 	Retirement (1/2=1) (3/4=0)
+		lab var Retirement "Decent living for old"
+	gen Housing = V33
+		recode 	Housing (1/2=1) (3/4=0)
+		lab var Housing "Decent housing for poor"
+	gen Healthcare = V27
+		recode 	Healthcare (1/2=1) (3/4=0)
+		lab var Healthcare "Health care for sick"
+
+	recode sex (1=0) (2=1), gen(female)
+
+	gen age_sq = age * age
+
+	rename marital marstat 
+	ta marstat, gen(marstat_bin) // In the text they write "never married" instead of "not married"
+	rename marstat_bin1 married
+	rename marstat_bin2 widowed
+	rename marstat_bin3 divorced
+	rename marstat_bin4 notmarried
+	rename hompop hhsize
+	gen childreninhh = hhcycle
+	replace childreninhh = . if hhcycle == 95 // "other" set to sysmis
+	recode childreninhh (1 5 9 11 13 15 17 19 21 = 0)
+	recode childreninhh (2 3 4 6 7 8 10 12 14 16 18 20 = 1)
+	recode urbrural (1=1) (2/3=2) (4/5=3), gen(region)
+	ta region, gen(urban_bin) 
+	rename urban_bin1 urban
+	rename urban_bin2 suburb
+	rename urban_bin3 rural 
+
+	recode degree (0/2 = 1) (3/4=2) (5=3), gen(educ) 
+	ta educ, gen(educ_bin)
+	rename educ_bin1 lessthansecondary
+	rename educ_bin2 secondary
+	rename educ_bin3 university
+
+	recode wrkst (2/10=0), gen(fulltime)
+	recode wrkst (2/4=1) (nonmiss=0), gen(parttime)
+	recode wrkst (5=1) (nonmiss=0), gen(unemp)
+	recode wrkst (6/10=1) (nonmiss=0), gen(notinlabor)
+	recode wrktype (1/2=1) (3/.=0), gen(public)
+	recode wrktype (3=1) (1 2/.=0), gen(private) // Abweichung! 
+	recode wrktype (2/.=0), gen(selfemp)
+
+	gen inc_z=.
+	local inc_cntrs = "AU_INC CA_INC FR_INC DE_INC IE_INC JP_INC NZ_INC NO_INC ES_INC SE_INC CH_INC GB_INC US_INC" 
+	foreach inc_cntr of local inc_cntrs {
+		zscore `inc_cntr', listwise
+		replace inc_z=z_`inc_cntr' if z_`inc_cntr'!=.
+		drop z_`inc_cntr'
+	}
+
+	recode attend (1/6=1) (7=2) (8=3) (nonmiss=0), gen(religion)
+	ta religion, gen(religion_bin)
+	rename religion_bin1 high_rel
+	rename religion_bin2 low_rel
+	rename religion_bin3 not_rel
+
+order id cntry year $dv $idv
+keep  id cntry year $idv $dv
+
+save "issp2006.dta", replace
+
+
+use "bradyfinnigan2014countrydata", clear
+
+	lab var emprate      "Employment Rate"
+	lab var foreignpct   "Percent Foreign Born"
+	lab var socx         "Social Welfare Expenditures"	
+	lab var netmigpct    "Net Migration"				
+	
+keep cntry year emprate foreignpct socx netmigpct
+	
+save "countrydta.dta", replace
+
+
+use 			"issp2006", clear // label for cntry only in 2006
+append using	"issp1996"
+
+	order cntry year id1996 id2006
+
+merge m:1 cntry year using "countrydta.dta", assert(2 3) keep(3) nogen
+
+	erase		"issp1996.dta"
+	erase		"issp2006.dta"
+	erase		"countrydta.dta"
+
+	lab var age "Age"
+	lab var age_sq "Age * Age"
+	lab var female "Female"
+	lab var lessthansecondary "Less than Secondary"
+	lab var university "University or Above"
+	lab var parttime "Part-Time Employment"
+	lab var unemp "Unemployed"
+	lab var notinlabor "Not in Labor Force"
+	lab var selfemp "Self-Employed"
+	lab var inc_z "Relative Income"
+	
+ 	lab def year 1996 "1996" 2006 "2006"
+	lab val year year
+	
+
+	global twfe " ib1996.year ib36.cntry "
+
+	foreach dv of global dv {
+	 #delimit;
+	 qui {;	
+
+	  logit `dv' foreignpct	           $idv $twfe; est store t41`dv'; loc t41`dv'=e(N);
+ 	  logit `dv' foreignpct socx       $idv $twfe; est store t42`dv'; loc t42`dv'=e(N);
+	  logit `dv' foreignpct emprate    $idv $twfe; est store t43`dv'; loc t43`dv'=e(N);
+                                                                                       
+	  logit `dv' netmigpct	           $idv $twfe; est store t51`dv'; loc t51`dv'=e(N);
+	  logit `dv' netmigpct  socx       $idv $twfe; est store t52`dv'; loc t52`dv'=e(N);
+	  logit `dv' netmigpct  emprate    $idv $twfe; est store t53`dv'; loc t53`dv'=e(N);
+	  logit `dv' netmigpct  foreignpct $idv $twfe; est store t54`dv'; loc t54`dv'=e(N);
+	 
+	 }; // quietly end
+	 #delimit cr;
+	}
+	
+	matrix input t4N = /// 
+	(`t41Jobs', `t41Unemp', `t41Income', `t41Retirement', `t41Housing', `t41Healthcare' \ ///
+	 `t42Jobs', `t42Unemp', `t42Income', `t42Retirement', `t42Housing', `t42Healthcare' \ ///
+	 `t43Jobs', `t43Unemp', `t43Income', `t43Retirement', `t43Housing', `t43Healthcare' ) 
+	 
+	matrix input t5N = /// 
+	(`t51Jobs', `t51Unemp', `t51Income', `t51Retirement', `t51Housing', `t51Healthcare' \ ///
+	 `t52Jobs', `t52Unemp', `t52Income', `t52Retirement', `t52Housing', `t52Healthcare' \ ///
+	 `t53Jobs', `t53Unemp', `t53Income', `t53Retirement', `t53Housing', `t53Healthcare' \ /// 
+	 `t54Jobs', `t54Unemp', `t54Income', `t54Retirement', `t54Housing', `t54Healthcare' ) 
+	
+	mat list t4N 
+	mat list t5N
+
+	
+
+capt prog drop mergemodels
+prog mergemodels, eclass
+// assuming that last element in e(b)/e(V) is _cons
+ version 8
+ syntax namelist
+ tempname b V tmp
+ foreach name of local namelist {
+   qui est restore `name'
+   mat `b' = nullmat(`b') , e(b)
+   mat `b' = `b'[1,1..colsof(`b')-1]
+   mat `tmp' = e(V)
+   mat `tmp' = `tmp'[1..rowsof(`tmp')-1,1..colsof(`tmp')-1]
+   capt confirm matrix `V'
+   if _rc {
+     mat `V' = `tmp'
+   }
+   else {
+     mat `V' = ///
+      ( `V' , J(rowsof(`V'),colsof(`tmp'),0) ) \ ///
+      ( J(rowsof(`tmp'),colsof(`V'),0) , `tmp' )
+   }
+ }
+ local names: colfullnames `b'
+ mat coln `V' = `names'
+ mat rown `V' = `names'
+ eret post `b' `V'
+ eret local cmd "whatever"
+end
+
+
+	foreach dv of global dv {
+
+		mergemodels t41`dv' t42`dv' t43`dv'
+		est sto t4`dv'
+
+		mergemodels t51`dv' t52`dv'  t53`dv' t54`dv'
+		est sto t5`dv'
+	}
+	
+set matsize 1100
+
+  #delimit;
+	estout  t4Jobs			t4Unemp 		t4Income 
+			t4Retirement  	t4Housing  		t4Healthcare 
+			,
+			cells(b(star fmt(3)) t(par) ) eform							
+			label  collabels(none)  
+			mlabels( $dv )
+			drop($idv 1996.year 2006.year  
+				  36.cntry 124.cntry 250.cntry 276.cntry 372.cntry 392.cntry 
+				 554.cntry 578.cntry 724.cntry 752.cntry 756.cntry 826.cntry 
+				 840.cntry 			 );
+  #delimit cr;
+				 
+  #delimit;
+	estout  t5Jobs			t5Unemp 		t5Income 
+			t5Retirement  	t5Housing  		t5Healthcare 
+			,
+			cells(b(star fmt(3)) t(par) ) eform							
+			label  collabels(none)  
+			mlabels( $dv )
+			drop($idv 1996.year 2006.year  
+				  36.cntry 124.cntry 250.cntry 276.cntry 372.cntry 392.cntry 
+				 554.cntry 578.cntry 724.cntry 752.cntry 756.cntry 826.cntry 
+				 840.cntry 			 );
+  #delimit cr;
+
+
+	mat list t4N
+	mat list t5N
+				
+				
+esttab t41Jobs t41Unemp t41Income t41Retirement t41Housing t41Healthcare ///
+       t42Jobs t42Unemp t42Income t42Retirement t42Housing t42Healthcare ///
+	   t43Jobs t43Unemp t43Income t43Retirement t43Housing t43Healthcare ///
+	                                                                     ///
+	   t51Jobs t51Unemp t51Income t51Retirement t51Housing t51Healthcare ///
+	   t52Jobs t52Unemp t52Income t52Retirement t52Housing t52Healthcare ///
+	   t53Jobs t53Unemp t53Income t53Retirement t53Housing t53Healthcare ///
+	   t54Jobs t54Unemp t54Income t54Retirement t54Housing t54Healthcare ///
+	                                                                     ///
+	   using RepTask01netmigpct_table4&5.csv, replace scsv               ///
+	   order(foreignpct socx foreignpct emprate netmigpct _cons $idv )   ///
+	   cells(b(star fmt(3)) t(par) ) eform                               ///
+	   legend stats(N , fmt(%9.0f))                                      ///
+	   nobase constant label mtitles($dv $dv $dv $dv $dv $dv $dv )        
+ 	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   

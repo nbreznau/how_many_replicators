@@ -1,0 +1,204 @@
+Team: 31
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta"
+
+recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
+label define cntrylbl 36 "Australia" 124 "Canada" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 372 "Ireland" 392 "Japan" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 620 "Portugal" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values v3a cntrylbl
+
+keep if v3a==36 | v3a==124 | v3a==208 | v3a==246 | v3a==250 | v3a==276 | v3a==372 | v3a==392 | v3a==528 | v3a==554 | v3a==578 | v3a==620 | v3a==724 | v3a==752 | v3a==756 | v3a==826 | v3a==840
+
+generate year=1996
+gen yr2006=0
+
+rename v3a cntry
+rename v325 wghts
+
+revrs v36 v38 v39 v41 v42 v44
+recode revv36 (1/2=0) (3/4=1), generate(jobs)
+recode revv38 (1/2=0) (3/4=1), gen(hcare)
+recode revv39 (1/2=0) (3/4=1), gen(retire)
+recode revv41 (1/2=0) (3/4=1), gen(unemp)
+recode revv42 (1/2=0) (3/4=1), gen(incdiff)
+recode revv44 (1/2=0) (3/4=1), gen(housing)
+
+gen agesq = v201*v201
+rename v201 age
+recode v200 (1=0) (2=1), generate(female)
+recode v205 (1/4=1) (5/6=2) (7=3), generate(edcat)
+tab edcat, gen(edcat_)
+recode v206 (1=1) (2/3=2) (5=3) (4=4) (6/10=4), generate(lmstatus)
+recode v212 (1/2=1) (3=2) (4=4) (*=4), generate(v212_r)
+generate worktype = .
+replace worktype = 1 if v212_r==1 
+replace worktype = 2 if v212_r==2
+replace worktype = 4 if v212_r==4
+replace worktype = 3 if v213==1
+egen mean_income = mean(v218), by(cntry)
+egen sd_income = sd(v218), by(cntry)
+gen zinc = (v218 - mean_income)/sd_income
+
+save "ZA2900_sample.dta", replace
+
+use "ZA4700.dta"
+
+keep if V3a==36 | V3a==124 | V3a==208 | V3a==246 | V3a==250 | V3a==276 | V3a==372 | V3a==392 | V3a==528 | V3a==554 | V3a==578 | V3a==620 | V3a==724 | V3a==752 | V3a==756 | V3a==826 | V3a==840
+
+gen year=2006
+gen yr2006=1
+
+rename V3a cntry
+
+rename weight wghts
+save "ZA4700_sample.dta"
+
+revrs V25 V27 V28 V30 V31 V33
+recode revV25 (1/2=0) (3/4=1), generate(jobs)
+recode revV27 (1/2=0) (3/4=1), gen(hcare)
+recode revV28 (1/2=0) (3/4=1), gen(retire)
+recode revV30 (1/2=0) (3/4=1), gen(unemp)
+recode revV31 (1/2=0) (3/4=1), gen(incdiff)
+recode revV33 (1/2=0) (3/4=1), gen(housing)
+gen agesq = age*age
+recode sex (1=0) (2=1), generate(female)
+recode degree (0/2=1) (3/4=2) (5=3), generate(edcat)
+tab edcat, gen(edcat_)
+recode wrkst (1=1) (2/3=2) (5=3) (4=4) (6/10=4), generate(lmstatus)
+recode wrktype (1/2=1) (3=2) (4=3) (5=4) (*=4), generate(worktype)
+generate faminc = .
+replace faminc = AU_INC if AU_INC!=. 
+replace faminc = CA_INC if CA_INC!=. 
+replace faminc = CH_INC if CH_INC!=. 
+replace faminc = DE_INC if DE_INC!=. 
+replace faminc = DK_INC if DK_INC!=. 
+replace faminc = ES_INC if ES_INC!=. 
+replace faminc = IE_INC if IE_INC!=. 
+replace faminc = FI_INC if FI_INC!=. 
+replace faminc = FR_INC if FR_INC!=. 
+replace faminc = GB_INC if GB_INC!=. 
+replace faminc = JP_INC if JP_INC!=. 
+replace faminc = NL_INC if NL_INC!=. 
+replace faminc = NO_INC if NO_INC!=. 
+replace faminc = NZ_INC if NZ_INC!=. 
+replace faminc = PT_INC if PT_INC!=. 
+replace faminc = SE_INC if SE_INC!=. 
+replace faminc = US_INC if US_INC!=. 
+egen mean_income = mean(faminc), by(cntry)
+egen sd_income = sd(faminc), by(cntry)
+gen zinc = (faminc - mean_income)/sd_income
+
+save "ZA4700_sample.dta", replace
+
+clear
+import delimited /Users/maureeneger/meger/CRI/bradyfinnigan2014countrydata.csv
+keep if cntry==36 | cntry==124 | cntry==208 | cntry==246 | cntry==250 | cntry==276 | cntry==372 | cntry==392 | cntry==528 | cntry==554 | cntry==578 | cntry==620 | cntry==724 | cntry==752 | cntry==756 | cntry==826 | cntry==840
+save "/Users/maureeneger/meger/CRI/bradyfinnigan2014countrydata_sample.dta"
+
+use "ZA4700_sample.dta"
+append using "ZA2900_sample.dta"
+sort cntry year
+
+merge m:1 cntry year using "bradyfinnigan2014countrydata_sample.dta"
+recode cntry (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig17)
+recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig13)
+save "CRI.dta" 
+
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct if orig13==1, or
+outreg2 using "Table4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+*Model 2
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct socx if orig13==1, or
+outreg2 using "Table4_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+*Model 3
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct emprate if orig13==1, or
+outreg2 using "Table4_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+
+*Table 5
+*Model 1
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *)  
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  if orig13==1, or
+outreg2 using "Table5_M1.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+*Model 2
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  socx if orig13==1, or
+outreg2 using "Table5_M2.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+*Model 3
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry netmigpct  emprate if orig13==1, or
+outreg2 using "Table5_M3.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+*Model 4
+logit jobs age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit unemp age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit incdiff age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit retire age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit housing age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+logit hcare age agesq female ib2.edcat zinc i.lmstatus ib2.worktype yr2006 i.cntry foreignpct netmigpct  if orig13==1, or
+outreg2 using "Table5_M4.dta", excel eform cti(odds ratio) stats(coef tstat) alpha(0.001, 0.01, 0.05) sym(***, **, *) 
+
+
+
+
+

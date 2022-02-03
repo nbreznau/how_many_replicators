@@ -1,0 +1,173 @@
+Team: 38
+Software: Stata
+Version: ORIGINAL
+
+
+version 15     
+clear all         
+macro drop _all    
+set more off, perm 
+
+use ZA2900.dta, clear
+
+recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
+label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values v3a cntrylbl
+
+recode v36 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+recode govjobs (1/2=0) (3/4=1), gen(dgovjobs)
+
+recode v38 (1=4) (2=3) (3=2) (4=1), gen(govhcare)
+recode govhcare (1/2=0) (3/4=1), gen(dhcare)
+
+recode v39 (1=4) (2=3) (3=2) (4=1), gen(govretire)
+recode govretire (1/2=0) (3/4=1), gen(dgovretire)
+
+recode v41 (1=4) (2=3) (3=2) (4=1), gen(govunemp)
+recode govunemp (1/2=0) (3/4=1), gen(dgovunemp)
+
+recode v42 (1=4) (2=3) (3=2) (4=1), gen(govincdiff)
+recode govincdiff (1/2=0) (3/4=1), gen(dgovincdiff)
+
+recode v44 (1=4) (2=3) (3=2) (4=1), gen(govhousing)
+recode govhousing (1/2=0) (3/4=1), gen(dgovhous)
+
+
+rename v201 age
+recode v200 (1=0) (2=1), gen(female)
+recode v205 (1/4=1) (5/6=2) (7=3), gen(educ)
+label define educlbl 1 "lesshs" 2 "hs" 3 "univ"
+label value educ educlbl
+
+recode v206 (3/4=2) (5=3) (6/10=4), gen(empstat)
+label define empstatlbl 1 "ftemp" 2 "ptemp" 3 "unemp" 4 "nolabor"
+label value empstat empstatlbl
+
+gen selfemp=v213==1 //recodes missings to 0
+replace selfemp=. if v206==. //missings on empl. status
+
+rename v218 faminc
+
+gen inczscore=.
+levelsof v3a, local(cntries)
+foreach cntryval of local cntries {
+	zscore faminc if v3a==`cntryval', listwise
+	replace inczscore=z_faminc if v3a==`cntryval'
+	drop z_faminc
+}
+
+
+gen year=1996
+gen yr2006=0
+
+rename v3a cntry
+
+ta v325, m
+rename v325 wghts
+
+save ISSP96recode.dta, replace
+
+use ZA4700.dta, clear
+
+recode V25 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+recode govjobs (1/2=0) (3/4=1), gen(dgovjobs)
+
+recode V27 (1=4) (2=3) (3=2) (4=1), gen(govhcare)
+recode govhcare (1/2=0) (3/4=1), gen(dhcare)
+
+recode V28 (1=4) (2=3) (3=2) (4=1), gen(govretire)
+recode govretire (1/2=0) (3/4=1), gen(dgovretire)
+
+recode V30 (1=4) (2=3) (3=2) (4=1), gen(govunemp)
+recode govunemp (1/2=0) (3/4=1), gen(dgovunemp)
+
+recode V31 (1=4) (2=3) (3=2) (4=1), gen(govincdiff)
+recode govincdiff (1/2=0) (3/4=1), gen(dgovincdiff)
+
+recode V33 (1=4) (2=3) (3=2) (4=1), gen(govhousing)
+recode govhousing (1/2=0) (3/4=1), gen(dgovhous)
+
+recode sex (1=0) (2=1), gen(female)
+
+recode degree (0/2=1) (3/4=2) (5=3), gen(educ)
+label define educlbl 1 "lesshs" 2 "hs" 3 "univ"
+label value educ educlbl
+
+recode wrkst (3/4=2) (5=3) (6/10=4), gen(empstat)
+label define empstatlbl 1 "ftemp" 2 "ptemp" 3 "unemp" 4 "nolabor"
+label value empstat empstatlbl
+
+gen selfemp=wrktype==4
+replace selfemp=. if wrkst==.
+
+gen inczscore=.
+local incvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
+foreach incvar of local incvars {
+	zscore `incvar', listwise
+	replace inczscore=z_`incvar' if z_`incvar'!=.
+	drop z_`incvar'
+}
+
+rename V3a cntry
+rename weight wghts
+
+gen year=2006
+gen yr2006=1
+
+
+save ISSP06recode.dta, replace
+
+append using ISSP96recode.dta
+sort cntry year
+merge m:1 cntry year using "BradyFinnigan2014CountryData.dta"
+
+recode cntry (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig17)
+recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig13)
+
+encode country, gen(cnt)
+
+
+save ISSP9606.dta, replace
+
+keep if orig13
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "c.age##c.age i.female i.b2.educ i.b1.empstat i.selfemp c.inczscore i.yr2006 i.b13.cnt"
+
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct $controls 
+	outreg2 using $tables/forborn9606.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct socx $controls 
+	outreg2 using $tables/forborn9606socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct emprate $controls 
+	outreg2 using $tables/forborn9606emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct $controls
+	outreg2 using $tables/netmig9606.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct socx $controls
+	outreg2 using $tables/netmig9606socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct emprate $controls 
+	outreg2 using $tables/netmig9606emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct foreignpct $controls 
+	outreg2 using $tables/netmig9606forborn.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+

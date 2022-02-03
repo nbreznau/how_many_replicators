@@ -1,0 +1,395 @@
+Team: 34
+Software: R
+Version: Original
+
+library(readr)
+ZA4700 <- read_csv("ZA4700.csv")
+ZA2900 <- read_csv("ZA2900.csv")
+bradyfinnigan2014countrydata <- read_csv("bradyfinnigan2014countrydata.csv")
+
+data961 <- ZA2900
+data061 <- ZA4700
+countrydata1 <- bradyfinnigan2014countrydata
+
+data962 <- subset(data961, subset=(v3=="aus" | v3=="cdn" | v3== "f" | v3=="D-E"| v3=="irl"| v3=="j"|v3=="nz"|
+                                     v3=="n"|v3=="e"|v3=="s"|v3=="ch"|v3=="gb"|v3=="usa"))
+table(data962$v3)
+
+data062 <- subset(data061, subset=(V3a=="AU-Australia"|V3a=="CA-Canada"|V3a=="FR-France"|V3a=="DE-Germany"|
+                                     V3a=="IE-Ireland"|V3a=="JP-Japan"|V3a=="NZ-New Zealand"|V3a=="NO-Norway"|
+                                     V3a=="ES-Spain"|
+                                     V3a=="SE-Sweden"|V3a=="CH-Switzerland"|V3a=="GB-Great Britain"|V3a=="US-United States"))
+table(data062$V3a)
+
+data962$country1 <- NA
+data962$country1 <- data962$v3
+data062$country1 <- NA
+data062$country1 <- data062$V3a
+
+data962$country <- NA
+data962$country[data962$country1=="aus"] <- "aus"
+data962$country[data962$country1=="cdn"] <- "can"
+data962$country[data962$country1=="f"] <- "fra"
+data962$country[data962$country1=="D-E"] <- "ger"
+data962$country[data962$country1=="irl"] <- "irl"
+data962$country[data962$country1=="j"] <- "jap"
+data962$country[data962$country1=="nz"] <- "nzl"
+data962$country[data962$country1=="n"] <- "nor"
+data962$country[data962$country1=="e"] <- "spa"
+data962$country[data962$country1=="s"] <- "swe"
+data962$country[data962$country1=="ch"] <- "sw"
+data962$country[data962$country1=="gb"] <- "gb"
+data962$country[data962$country1=="usa"] <- "usa"
+
+data062$country <- NA
+data062$country[data062$country1=="AU-Australia"] <- "aus"
+data062$country[data062$country1=="CA-Canada"] <- "can"
+data062$country[data062$country1=="FR-France"] <- "fra"
+data062$country[data062$country1=="DE-Germany"] <- "ger"
+data062$country[data062$country1=="IE-Ireland"] <- "irl"
+data062$country[data062$country1=="JP-Japan"] <- "jap"
+data062$country[data062$country1=="NZ-New Zealand"] <- "nzl"
+data062$country[data062$country1=="NO-Norway"] <- "nor"
+data062$country[data062$country1=="ES-Spain"] <- "spa"
+data062$country[data062$country1=="SE-Sweden"] <- "swe"
+data062$country[data062$country1=="CH-Switzerland"] <- "sw"
+data062$country[data062$country1=="GB-Great Britain"] <- "gb"
+data062$country[data062$country1=="US-United States"] <- "usa"
+
+table(data962$country)
+table(data062$country)
+
+countrydata1$country.org <- NA
+countrydata1$country.org <- countrydata1$country
+
+countrydata1$country[countrydata1$country.org=="Australia"] <- "aus"
+countrydata1$country[countrydata1$country.org=="Canada"] <- "can"
+countrydata1$country[countrydata1$country.org=="France"] <- "fra"
+countrydata1$country[countrydata1$country.org=="Germany"] <- "ger"
+countrydata1$country[countrydata1$country.org=="Japan"] <- "jap"
+countrydata1$country[countrydata1$country.org=="New Zealand"] <- "nzl"
+countrydata1$country[countrydata1$country.org=="Norway"] <- "nor"
+countrydata1$country[countrydata1$country.org=="Spain"] <- "spa"
+countrydata1$country[countrydata1$country.org=="United Kingdom"] <- "gb"
+countrydata1$country[countrydata1$country.org=="United States"] <- "usa"
+countrydata1$country[countrydata1$country.org=="Ireland"] <- "irl"
+countrydata1$country[countrydata1$country.org=="Sweden"] <- "swe"
+countrydata1$country[countrydata1$country.org=="Switzerland"] <- "sw"
+
+table(countrydata1$country)
+
+countrydata <- subset(countrydata1, subset=(country=="aus"|country=="can"|country=="fra"|country=="gb"|
+                                              country=="ger"|country=="irl"|country=="jap"|
+                                              country=="nor"|country=="nzl"|country=="spa"|
+                                              country=="sw"|country=="swe"|country=="gb"|
+                                              country=="usa"))
+table(data062$country)
+table(data962$country)
+table(countrydata$country)
+
+d96 <- subset(countrydata, subset=(year=="1996"))
+d06 <- subset(countrydata, subset=(year=="2006"))
+
+install.packages("dplyr")
+library(dplyr)
+y<-inner_join(data962, d96, by="country")
+x<-inner_join(data062, d06, by="country")
+
+#1996: y
+
+table(y$v36)
+y$dgovjobs <- NA
+y$dgovjobs <- as.numeric(y$govjobs)
+y$dgovjobs[y$v36=="Definitely not"] <-0
+y$dgovjobs[y$v36=="Definitely should"] <-1
+y$dgovjobs[y$v36=="Probably not"] <-0
+y$dgovjobs[y$v36=="Probably should"] <-1
+table(y$dgovjobs)
+
+table(y$v38)
+y$dhcare <- NA
+y$dhcare <- as.numeric(y$dhcare)
+y$dhcare[y$v38=="Definitely not"] <-0
+y$dhcare[y$v38=="Definitely should"] <-1
+y$dhcare[y$v38=="Probably not"] <-0
+y$dhcare[y$v38=="Probably should"] <-1
+table(y$dhcare)
+
+table(y$v39)
+y$dgovretire <- NA
+y$dgovretire <- as.numeric(y$dgovretire)
+y$dgovretire[y$v39=="Definitely not"] <-0
+y$dgovretire[y$v39=="Definitely should"] <-1
+y$dgovretire[y$v39=="Probably not"] <-0
+y$dgovretire[y$v39=="Probably should"] <-1
+table(y$dgovretire)
+
+table(y$v41)
+y$dgovunemp <- NA
+y$dgovunemp <- as.numeric(y$dgovunemp)
+y$dgovunemp[y$v41=="Definitely not"] <-0
+y$dgovunemp[y$v41=="Definitely should"] <-1
+y$dgovunemp[y$v41=="Probably not"] <-0
+y$dgovunemp[y$v41=="Probably should"] <-1
+table(y$dgovunemp)
+
+
+table(y$v42)
+y$dgovincdiff <- NA
+y$dgovincdiff <- as.numeric(y$dgovincdiff)
+y$dgovincdiff[y$v42=="Definitely not"] <-0
+y$dgovincdiff[y$v42=="Definitely should"] <-1
+y$dgovincdiff[y$v42=="Probably not"] <-0
+y$dgovincdiff[y$v42=="Probably should"] <-1
+table(y$dgovincdiff)
+
+
+table(y$v44)
+y$dgovhous <- NA
+y$dgovhous <- as.numeric(y$dgovincdiff)
+y$dgovhous[y$v44=="Definitely not"] <-0
+y$dgovhous[y$v44=="Definitely should"] <-1
+y$dgovhous[y$v44=="Probably not"] <-0
+y$dgovhous[y$v44=="Probably should"] <-1
+table(y$dgovhous)
+
+#2006: x
+
+table(x$V25)
+x$dgovjobs <- NA
+x$dgovjobs <- as.numeric(x$dgovjobs)
+x$dgovjobs[x$V25=="Definitely should be"] <-1
+x$dgovjobs[x$V25=="Definitely should not be"] <-0
+x$dgovjobs[x$V25=="Probably should be"] <-1
+x$dgovjobs[x$V25=="Probably should not be"] <-0
+table(x$dgovjobs)
+
+table(x$V30)
+x$dgovunemp <- NA
+x$dgovunemp <- as.numeric(x$dgovunemp)
+x$dgovunemp[x$V30=="Definitely should be"] <-1
+x$dgovunemp[x$V30=="Definitely should not be"] <-0
+x$dgovunemp[x$V30=="Probably should be"] <-1
+x$dgovunemp[x$V30=="Probably should not be"] <-0
+table(x$dgovunemp)
+
+table(x$V31)
+x$dgovincdiff <- NA
+x$dgovincdiff <- as.numeric(x$dgovincdiff)
+x$dgovincdiff[x$V31=="Definitely should be"] <-1
+x$dgovincdiff[x$V31=="Definitely should not be"] <-0
+x$dgovincdiff[x$V31=="Probably should be"] <-1
+x$dgovincdiff[x$V31=="Probably should not be"] <-0
+table(x$dgovincdiff)
+
+table(x$V27)
+x$dhcare <- NA
+x$dhcare <- as.numeric(x$dhcare)
+x$dhcare[x$V27=="Definitely should be"] <-1
+x$dhcare[x$V27=="Definitely should not be"] <-0
+x$dhcare[x$V27=="Probably should be"] <-1
+x$dhcare[x$V27=="Probably should not be"] <-0
+table(x$dhcare)
+
+table(x$V28)
+x$dgovretire <- NA
+x$dgovretire<- as.numeric(x$dgovretire)
+x$dgovretire[x$V28=="Definitely should be"] <-1
+x$dgovretire[x$V28=="Definitely should not be"] <-0
+x$dgovretire[x$V28=="Probably should be"] <-1
+x$dgovretire[x$V28=="Probably should not be"] <-0
+table(x$dgovretire)
+
+table(x$V28)
+x$dgovhous <- NA
+x$dgovhous<- as.numeric(x$dgovhous)
+x$dgovhous[x$V33=="Definitely should be"] <-1
+x$dgovhous[x$V33=="Definitely should not be"] <-0
+x$dgovhous[x$V33=="Probably should be"] <-1
+x$dgovhous[x$V33=="Probably should not be"] <-0
+table(x$dgovhous)
+
+
+attach(y)
+dfy <- data.frame(dgovhous, dgovincdiff, dgovretire, dgovjobs, dgovunemp, dhcare, foreignpct,emprate, socx,netmigpct,country, year)
+detach(y)
+
+attach(x)
+dfx <- data.frame(dgovhous, dgovincdiff, dgovretire, dgovjobs, dgovunemp, dhcare, foreignpct, emprate,socx,netmigpct,
+                  year, country)
+detach(x)
+d1 <- rbind(dfy, dfx)
+d1<-na.omit(d1) # line wise deletion
+
+
+
+table(d1$country)
+mod1 <- glm(dgovjobs~foreignpct+country+year, family=binomial, data=d1)
+summary(mod1)
+logistic.display(mod1)
+
+mod1a <- glm(dgovjobs~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod1a)
+logistic.display(mod1a)
+
+mod1b <- glm(dgovjobs~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod1b)
+logistic.display(mod1b)
+
+mod2 <- glm(dgovunemp~foreignpct+country+year, family=binomial, data=d1)
+summary(mod2)
+logistic.display(mod2)
+
+mod2a <- glm(dgovunemp~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod2a)
+logistic.display(mod2a)
+
+mod2b <- glm(dgovunemp~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod2b)
+logistic.display(mod2b)
+
+mod3 <- glm(dgovincdiff~foreignpct+country+year, family=binomial, data=d1)
+summary(mod3)
+logistic.display(mod3)
+
+mod3a <- glm(dgovincdiff~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod3a)
+logistic.display(mod3a)
+
+mod3b <- glm(dgovincdiff~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod3b)
+logistic.display(mod3b)
+
+mod4 <- glm(dgovretire~foreignpct+country+year, family=binomial, data=d1)
+summary(mod4)
+logistic.display(mod4)
+
+mod4a <- glm(dgovretire~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod4a)
+logistic.display(mod4a)
+
+mod4b <- glm(dgovretire~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod4b)
+logistic.display(mod4b)
+
+mod5 <- glm(dgovhous~foreignpct+country+year, family=binomial, data=d1)
+summary(mod5)
+logistic.display(mod5)
+
+mod5a <- glm(dgovhous~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod5a)
+logistic.display(mod5a)
+
+mod5b <- glm(dgovhous~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod5b)
+logistic.display(mod5b)
+
+mod6 <- glm(dhcare~foreignpct+country+year, family=binomial, data=d1)
+summary(mod6)
+logistic.display(mod6)
+
+mod6a <- glm(dhcare~foreignpct+socx+country+year, family=binomial, data=d1)
+summary(mod6a)
+logistic.display(mod6a)
+
+mod6b <- glm(dhcare~foreignpct+emprate+country+year, family=binomial, data=d1)
+summary(mod6b)
+logistic.display(mod6b)
+
+mod7a <- glm(dgovjobs~netmigpct+country+year, family=binomial, data=d1)
+summary(mod7a)
+logistic.display(mod7a)
+
+mod7b <- glm(dgovjobs~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod7b)
+logistic.display(mod7b)
+
+mod7c <- glm(dgovjobs~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod7c)
+logistic.display(mod7c)
+
+mod7d <- glm(dgovjobs~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod7d)
+logistic.display(mod7d)
+
+mod8a <- glm(dgovunemp~netmigpct+country+year, family=binomial, data=d1)
+summary(mod8a)
+logistic.display(mod8a)
+
+mod8b <- glm(dgovunemp~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod8b)
+logistic.display(mod8b)
+
+mod8c <- glm(dgovunemp~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod8c)
+logistic.display(mod8c)
+
+mod8d <- glm(dgovunemp~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod8d)
+logistic.display(mod8d)
+
+mod9a <- glm(dgovincdiff~netmigpct+country+year, family=binomial, data=d1)
+summary(mod9a)
+logistic.display(mod9a)
+
+mod9b <- glm(dgovincdiff~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod9b)
+logistic.display(mod9b)
+
+mod9c <- glm(dgovincdiff~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod9c)
+logistic.display(mod9c)
+
+mod9d <- glm(dgovincdiff~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod9d)
+logistic.display(mod9d)
+
+mod10a <- glm(dgovretire~netmigpct+country+year, family=binomial, data=d1)
+summary(mod10a)
+logistic.display(mod10a)
+
+mod10b <- glm(dgovretire~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod10b)
+logistic.display(mod10b)
+
+mod10c <- glm(dgovretire~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod10c)
+logistic.display(mod10c)
+
+mod10d <- glm(dgovretire~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod10d)
+logistic.display(mod10d)
+
+mod11a <- glm(dgovhous~netmigpct+country+year, family=binomial, data=d1)
+summary(mod11a)
+logistic.display(mod11a)
+
+mod11b <- glm(dgovhous~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod11b)
+logistic.display(mod11b)
+
+mod11c <- glm(dgovhous~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod11c)
+logistic.display(mod11c)
+
+mod11d <- glm(dgovhous~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod11d)
+logistic.display(mod11d)
+
+mod12a <- glm(dhcare~netmigpct+country+year, family=binomial, data=d1)
+summary(mod12a)
+logistic.display(mod12a)
+
+mod12b <- glm(dhcare~netmigpct+socx+country+year, family=binomial, data=d1)
+summary(mod12b)
+logistic.display(mod12b)
+
+mod12c <- glm(dhcare~emprate+netmigpct+country+year, family=binomial, data=d1)
+summary(mod12c)
+logistic.display(mod12c)
+
+mod12d <- glm(dhcare~foreignpct+netmigpct+country+year, family=binomial, data=d1)
+summary(mod12d)
+logistic.display(mod12d)
+
+
