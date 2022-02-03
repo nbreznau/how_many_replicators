@@ -1,0 +1,478 @@
+Team: 17
+Software: Stata
+Version: Original
+
+use "bradyfinnigan2014countrydata.dta", clear 
+
+	rename country cntry2
+	rename cntry country
+
+	generate regime=1 if liberal==1
+	replace regime=2 if socdem==1
+	replace regime=0 if regime==.
+
+	label variable regime "welfare state regime"
+	label define regime 0 "conservative" 1"liberal" 2"social democratic"
+	label values regime regime
+
+	label variable mcp "multiculturalism policy index"
+	label variable socx "social welfare expenditure"
+	label variable emprate "employment rate"
+
+save "bradyfinnigan2014countrydatarep.dta", replace
+
+
+use "ZA2900.dta", clear
+
+	recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(country)
+	label define country 36 "AU-Australia" 124 "CA-Canada" 152 "CL-Chile" 158 "TW-Taiwan" 191 "HR-Croatia" 203 "CZ-Czech" 208 "DK-Denmark" 214"DO-Dominican Republic" 246 "FI-Finland" 250 "FR-France" 276 "DE-Germany" 348 "-HU-Hungary" 372 "IE-Ireland" 376 "IL-Isreal" 392 "JP-Japan" 410 "SK-South Korea" 428 "LV-Latvia" 528 "NL-Netherlands" 554 "NZ-New Zealand" 578 "NO-Norway" 608 "PH-Philippines" 616 "PL-Poland" 620 "PT-Portugal" 643 "RU-Russia" 705 "SI-Slovenia" 710"ZA-South Africa" 724 "ES-Spain" 752 "SE-Sweden" 756 "CH-Switzerland" 826 "GB-Great Britain" 840 "US-United States" 858"UY-Uruguay" 862"VE-Venezuela" 
+	label values country country
+	tabulate country v3, missing 
+
+	gen year=1996
+	gen yr2006=0
+
+	label variable country "Country ID"
+
+	recode v36 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+	recode govjobs (1/2=0) (3/4=1), gen(jobs)
+	label variable jobs "jobs"
+	label define should 0"shouldn't" 1"should"
+	label values jobs should
+
+	recode v41 (1=4) (2=3) (3=2) (4=1), generate(govunemp)
+	recode govunemp (1/2=0) (3/4=1), generate(unemp)
+	label variable unemp "unemployment"
+	label values unemp should
+	
+	recode v42 (1=4) (2=3) (3=2) (4=1), generate(govincdiff)
+	recode govincdiff (1/2=0) (3/4=1), generate(incdiff)
+	label variable incdiff "income difference"
+	label values incdiff should
+
+	recode v39 (1=4) (2=3) (3=2) (4=1), generate(govretire)
+	recode govretire (1/2=0) (3/4=1), generate(retire)
+	label variable retire "retirement"
+	label values retire should
+
+	recode v44 (1=4) (2=3) (3=2) (4=1), generate(govhousing)
+	recode govhousing (1/2=0) (3/4=1), generate(housing)
+	label variable housing "housing"
+	label values housing should
+	recode v38 (1=4) (2=3) (3=2) (4=1), generate(govhcare)
+	recode govhcare (1/2=0) (3/4=1), generate(hcare)
+	label variable hcare "healthcare"
+	label values hcare should
+	
+	tabulate v201, missing
+	rename v201 age
+
+	tabulate v200, missing
+	rename v200 sex
+	recode sex (1=0) (2=1), gen(female)
+	label variable female "sex"
+	label define female 1"female" 0"male"
+	label values female female
+
+	tabulate v202, missing
+	tabulate v202 country, missing 
+		*completely missing for Spain*
+
+	recode v202 (1=0) (5=1) (3/4=2) (2=3), generate(marstat)
+	label define marstat 0"married" 1"never married" 2"divorced" 3"widowed"
+	label values marstat marstat
+	label variable marstat "marital status"
+
+	rename v273 hhsize
+	label variable hhsize "HH size"
+
+	recode v274 (2/4=1) (6/8=1) (nonmiss=0), gen(childhh)
+	local i = 10
+	while `i' < 27 {
+		replace childhh=1 if v274==`i'
+	local i = `i' + 2
+	}
+
+	tabulate v275, missing
+	recode v275 (1=0) (2=1) (3=2), gen(residn)
+	label define residn 0"urban" 1"suburb/town" 2"rural" 
+	label values residn residn
+	label variable residn "residence area
+	tabulate v205,missing 
+	rename v205 educat
+	recode educat (1/4=1) (5/6=0)(7=2), gen(degree3)
+	label define degree3 1 "less than secondary degree" 0 "Secondary"  2 "University or higher"
+	label values degree3 degree3
+
+	recode v206 (1=0) (2/4=1)(5=2)(6/10=3), generate (lmstatus)
+	replace lmstatus=4 if v213==1 & (v206!=. & lmstatus!=2 & lmstatus!=3)
+	replace lmstatus=5 if (v212==1 | v212==2) & (v206!=. & lmstatus!=2 & lmstatus!=3 & lmstatus!=4)
+	label variable lmstatus "LM status"	
+	label define lmstatus 0 "private full-time" 1"part-time employment" 2"unemployed" 3"not in the labour force" 4"self-employment" 5"public employment" 
+	label values lmstatus lmstatus 	
+	
+	rename v218 faminc
+	generate faminczscore=.
+	levelsof country, local(cntries)
+	foreach country of local cntries {
+		zscore faminc if country==`country', listwise
+		replace faminczscore=z_faminc if country==`country'
+		drop z_faminc
+	}
+	tabulate v220, missing
+
+	recode v220 (6=0) (3/5=1) (1/2=2), gen(religious)
+	label variable religious "Religious attendance"
+	label define religious 0 "no attendance" 1"low attendance" 2"high attendance"
+	label values religious religious
+
+save "ISSP96replication.dta", replace
+
+use "ZA4700.dta", clear
+
+	generate year=2006
+	generate yr2006=1
+
+	rename V3a country
+	label define country 36 "AU-Australia" 124 "CA-Canada" 152 "CL-Chile" 158 "TW-Taiwan" 191 "HR-Croatia" 203 "CZ-Czech" 208 "DK-Denmark" 214"DO-Dominican Republic" 246 "FI-Finland" 250 "FR-France" 276 "DE-Germany" 348 "-HU-Hungary" 372 "IE-Ireland" 376 "IL-Isreal" 392 "JP-Japan" 410 "SK-South Korea" 428 "LV-Latvia" 528 "NL-Netherlands" 554 "NZ-New Zealand" 578 "NO-Norway" 608 "PH-Philippines" 616 "PL-Poland" 620 "PT-Portugal" 643 "RU-Russia" 705 "SI-Slovenia" 710"ZA-South Africa" 724 "ES-Spain" 752 "SE-Sweden" 756 "CH-Switzerland" 826 "GB-Great Britain" 840 "US-United States" 858"UY-Uruguay" 862"VE-Venezuela" 
+	label values country country
+	label variable country "Country ID"
+
+	recode V25 (1=4) (2=3) (3=2) (4=1), gen(govjobs)
+	recode govjobs (1/2=0) (3/4=1), gen(jobs)
+	label variable jobs "jobs"
+	label define should 0"shouldn't" 1"should"
+	label values jobs should
+
+	recode V30 (1=4) (2=3) (3=2) (4=1), generate(govunemp)
+	recode govunemp (1/2=0) (3/4=1), generate(unemp)
+	label variable unemp "unemployment"
+	label values unemp should
+	
+	recode V31 (1=4) (2=3) (3=2) (4=1), generate(govincdiff)
+	recode govincdiff (1/2=0) (3/4=1), generate(incdiff)
+	label variable incdiff "income difference"
+	label values incdiff should
+
+	recode V28 (1=4) (2=3) (3=2) (4=1), generate(govretire)
+	recode govretire (1/2=0) (3/4=1), generate(retire)
+	label variable retire "retirement"
+	label values retire should
+
+	recode V33 (1=4) (2=3) (3=2) (4=1), generate(govhousing)
+	recode govhousing (1/2=0) (3/4=1), generate(housing)
+	label variable housing "housing"
+	label values housing should
+
+	recode V27 (1=4) (2=3) (3=2) (4=1), generate(govhcare)
+	recode govhcare (1/2=0) (3/4=1), generate(hcare)
+	label variable hcare "healthcare"
+	label values hcare should
+	
+	tabulate age, missing
+
+	recode sex (1=0) (2=1), gen(female)
+	label variable female "sex"
+	label define female 1"female" 0"male"
+	label values female female
+
+	tabulate marital, missing
+	tabulate marital country, missing 
+
+	recode marital (1=0) (5=1) (3/4=2) (2=3), generate(marstat)
+	label define marstat 0"married" 1"never married" 2"divorced" 3"widowed"
+	label values marstat marstat
+	label variable marstat "marital status"
+
+	rename hompop hhsize
+	label variable hhsize "HH size"
+
+	recode hhcycle(2/4=1) (6/8=1) (nonmiss=0), gen(childhh)
+	local i = 10
+	while `i' < 29 {
+		replace childhh=1 if hhcycle==`i'
+	local i = `i' + 2
+	}
+
+	tabulate urbru, missing
+	recode urbru (1=0) (2/3=1) (4/5=2), gen(residn)
+	label define residn 0"urban" 1"suburb/town" 2"rural" 
+	label values residn residn
+	label variable residn "residence area"
+	tabulate degree,missing 
+	recode degree (0/2=1) (3/4=0)(5=2), gen(degree3)
+	label define degree3 1 "less than secondary degree" 0 "Secondary"  2 "University or higher"
+	label values degree3 degree3
+
+	recode wrkst (1=0) (2/4=1)(5=2)(6/10=3), generate (lmstatus)
+	replace lmstatus=4 if wrktype==4 & (wrkst!=. & lmstatus!=2 & lmstatus!=3)
+	replace lmstatus=5 if (wrktype==1 | wrktype==2) & (lmstatus!=. & lmstatus!=2 & lmstatus!=3 & lmstatus!=4)
+	label variable lmstatus "LM status"	
+	label define lmstatus 0 "private full-time" 1"part-time employment" 2"unemployed" 3"not in the labour force" 4"self-employment" 5"public employment" 
+	label values lmstatus lmstatus 	
+	
+	gen faminczscore=.
+	local famincvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
+	foreach famincvar of local famincvars {
+	zscore `famincvar', listwise
+	replace faminczscore=z_`famincvar' if z_`famincvar'!=.
+	drop z_`famincvar'
+	}
+
+	tabulate attend, missing
+	tabulate attend, nolabel
+	recode attend (8=0) (4/7=1) (1/3=2), gen(religious)
+	label variable religious "Religious attendance"
+	label define religious 0 "no attendance" 1"low attendance" 2"high attendance"
+	label values religious religious
+
+save "C:\Users\Malancu\Documents\REPLICATION\stata\ISSP06replication.dta", replace
+
+
+	append using "ISSP96replication.dta"
+	sort country year
+	merge m:1 country year using "bradyfinnigan2014countrydatarep.dta"
+
+	recode country (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(f17)
+	recode country (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(f13)
+	
+save "ISSP9606replication.dta", replace
+
+global data "ISSP9606replication.dta"
+global results "results"
+
+	use $data, clear
+	keep if year==2006
+	keep if f17
+
+local ilcontrols "age female marstat hhsize childhh residn degree3 lmstatus faminczscore religious"
+
+	generate rowtotal = 0 
+	foreach v in `ilcontrols' { 
+		replace rowtotal = rowtotal + `v' 
+	}
+	keep if rowtotal!=.
+
+local depvar "jobs unemp incdiff retire housing hcare"
+
+	preserve
+	collapse `depvar' , by(country)
+	outsheet country `depvar'  using $results\dv06.xls, comma replace
+	restore
+
+	preserve
+	keep country `depvar' 
+	bysort country: outreg2 using $results\dv06.xls, append noaster excel sideway bdec(2) sdec(2) sum(detail) eqkeep(mean sd)
+	restore
+
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv `ilcontrols', i(country) quad(30)
+	outreg2 using $results\controls06.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.foreignpct `ilcontrols', i(country) quad(30)
+	outreg2 using $results\fb06.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.foreignpct c.socx `ilcontrols', i(country) quad(30)
+	outreg2 using $results\fb06socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.foreignpct i.regime `ilcontrols', i(country) quad(30)
+	outreg2 using $results\fb06regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.foreignpct c.emprate `ilcontrols', i(country) quad(30)
+	outreg2 using $results\fb06emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.foreignpct c.mcp `ilcontrols', i(country) quad(30)
+	outreg2 using $results\fb06mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct c.socx `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct i.regime `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+	}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct c.emprate `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct c.mcp `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.netmigpct c.foreignpct `ilcontrols', i(country) quad(30)
+	outreg2 using $results\netmig06fb.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn c.socx `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06socx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn i.regime `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06regime.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn c.emprate `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06emprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+	}
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn c.mcp `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06mcp.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn c.foreignpct `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06fb.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+}
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols " c.age##c.age i.female i.marstat c.hhsize i.childhh i.residn i.degree3 i.lmstatus c.faminczscore i.religious"
+
+
+foreach v in `depvar' {
+	rename `v' dv
+	xtlogit dv c.cforborn c.netmigpct `ilcontrols', i(country) quad(30)
+	outreg2 using $results\cfb06netmig.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`v')
+	rename dv `v'
+	}
+
+use $data, clear 
+keep if f13
+quietly tab country, gen(countryfe)
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols "c.age##c.age i.female i.degree3 i.lmstatus c.faminczscore i.yr2006"
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols "c.age##c.age i.female i.degree3 i.lmstatus c.faminczscore i.yr2006"
+
+foreach v of varlist `depvar'{
+	logit `v' `ilcontrols' i.countryfe*
+	outreg2 using $results\controls.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+foreach v of varlist `depvar' {
+    logit `v' c.foreignpct `ilcontrols' i.countryfe*
+	outreg2 using $results\fb.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach v of varlist `depvar' {
+	logit `v' c.foreignpct c.socx `ilcontrols' i.countryfe*
+	outreg2 using $results\fbsocx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach v of varlist `depvar' {
+	logit `v' c.foreignpct c.emprate `ilcontrols' i.countryfe*
+	outreg2 using $results\fbemprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+local depvar "jobs unemp incdiff retire housing hcare"
+local ilcontrols "c.age##c.age i.female i.degree3 i.lmstatus c.faminczscore i.yr2006"
+
+foreach v of varlist `depvar'{
+	logit `v' c.netmigpct `ilcontrols' i.countryfe*
+	outreg2 using $results\netmig.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach v of varlist `depvar' {
+	logit `v' c.netmigpct c.socx `ilcontrols' i.countryfe*
+	outreg2 using $results\netmigsocx.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach v of varlist `depvar'{
+	logit `v' c.netmigpct c.emprate `ilcontrols' i.countryfe*
+	outreg2 using $results\netmigemprate.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach v of varlist `depvar'{
+	logit `v' c.netmigpct c.foreignpct `ilcontrols' i.countryfe*
+	outreg2 using $results\netmigfb.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+

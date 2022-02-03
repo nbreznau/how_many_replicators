@@ -1,0 +1,186 @@
+Team: 20
+Software: Stata
+Version: Original
+
+use "ZA2900.dta", clear
+
+tab v1
+gen study=v1
+gen year=1996
+
+tab v3
+tab v3, nolabel
+gen cntry=.
+replace cntry=36 if v3==1
+replace cntry=100 if v3==17
+replace cntry=124 if v3==20
+replace cntry=196 if v3==28
+replace cntry=203 if v3==14
+replace cntry=250 if v3==27
+replace cntry=276 if v3==2
+replace cntry=276 if v3==3
+replace cntry=348 if v3==8
+replace cntry=372 if v3==10
+replace cntry=376 if v3==22
+replace cntry=376 if v3==23
+replace cntry=380 if v3==9
+replace cntry=392 if v3==24
+replace cntry=428 if v3==26
+replace cntry=554 if v3==19
+replace cntry=578 if v3==12
+replace cntry=608 if v3==21
+replace cntry=616 if v3==16
+replace cntry=643 if v3==18
+replace cntry=705 if v3==15
+replace cntry=724 if v3==25
+replace cntry=752 if v3==13
+replace cntry=756 if v3==30
+replace cntry=826 if v3==4
+replace cntry=840 if v3==6
+
+tab cntry v3
+
+tab v200
+gen female=.
+replace female=1 if v200==2
+replace female=0 if v200==1
+tab female
+
+tab v201
+gen age=v201
+
+gen age2=age*age
+
+tab v205
+tab v205,nol
+gen educ=.
+replace educ=1 if v205==1 & v206!=6
+replace educ=1 if v205==2 | v205==3
+replace educ=2 if v205==4 | v205==5
+replace educ=3 if v205==6 | v205==7
+tab educ
+
+tab v206
+tab v206,nolabel
+gen empl=.
+replace empl=1 if v206==1
+replace empl=2 if v206==2 | v206==3
+replace empl=3 if v206==5 
+replace empl=4 if v206==4 | v206==6 | v206==7 | v206==8 | v206==9 | v206==10
+tab empl
+
+tab v39
+tab v39,nol
+gen oldage=.
+replace oldage=1 if v39==1 | v39==2
+replace oldage=0 if v39==3 | v39==4
+
+tab v41
+tab v41,nol
+gen unemployed=.
+replace unemployed=1 if v41==1 | v41==2
+replace unemployed=0 if v41==3 | v41==4
+
+tab v42
+tab v42,nol
+gen reducinc=.
+replace reducinc=1 if v42==1 | v42==2
+replace reducinc=0 if v42==3 | v42==4
+
+tab v36
+tab v36,nol
+gen jobs=.
+replace jobs=1 if v42==1 | v42==2
+replace jobs=0 if v42==3 | v42==4
+
+gen newid=_n
+gen double id=199600000+newid
+
+keep id oldage unemployed reducinc jobs year female age age2 educ empl cntry
+save "issp1996.dta", replace
+
+use "ZA4700.dta" 
+
+gen oldage = V28
+recode oldage (2 = 1) (3 4=0)
+gen unemployed = V30
+recode unemployed (2 = 1) (3 4=0)
+gen reducinc = V31
+recode reducinc (2 = 1) (3 4=0)
+gen jobs = V25
+recode jobs (2 = 1) (3 4=0)
+
+gen newid=_n
+gen double id=200600000+newid
+
+gen year = 2006
+
+gen female = sex
+recode female (1=0) (2=1)
+
+gen age2 = age*age
+
+gen educ = .
+replace educ = 1 if degree <= 1
+replace educ = 2 if degree == 2 | degree == 3
+replace educ = 3 if degree >= 4
+
+gen empl = .
+replace empl = 1 if wrkst == 1
+replace empl = 2 if wrkst == 2 | wrkst == 3
+replace empl = 3 if wrkst == 5
+replace empl = 4 if wrkst ==4 | wrkst >= 6
+
+gen cntry = V3
+recode cntry (276.1 = 276) (276.2 = 276) (376.1 = 376) (376.2 = 376) (826.1 = 826)
+
+keep id oldage unemployed reducinc jobs year female age age2 educ empl cntry
+
+save "ISSP2006.dta", replace
+
+merge 1:1 id cntry using "issp1996.dta"
+
+save "ISSP_combined.dta", replace
+drop _merge
+
+merge m:1 cntry year using "L2data.dta"
+
+drop if id == .
+
+save "ISSP_combined.dta", replace
+
+clear
+use "ISSP_combined.dta"
+
+global indlev female age age2 b2.educ b1.empl
+global dvars oldage unemployed reducinc jobs
+
+global M1 $indlev foreignpct 
+global M2 $indlev foreignpct socx 
+global M3 $indlev foreignpct emprate 
+global M4 $indlev netmigpct 
+global M5 $indlev netmigpct socx
+global M6 $indlev netmigpct emprate
+
+quietly reg id $indlev $dvars $M2 $M3 $M4  
+gen netsamp_A = e(sample)
+
+estimates clear
+local n 6
+forvalues md= 1/`n'{
+		*di `md'
+			foreach dv in $dvars {
+				di "`dv'"
+					logit `dv'	${M`md'}	i.year i.cntry if netsamp_A==1
+					est store `dv'_M`md'
+			}
+		}
+	
+esttab oldage_M1 unemployed_M1 reducinc_M1 jobs_M1 ///
+		oldage_M2 unemployed_M2 reducinc_M2 jobs_M2 ///
+		oldage_M3 unemployed_M3 reducinc_M3 jobs_M3 ///
+		oldage_M4 unemployed_M4 reducinc_M4 jobs_M4 ///
+		oldage_M5 unemployed_M5 reducinc_M5 jobs_M5 ///
+		oldage_M6 unemployed_M6 reducinc_M6 jobs_M6 using "models.rtf", b(3) z(3) star(* 0.05 ** 0.01 *** 0.001) eform nogaps constant replace
+		
+		

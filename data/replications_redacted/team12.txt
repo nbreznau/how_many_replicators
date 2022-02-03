@@ -1,0 +1,266 @@
+Team: 12
+Software: R
+Version: ORIGINAL
+
+remove.packages('dplyr')
+
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+packages <- c('openxlsx', 'lme4', 'car')
+
+ipak(packages)
+
+l2 <- read.xlsx('L2data.xlsx', sheet = 1, startRow = 1, colNames = TRUE)
+
+l196 <- read.xlsx('za2900.xlsx', sheet = 1, startRow = 1, colNames = TRUE)
+
+l106 <- read.xlsx('za4700.xlsx', sheet = 1, startRow = 1, colNames = TRUE)
+
+l196$Female <- l196$V200 - 1
+l106$Female <- l106$Sex - 1
+
+names(l196)[names(l196) == "V201"] <- "Age"
+
+l196$Age2 <- l196$Age*l196$Age
+l106$Age2 <- l106$Age*l106$Age
+
+l196$EduP <- car::recode(l196$V205, "1:4 = 1; 5:7 = 0")
+l106$EduP <- car::recode(l106$Degree, "0:2 = 1; 3:5 = 0")
+
+l196$EduU <- car::recode(l196$V205, "1:6 = 0; 7 = 1")
+l106$EduU <- car::recode(l106$Degree, "0:4 = 0; 5 = 1")
+
+l196$WrkstPt <- car::recode(l196$V206, "1 = 0; 2:3 = 1; 4:10 = 0")
+l106$WrkstPt <- car::recode(l106$Wrkst, "1 = 0; 2:3 = 1; 4:10 = 0")
+
+l196$WrkstNa <- car::recode(l196$V206, "1:3 = 0; 4 = 1; 5 = 0; 6:10 = 1")
+l106$WrkstNa <- car::recode(l106$Wrkst, "1:3 = 0; 4 = 1; 5 = 0; 6:10 = 1")
+
+l196$WrkstAu <- car::recode(l196$V206, "1:4 = 0; 5 = 1; 6:10 = 0")
+l106$WrkstAu <- car::recode(l106$Wrkst, "1:4 = 0; 5 = 1; 6:10 = 0")
+
+l196$Old <- car::recode(l196$V39, "1:2 = 1; 3:4 = 0")
+l106$Old <- car::recode(l106$V28, "1:2 = 1; 3:4 = 0")
+
+l196$Unemp <- car::recode(l196$V41, "1:2 = 1; 3:4 = 0")
+l106$Unemp <- car::recode(l106$V30, "1:2 = 1; 3:4 = 0")
+
+l196$Inc <- car::recode(l196$V42, "1:2 = 1; 3:4 = 0")
+l106$Inc <- car::recode(l106$V31, "1:2 = 1; 3:4 = 0")
+
+l196$Jobs <- car::recode(l196$V36, "1:2 = 1; 3:4 = 0")
+l106$Jobs <- car::recode(l106$V25, "1:2 = 1; 3:4 = 0")
+
+l196$Country <- car::recode(l196$V3, "1 = 36; 2 = 276; 3 = 276; 4 = 826;
+                   5 = 826; 6 = 840; 7 = 40; 8 = 348; 9 = 380;
+                   10 = 372; 11 = 528; 12 = 578; 13 = 752; 
+                   14 = 203; 15 = 705; 16 = 616; 17 = 100; 
+                   18 = 643; 19 = 554; 20 = 124; 21 = 608; 
+                   22 = 376; 23 = 376; 24 = 392; 25 = 724; 
+                   26 = 428; 27 = 250; 28 = 196; 30 = 756")
+names(l106)[names(l106) == "V3a"] <- "Country"
+
+names(l196)[names(l196) == "V1"] <- "Wave"
+names(l106)[names(l106) == "V1"] <- "Wave"
+
+l196$Wave <- car::recode(l196$Wave, "2900 = 1996")
+l106$Wave <- car::recode(l106$Wave, "4700 = 2006")
+
+l106$ID <- as.numeric(paste(l106$Wave, l106$V2, l106$Country, sep = ""))
+l196$ID <- as.numeric(paste(l196$Wave, l196$V2, l196$Country, sep = ""))
+
+install.packages('dplyr')
+library('dplyr')
+
+l196s <- select(l196, Wave, ID, Country, Old, Unemp, Inc, Jobs,
+                Female, Age, Age2, EduP, EduU, 
+                WrkstPt, WrkstNa, WrkstAu) 
+l106s <- select(l106, Wave, ID, Country, Old, Unemp, Inc, Jobs,
+                Female, Age, Age2, EduP, EduU, 
+                WrkstPt, WrkstNa, WrkstAu) 
+
+l1p <- rbind(l196s, l106s) 
+
+names(l2)[names(l2) == "cntry"] <- "Country"
+names(l2)[names(l2) == "year"] <- "Wave"
+
+l12 <- merge(l1p, l2, by = c("Country", "Wave"))
+
+l12$Wave <- factor(l12$Wave, levels = c(1996, 2006), labels = c("1996", "2006"))
+
+
+l12s13 <- subset(l12, 
+               Country == 250 | Country == 246 | Country == 208 | Country == 752 | Country == 276 | Country == 578 | 
+               Country == 724 | Country == 620 | Country == 528 | Country == 826 | Country == 756 | 
+               Country == 554)
+m1b <- glm(Old ~ foreignpct + 
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m1b)
+exp(coef(m1b))
+
+m2b <- glm(Unemp ~ foreignpct + 
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m2b)
+exp(coef(m2b))
+
+m3b <- glm(Inc ~ foreignpct + 
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m3b)
+exp(coef(m3b))
+
+m4b <- glm(Jobs ~ foreignpct + 
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m4b)
+exp(coef(m4b))
+
+m5b <- glm(Old ~ foreignpct + socx +
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m5b)
+exp(coef(m5b))
+
+m6b <- glm(Unemp ~ foreignpct + socx +
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m6b)
+exp(coef(m6b))
+
+m7b <- glm(Inc ~ foreignpct + socx +
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m7b)
+exp(coef(m7b))
+
+m8b <- glm(Jobs ~ foreignpct + socx +
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m8b)
+exp(coef(m8b))
+
+m9b <- glm(Old ~ foreignpct + emprate +
+            Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+            Wave + country, 
+          family = binomial (link = 'logit'), data = l12s13)
+summary(m9b)
+exp(coef(m9b))
+
+m10b <- glm(Unemp ~ foreignpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m10b)
+exp(coef(m10b))
+
+m11b <- glm(Inc ~ foreignpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m11b)
+exp(coef(m11b))
+
+m12b <- glm(Jobs ~ foreignpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m12b)
+exp(coef(m12b))
+
+m13b <- glm(Old ~ netmigpct +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m13b)
+exp(coef(m13b))
+
+m14b <- glm(Unemp ~ netmigpct +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m14b)
+exp(coef(m14b))
+
+m15b <- glm(Inc ~ netmigpct +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m15b)
+exp(coef(m15b))
+
+m16b <- glm(Jobs ~ netmigpct +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m16b)
+exp(coef(m16b))
+
+m17b <- glm(Old ~ netmigpct + socx +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m17b)
+exp(coef(m17b))
+
+m18b <- glm(Unemp ~ netmigpct + socx +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m18b)
+exp(coef(m18b))
+
+m19b <- glm(Inc ~ netmigpct + socx +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m19b)
+exp(coef(m19b))
+
+m20b <- glm(Jobs ~ netmigpct + socx +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m20b)
+exp(coef(m20b))
+
+m21b <- glm(Old ~ netmigpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m21b)
+exp(coef(m21b))
+
+m22b <- glm(Unemp ~ netmigpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m22b)
+exp(coef(m22b))
+
+m23b <- glm(Inc ~ netmigpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m23b)
+exp(coef(m23b))
+
+m24b <- glm(Jobs ~ netmigpct + emprate +
+             Female + Age + Age2 + EduP + EduU + WrkstPt + WrkstNa + WrkstAu + 
+             Wave + country, 
+           family = binomial (link = 'logit'), data = l12s13)
+summary(m24b)
+exp(coef(m24b))

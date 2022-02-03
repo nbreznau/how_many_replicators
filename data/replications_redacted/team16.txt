@@ -1,0 +1,470 @@
+Team: 16
+Software: R
+Version: Original
+library(readxl)
+library(haven)
+library(tidyr)
+library(dplyr)
+library(purrr)
+library(lme4)
+library(knitr)
+
+label_to_name = function(x) {
+    attributes(x)$label %>%
+      tolower() %>%
+      gsub("[[:blank:][:punct:]]+", "_", .) %>%
+      gsub("^_+|_+$", "", .) %>%
+      return()
+  }
+
+issp96 = read_stata("ZA2900.dta") %>%
+  setNames(lapply(., label_to_name)) %>%
+  zap_formats()
+issp06 = read_stata("ZA4700.dta") %>%
+  setNames(lapply(., label_to_name)) %>%
+  zap_formats()
+
+countries = read_xls("bradyfinnigan2014countrydata.xls")
+
+issp96 = issp96 %>%
+  mutate(year = 1996,
+         r_agesq = r_age^2) %>%
+  select(year, country, id_resp = respondent_id_number, weighting_factor,
+         starts_with("resp_"),
+         starts_with("r_"),
+         how_many_persons_in_household, household_cycle, family_income,
+         urban_rural, origin_country_ethnic_group_language) %>%
+  select(-starts_with("r_vote"),
+         -starts_with("r_party")) %>%
+  setNames(sub("^r_", "", names(.))) %>%
+  mutate_if(grepl("^(id_resp|year|country|weighting_factor|age|agesq|earnings|family_income)$|^how_many_persons|^hours_worked",
+                  names(.)), as.numeric) %>%
+  mutate_if(!grepl("^(id_resp|year|country|weighting_factor|age|agesq||earnings|family_income)$|^how_many_persons|^hours_worked",
+                   names(.)), as_factor) %>%
+  mutate(country = case_when(country %in% 1 ~ 36,
+                             country %in% (2:3) ~ 276,
+                             country %in% 4 ~ 826,
+                             country %in% 6 ~ 840,
+                             country %in% 8 ~ 348,
+                             country %in% 10 ~ 372,
+                             country %in% 12 ~ 578,
+                             country %in% 13 ~ 752,
+                             country %in% 14 ~ 203,
+                             country %in% 15 ~ 705,
+                             country %in% 16 ~ 616,
+                             country %in% 18 ~ 643,
+                             country %in% 19 ~ 554,
+                             country %in% 20 ~ 124,
+                             country %in% 21 ~ 608,
+                             country %in% (22:23) ~ 376,
+                             country %in% 24 ~ 392,
+                             country %in% 25 ~ 724,
+                             country %in% 26 ~ 428,
+                             country %in% 27 ~ 250,
+                             country %in% 30 ~ 756)) %>%
+  filter(country %in% countries$cntry) %>%
+  mutate_if(grepl("^resp_", names(.)),
+            funs(case_when(grepl("should$", .) ~ 1,
+                           grepl("not$", . ) ~ 0))) %>%
+  mutate(female = case_when(sex %in% "Female" ~ 1,
+                            sex %in% "Male" ~ 0),
+         marital_status = 
+           case_when(
+             marital_status %in% "marr,liv as mar" ~ "married",
+             marital_status %in% "not married" ~ "never married",
+             marital_status %in% c("divorced", "separated") ~ "divorced",
+             marital_status %in% "widowed" ~ "widowed") %>% 
+           factor(levels = c("married", "never married", "divorced", "widowed")),
+         urban_rural = 
+           case_when(
+             urban_rural %in% "Urban" ~ "Urban",
+             urban_rural %in% "Suburb,city,town,county seat" ~ "Suburban",
+             urban_rural %in% "Rural" ~ "Rural") %>% 
+           factor(levels = c("Urban", "Suburban", "Rural")),
+         empl_status =
+           case_when(
+             current_employment_status %in% "F-time empl,main job" ~ "full-time",
+             current_employment_status %in% c("P-t empl,main job",
+                                              "Less part-time",
+                                              "Help family member") ~ "part-time",
+             current_employment_status %in% "Unemployed" ~ "unemployed",
+             current_employment_status %in% c("Studt,school,educ",
+                                              "Retired",
+                                              "Housewife <man>",
+                                              "Permanent disabled",
+                                              "Oth,n i lab force") ~ "not in labor force") %>% 
+           factor(levels = c("full-time", "part-time", "unemployed",
+                             "not in labor force")),
+         publempl = 
+           case_when(
+             working_for_privat_public_sector %in% c("Government",
+                                                     "Public owned firm") ~ 1,
+             !is.na(empl_status) ~ 0),
+         selfempl = 
+           case_when(
+             self_employed_i %in% "Self-employed RP:informell" ~ 1,
+             !is.na(empl_status) ~ 0),
+         relatt = 
+           case_when(
+             religious_services_how_often %in% "Never" ~ "none",
+             religious_services_how_often %in% c("Once a month",
+                                                 "Sev times a year",
+                                                 "Less frequently a year") ~ "low",
+             religious_services_how_often %in% c("Once a week or more",
+                                                 "2-3 times a month") ~ "high") %>%
+           factor(levels = c("none", "low", "high")),
+         education =
+           case_when(
+             education_ii_categories %in% c("None;still at school,uni",
+                                            "Incpl primary",
+                                            "Primary compl",
+                                            "Incpl secondary") ~ "less than secondary",
+             education_ii_categories %in% c("Secondary compl",
+                                            "Semi-higher,Incpl uni.") ~ "secondary",
+             education_ii_categories %in% "University compl" ~ "university") %>%
+           factor(levels = c("secondary", "less than secondary", "university")),
+         kidshh = case_when(grepl("child$|children$|ch$", household_cycle) ~ 1,
+                            !is.na(household_cycle) ~ 0)) %>%
+  group_by(country) %>%
+  mutate(inczscore = scale(family_income)) %>%
+  ungroup() %>%
+  select(year, cntry = country, id_resp, weighting_factor,
+         starts_with("resp_"),
+         age, agesq, female, marital_status, education, relatt,
+         empl_status, selfempl, publempl, inczscore,
+         hhsize = how_many_persons_in_household, kidshh,
+         urban_rural)
+
+issp06 = issp06 %>%
+  mutate(year = 2006,
+         r_agesq = r_age^2) %>%
+  select(year, id_resp = respondent_id_number, weighting_factor,
+         country = country_sample_see_v3a_for_codes_for_whole_nation_states,
+         contains("gov_responsibility"),
+         starts_with("r_"),
+         starts_with("family_income_"),
+         how_many_persons_in_household,
+         household_cycle = household_composition_children_adults,
+         urban_rural = type_of_community_rs_self_assessment,
+         family_origin_ethnic_group_identity) %>%
+  rename(resp_provid_jobs_for_all = q7a_gov_responsibility_provide_job_for_everyone,
+         resp_prices_under_control = q7b_gov_responsibility_control_prices,
+         resp_health_care_for_sick = q7c_gov_responsibility_provide_health_care_for_sick,
+         resp_provide_for_elderly = q7d_gov_responsibility_provide_living_standard_for_the_old,
+         resp_assist_industry_growth = q7e_gov_responsibility_help_industry_grow,
+         resp_provide_for_unemployed = q7f_gov_responsibility_provide_living_standard_for_unemployed,
+         resp_reduce_income_differences = q7g_gov_responsibility_reduce_income_differences_betw_rich_poor,
+         resp_financial_help_for_students = q7h_gov_responsibility_financial_help_to_students,
+         resp_provide_decent_housing = q7i_gov_responsibility_provide_decent_housing,
+         resp_industry_less_damage_environment = q7j_gov_responsibility_laws_to_protect_environment) %>%
+  select(-starts_with("r_vote"),
+         -starts_with("r_party")) %>%
+  setNames(sub("^r_", "", names(.))) %>%
+  mutate_if(grepl("^(id_resp|year|country|weighting_factor|age|agesq|earnings)$|^family_income|^how_many_persons|^hours_worked",
+                  names(.)), as.numeric) %>%
+  mutate_if(!grepl("^(id_resp|year|country|weighting_factor|age|agesq|earnings)$|^family_income|^how_many_persons|^hours_worked",
+                   names(.)), as_factor) %>%
+  mutate(country = case_when(country %in% c(276.1, 276.2) ~ 276,
+                             country %in% 826.1 ~ 826,
+                             TRUE ~ country)) %>%
+  mutate(is_not_NA_family_income =
+           select(., starts_with("family_income")) %>%
+           {!is.na(.)} %>%
+           rowSums(),
+         family_income = select(., starts_with("family_income")) %>%
+                                  rowSums(na.rm = TRUE),
+         family_income = ifelse(is_not_NA_family_income == 1,
+                                family_income,
+                                NA)) %>%
+  select(-starts_with("family_income_"), -is_not_NA_family_income,
+         -starts_with("earnings_")) %>%
+  filter(country %in% countries$cntry) %>%
+  mutate_if(grepl("^resp_", names(.)),
+            funs(case_when(grepl("should be$", .) ~ 1,
+                           grepl("should not be$", . ) ~ 0))) %>%
+  mutate(female = case_when(sex %in% "Female" ~ 1,
+                            sex %in% "Male" ~ 0),
+         marital_status = 
+           case_when(
+             marital_status %in% "Married" ~ "married",
+             marital_status %in% "Never married,single" ~ "never married",
+             marital_status %in% c("Divorced", "Separated (married but sep./not living w legal spouse)") ~ "divorced",
+             marital_status %in% "Widowed" ~ "widowed") %>% 
+           factor(levels = c("married", "never married", "divorced", "widowed")),
+         urban_rural = 
+           case_when(
+             urban_rural %in% c("Urban,a big city", "Town or small city" ) ~ "Urban",
+             urban_rural %in% "Suburb,outskirt of a big city" ~ "Suburban", # w tekście jest 'suburb/town' i wszystko małymi literami
+             urban_rural %in% c("Rural", "Country village,other type of community", "Farm or home in the country") ~ "Rural") %>% 
+           factor(levels = c("Urban", "Suburban", "Rural")),
+         empl_status =
+           case_when(
+             current_employment_status %in% "Employed, full-time,main job" ~ "full-time",
+             current_employment_status %in% c("Employed, part-time,main job",
+                                              "Employed, less than part-time",
+                                              "Helping family member") ~ "part-time",
+             current_employment_status %in% "Unemployed" ~ "unemployed",
+             current_employment_status %in% c("Student,school,vocational training",
+                                              "Retired",
+                                              "Housewife,-man,home duties",
+                                              "Permanently disabled",
+                                              "Other,not in labour force") ~ "not in labor force") %>% 
+           factor(levels = c("full-time", "part-time", "unemployed",
+                             "not in labor force")),
+         publempl = 
+           case_when(
+             workg_f_priv_pub_sector_selfempl %in% c("Work f government",
+                                                     "Public owned firm,nat.ind",
+                                                     "GB: Other, charity, voluntary sector,ZA:other") ~ 1,
+             !is.na(empl_status) ~ 0),
+         selfempl = 
+           case_when(
+             workg_f_priv_pub_sector_selfempl %in% "Self employed" ~ 1,
+             !is.na(empl_status) ~ 0),
+         relatt = 
+           case_when(
+             attendance_of_religious_services %in% "Never" ~ "none",
+             attendance_of_religious_services %in% c("Once a month",
+                                                     "Sev times a year",
+                                                     "Once a year",
+                                                     "Less frequently") ~ "low",
+             attendance_of_religious_services %in% c("Several times a week, IL: + every day",
+                                                     "Once a week,GB: once a week or more",
+                                                     "2 or 3 times a month") ~ "high") %>%
+           factor(levels = c("none", "low", "high")),
+         education =
+           case_when(
+             education_ii_highest_education_level %in% c("No formal qualification, incomplete primary",
+                                                         "Lowest formal qualification",
+                                                         "Above lowest qualification") ~ "less than secondary",
+             education_ii_highest_education_level %in% c("Higher secondary completed",
+                                                         "Above higher secondary level,other qualification") ~ "secondary",
+             education_ii_highest_education_level %in% "University degree completed, graduate studies" ~ "university") %>%
+           factor(levels = c("secondary", "less than secondary", "university")),
+         kidshh = case_when(grepl("child$|children$|ch$", household_cycle) ~ 1,
+                            !is.na(household_cycle) ~ 0)) %>%
+  group_by(country) %>%
+  mutate(inczscore = scale(family_income)) %>%
+  ungroup() %>%
+  select(year, cntry = country, id_resp, weighting_factor,
+         starts_with("resp_"),
+         age, agesq, female, marital_status, education, relatt,
+         empl_status, selfempl, publempl, inczscore,
+         hhsize = how_many_persons_in_household, kidshh,
+         urban_rural)
+
+issp = bind_rows(issp96, issp06) %>%
+  mutate(orig17 = cntry %in% c(36, 124, 208, 246, 250, 276, 372, 392, 528, 554,
+                               578, 620, 724, 752, 756, 826, 840), 
+         orig13 = cntry %in% c(36, 124, 250, 276, 372, 392, 554, 578, 724, 752,
+                               756, 826, 840)) %>%
+  left_join(countries)
+issp06 = issp %>%
+  filter(year %in% 2006)
+
+depVars = c("resp_provid_jobs_for_all", "resp_provide_for_unemployed",
+            "resp_reduce_income_differences", "resp_provide_for_elderly",
+            "resp_provide_decent_housing", "resp_health_care_for_sick")
+controlVars06 = c("age", "agesq", "female", "marital_status", "hhsize", "kidshh",
+                  "urban_rural", "education", "empl_status", "selfempl",
+                  "publempl", "inczscore", "relatt")
+controlVarsAll = setdiff(c(controlVars06, "year", "country"),
+                         c("marital_status", "hhsize", "kidshh", "urban_rural",
+                           "publempl", "relatt"))
+countryVars06 = c("foreignpct", "netmigpct", "cforborn", "socx", "socdem",
+                  "liberal", "emprate", "mcp")
+countryVarsAll = c("foreignpct", "netmigpct", "socx", "emprate")
+
+issp = issp %>%
+  filter(orig13) %>%
+  semi_join(issp %>%
+              select(id_resp, year, cntry, controlVarsAll) %>%
+              na.omit() %>%
+              select(id_resp, year, cntry)) %>%
+  mutate(year = factor(year))
+issp06 = issp06 %>%
+  filter(orig17) %>%
+  semi_join(issp06 %>%
+              select(id_resp, year, cntry, controlVars06) %>%
+              na.omit() %>%
+              select(id_resp, year, cntry))
+
+nObs = data.frame(`dependent variable` = depVars,
+                  `N 2006` = NA,
+                  `N 1996,2006` = NA,
+                  check.names = FALSE, stringsAsFactors = FALSE)
+for (i in 1:nrow(nObs)) {
+  nObs$`N 2006`[i] = issp06 %>%
+    select(nObs$`dependent variable`[i], controlVars06) %>%
+    na.omit() %>%
+    nrow()
+  nObs$`N 1996,2006`[i] = issp %>%
+    select(nObs$`dependent variable`[i], controlVarsAll) %>%
+    na.omit() %>%
+    nrow()
+}
+
+results =
+  list(table1 = list(c("foreignpct", controlVars06, "(1|country)"),
+                     c("foreignpct", "socx", controlVars06, "(1|country)"),
+                     c("foreignpct", "socdem", "liberal", controlVars06, "(1|country)"),
+                     c("foreignpct", "emprate", controlVars06, "(1|country)"),
+                     c("foreignpct", "mcp", controlVars06, "(1|country)")),
+       table2 = list(c("netmigpct", controlVars06, "(1|country)"),
+                     c("netmigpct", "socx", controlVars06, "(1|country)"),
+                     c("netmigpct", "socdem", "liberal", controlVars06, "(1|country)"),
+                     c("netmigpct", "emprate", controlVars06, "(1|country)"),
+                     c("netmigpct", "mcp", controlVars06, "(1|country)"),
+                     c("netmigpct", "foreignpct", controlVars06, "(1|country)")),
+       table3 = list(c("cforborn", controlVars06, "(1|country)"),
+                     c("cforborn", "socx", controlVars06, "(1|country)"),
+                     c("cforborn", "socdem", "liberal", controlVars06, "(1|country)"),
+                     c("cforborn", "emprate", controlVars06, "(1|country)"),
+                     c("cforborn", "mcp", controlVars06, "(1|country)"),
+                     c("cforborn", "foreignpct", controlVars06, "(1|country)"),
+                     c("cforborn", "netmigpct", controlVars06, "(1|country)")),
+       table4 = list(c("foreignpct", controlVarsAll),
+                     c("foreignpct", "socx", controlVarsAll),
+                     c("foreignpct", "emprate", controlVarsAll)),
+       table5 = list(c("netmigpct", controlVarsAll),
+                     c("netmigpct", "socx", controlVarsAll),
+                     c("netmigpct", "emprate", controlVarsAll),
+                     c("netmigpct", "foreignpct", controlVarsAll))) %>%
+  lapply(function(x) {return(lapply(x, paste, collapse = " + "))})
+
+orderOfVars = data.frame(variable = c("foreignpct", "socx", "socdem", "liberal",
+                                      "emprate", "mcp", "netmigpct",
+                                      "cforborn", "age", "agesq", "female",
+                                      "marital_statusnever married",
+                                      "marital_statusdivorced",
+                                      "marital_statuswidowed",
+                                      "hhsize", "kidshh",
+                                      "urban_ruralSuburban",
+                                      "urban_ruralRural",
+                                      "educationless than secondary",
+                                      "educationuniversity",
+                                      "empl_statuspart-time",
+                                      "empl_statusunemployed",
+                                      "empl_statusnot in labor force",
+                                      "selfempl", "publempl", "inczscore",
+                                      "relattlow",
+                                      "relatthigh",
+                                      "year2006",
+                                      paste0("country", 1:length(unique(issp$country))),
+                                      "(Intercept)",
+                                      "N ind.",
+                                      "N cntr."),
+                         order = NA,
+                         stringsAsFactors = FALSE) %>%
+  mutate(order = 1:nrow(.))
+
+ for (i in c("table1", "table2", "table3")) {
+   for (j in 1:length(results[[i]])) {
+     results[[i]][[j]] = depVars %>%
+       paste(results[[i]][[j]], sep = " ~ ") %>%
+       as.list() %>%
+       map(formula) %>%
+       map(glmer,
+           data = mutate(issp06, age = age / 10, agesq = agesq / 100),
+           family = binomial)
+   }
+ }
+
+for (i in c("table1", "table2", "table3")) {
+  for (j in 1:length(results[[i]])) {
+    names = paste0(depVars, "_ivset", j)
+    nObs = bind_rows(results[[i]][[j]] %>%
+                       map(model.frame) %>%
+                       map(nrow) %>%
+                       setNames(names) %>%
+                       as.data.frame(),
+                     results[[i]][[j]] %>%
+                       map(model.frame) %>%
+                       map(select, "country") %>%
+                       map(distinct) %>%
+                       map(nrow) %>%
+                       setNames(names) %>%
+                       as.data.frame()) %>%
+      mutate(variable = c("N ind.", "N cntr."),
+             par = "")
+    results[[i]][[j]] = results[[i]][[j]] %>%
+      map(summary) %>%
+      map(coef) %>%
+      map(as.data.frame) %>%
+      map2(names,
+           function(x, name) {data.frame(variable = rownames(x),
+                                           `odds ratio` = exp(x$Estimate),
+                                           z = x$Estimate / x$`Std. Error`,
+                                           stringsAsFactors = FALSE,
+                                           check.names = FALSE) %>%
+                 gather("par", "name", -variable) %>%
+                 setNames(sub("^name$", name, names(.))) %>%
+                 return()}) %>%
+      reduce(full_join) %>%
+      bind_rows(nObs)
+  }
+  results[[i]] = results[[i]] %>%
+    reduce(full_join) %>%
+    left_join(orderOfVars) %>%
+    arrange(order, par) %>%
+    select(-order)
+}
+kable(results$table1, caption = "Table 1.",
+      digits = 3, format.args = list(decimal.mark = ","))
+kable(results$table2, caption = "Table 2.",
+      digits = 3, format.args = list(decimal.mark = ","))
+kable(results$table3, caption = "Table 3.",
+      digits = 3, format.args = list(decimal.mark = ","))
+
+for (i in c("table4", "table5")) {
+  for (j in 1:length(results[[i]])) {
+    names = paste0(depVars, "_ivset", j)
+    results[[i]][[j]] = depVars %>%
+      paste(results[[i]][[j]], sep = " ~ ") %>%
+      as.list() %>%
+      map(formula) %>% # what is it for?
+      map(glm,
+          data = issp,
+          family = binomial,
+          contrasts = list(country = contr.sum))
+    nObs = bind_rows(results[[i]][[j]] %>%
+                       map(model.frame) %>%
+                       map(nrow) %>%
+                       setNames(names) %>%
+                       as.data.frame(),
+                     results[[i]][[j]] %>%
+                       map(model.frame) %>%
+                       map(select, "country") %>%
+                       map(distinct) %>%
+                       map(nrow) %>%
+                       setNames(names) %>%
+                       as.data.frame()) %>%
+      mutate(variable = c("N ind.", "N cntr."),
+             par = "")
+    results[[i]][[j]] = results[[i]][[j]] %>%
+      map(summary) %>%
+      map(coef) %>%
+      map(as.data.frame) %>%
+      map2(names,
+           function(x, name) {data.frame(variable = rownames(x),
+                                           `odds ratio` = exp(x$Estimate),
+                                           z = x$Estimate / x$`Std. Error`,
+                                           stringsAsFactors = FALSE,
+                                           check.names = FALSE) %>%
+                 gather("par", "name", -variable) %>%
+                 setNames(sub("^name$", name, names(.))) %>%
+                 return()}) %>%
+      reduce(full_join) %>%
+      bind_rows(nObs)
+  }
+  results[[i]] = results[[i]] %>%
+    reduce(full_join) %>%
+    left_join(orderOfVars) %>%
+    arrange(order, par) %>%
+    select(-order)
+}
+kable(results$table4, caption = "Table 4.",
+      digits = 3, format.args = list(decimal.mark = ","))
+kable(results$table5, caption = "Table 5.",
+      digits = 3, format.args = list(decimal.mark = ","))
+
