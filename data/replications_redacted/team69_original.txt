@@ -2,13 +2,12 @@ TEAM: 69
 SOFTWARE: STATA
 VERSION: ORIGINAL
 
-
 use "L2data.dta", clear
 rename cntry isocode
 save "L2dataB.dta", replace
 
-
 use "ZA2900.dta", clear
+
 gen oldagecare=0
 replace oldagecare=1 if v39 ==  1 | v39 == 2
 gen unemployed=0
@@ -31,36 +30,26 @@ replace edu=3 if v205==7
 label define edu 1 "Primary" 2 "Secondary" 3 "University"
 label values edu edu
 
-*rename age & sex
 rename v200 sex
 rename v201 age
-*gen age squared
 gen age2=age*age
 
 gen country=""
 replace country="Australia" if v3=="aus":V3
 replace country="Canada" if v3=="cdn":V3
-*replace country="Croatia" 
 replace country="Czech Republic" if v3=="cz":V3
-*replace country="Denmark" 
-*replace country="Finland" 
 replace country="France" if v3=="f":V3
-*Combine East and West Germany
 replace country="Germany" if v3=="D-W":V3 | v3=="D-E":V3
 replace country="Hungary" if v3=="h":V3
 replace country="Ireland" if v3=="irl":V3
-*Combine arab and jewish population of Israel
 replace country="Israel" if v3=="IL-J":V3 | v3=="IL-A":V3
 replace country="Japan" if v3=="j":V3
 replace country="Latvia" if v3=="lv":V3
-*replace country="Netherlands" 
 replace country="New Zealand" if v3=="nz":V3
 replace country="Norway" if v3=="n":V3
 replace country="Poland" if v3=="pl":V3
-*replace country="Portugal" 
 replace country="Russia" if v3=="rus":V3
 replace country="Slovenia" if v3=="slo":V3
-*replace country="South Korea" 
 replace country="Spain" if v3=="e":V3
 replace country="Sweden" if v3=="s":V3
 replace country="Switzerland" if v3=="ch":V3
@@ -73,7 +62,6 @@ save "1996.dta", replace
 
 use "ZA4700.dta", clear
 
-*rename and recode outcomes
 gen oldagecare=0
 replace oldagecare=1 if V28 ==  1 | V28 == 2
 gen unemployed=0
@@ -96,10 +84,8 @@ replace edu=3 if degree==5
 label define edu 1 "Primary" 2 "Secondary" 3 "University"
 label values edu edu
 
-*gen age squared
 gen age2=age*age
 
-*gen time variable
 gen year=2006
 
 rename V3a isocode
@@ -129,4 +115,62 @@ label variable socx "Social Welfare Expenditures"
 label variable emprate "Employment Rate"
 
 save "finaldata.dta", replace
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus foreignpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus foreignpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus foreignpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus foreignpct i.year i.isocode
+eststo
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus socx foreignpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus socx foreignpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus socx foreignpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus socx foreignpct i.year i.isocode
+eststo
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus emprate foreignpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus emprate foreignpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus emprate foreignpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus emprate foreignpct i.year i.isocode
+eststo
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus  netmigpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus  netmigpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus  netmigpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus netmigpct i.year i.isocode
+eststo
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus socx netmigpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus socx netmigpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus socx netmigpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus socx netmigpct i.year i.isocode
+eststo
+
+logit oldagecare i.sex age age2 i.edu i.emplstatus emprate netmigpct i.year i.isocode
+eststo
+logit unemployed i.sex age age2 i.edu i.emplstatus emprate netmigpct i.year i.isocode
+eststo
+logit reduceincomedifferences i.sex age age2 i.edu i.emplstatus emprate netmigpct i.year i.isocode
+eststo
+logit jobs i.sex age age2 i.edu i.emplstatus emprate netmigpct i.year i.isocode
+eststo
+esttab using results.csv, z eform replace label constant
+*estout using results.csv, eform cells(b(star fmt(3)) z(par fmt(2))) stats(N) plain
+est clear
+
 

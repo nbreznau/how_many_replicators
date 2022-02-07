@@ -2,14 +2,8 @@ TEAM: 67
 SOFTWARE: R
 VERSION: ORIGINAL
 
-
-setwd("/")
-folder <- '/'
-
 install.packages("jetpack")
 jetpack::init()
-
-
 jetpack::add("readr")
 jetpack::add("dplyr")
 jetpack::add("stringr")
@@ -18,12 +12,8 @@ library(readr)
 
 
 l2 <- readr::read_csv(paste0(folder, "L2data.csv"))
-
 za29 <- readr::read_csv(paste0(folder, "ZA2900.csv"))
-
-
 za47 <- readr::read_csv(paste0(folder, "ZA4700.csv"))
-
 
 za29 <- za29 %>% 
   select(old_age_care = v39, unemployed = v41, reduce_income_diff = v42, 

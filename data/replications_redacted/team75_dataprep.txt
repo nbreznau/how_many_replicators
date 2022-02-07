@@ -5,21 +5,14 @@ VERSION: ORIGINAL
 DATASET CLOSE ALL.
 get stata file="ZA4700.dta".
 
-FREQUENCIES v1 v2 v3 v3a sex age degree spwrkst v28 v30 v31 v25.
-
 RENAME VARIABLES v3a = cntry.
-FREQUENCIES cntry.
 
 RECODE sex (1 = 0) (2 = 1) (SYSMIS = -99).
-FREQUENCIES sex.
-
 
 COMPUTE age2 = age*age.
 RECODE age2 (sysmis = -99).
-FREQUENCIES age2.
 
 RECODE age (SYSMIS = -99).
-FREQUENCIES age.
 
 CROSSTABS age BY age2.
 
@@ -32,13 +25,10 @@ COMPUTE edus = 0.
 IF (degree = 2 OR degree = 3) edus = 1.
 IF (degree = 8 OR degree = 9) edus = -99.
 IF sysmis(degree) edus = -99.
-FREQUENCIES edus.
 COMPUTE eduh = 0.
 IF (degree = 4 OR degree = 5) eduh = 1.
 IF (degree = 8 OR degree = 9) eduh = -99.
 IF sysmis(degree) eduh = -99.
-FREQUENCIES eduh.
-
 
 COMPUTE emppt = 0.
 IF (spwrkst = 2 OR spwrkst = 3) emppt = 1.
@@ -52,31 +42,24 @@ IF sysmis(spwrkst) empau = -99.
 COMPUTE empft = 0.
 IF (spwrkst = 1) empft = 1.
 IF sysmis(spwrkst) empft = -99.
-FREQUENCIES emppt empna empau empft.
-
 
 COMPUTE old = 0.
 IF (v28=1 OR v28 = 2) old = 1.
 IF sysmis(v28) old = -99.
-FREQUENCIES old.
 
 COMPUTE une = 0.
 IF (v30=1 OR v30 = 2) une = 1.
 IF sysmis(v30) une = -99.
-FREQUENCIES une.
 
 COMPUTE dif = 0.
 IF (v31=1 OR v31 = 2) dif = 1.
 IF sysmis(v31) dif = -99.
-FREQUENCIES dif.
 
 COMPUTE job = 0.
 IF (v25=1 OR v25 = 2) job = 1.
 IF sysmis(v25) job = -99.
-FREQUENCIES job.
 
 MISSING VALUES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job (-99).
-FREQUENCIES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
 
 SORT CASES by cntry.
 FORMATS cntry(f3.0).
@@ -84,51 +67,33 @@ FORMATS cntry(f3.0).
 SAVE OUTFILE 'ZA4700_NTA.sav'
     /KEEP v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
 
-
 DATASET CLOSE ALL.
 get stata file="ZA2900.dta".
-
-FREQUENCIES v1 v2 v3 v200 v201 v205 v206 v39 v41 v42 v36.
-
 
 RECODE v3 (1  = 36)   (2   = 276) (3  = 276)  (4  = 826)  (6  = 840)  (8  = 348)  (9  = -99 ) (10 = 372) (12 = 578) (13 = 752) (14 = 203)
                   (15 = 705) (16 = 616) (17 =  -99) (18 = 643) (19 = 554) (20 =  124) (21 = -99) (22 = 376) (23 = 376) (24 = 392)
                   (25 = 724) (26 = 428) (27 = 250) (28 = -99)  (30 = 756) (ELSE = -99)  INTO cntry.
-FREQUENCIES cntry.
 
-FREQUENCIES v200.
 RECODE v200 (1 = 0) (2 = 1) (SYSMIS = -99) INTO sex.
-FREQUENCIES sex.
 
 COMPUTE age2 = v201*v201.
 RECODE age2 (sysmis = -99).
-FREQUENCIES age2.
 
 RECODE v201 (SYSMIS = -99) (ELSE = COPY) into age.
-FREQUENCIES age.
 
-CROSSTABS age BY age2.
-
-
-FREQUENCIES v205.
 COMPUTE edup = 0.
 IF (v205 = 1 OR v205 = 2 OR v205 = 3) edup = 1.
 IF (v205 = 99) edup = -99.
 IF sysmis(v205) edup = -99.
-FREQUENCIES edup.
 COMPUTE edus = 0.
 IF (v205 = 4 OR v205 =5) edus = 1.
 IF (v205 = 99) edus = -99.
 IF sysmis(v205) edus = -99.
-FREQUENCIES edus.
 COMPUTE eduh = 0.
 IF (v205 = 6 OR v205 = 7) eduh = 1.
 IF (v205 = 99) eduh = -99.
 IF sysmis(v205) eduh = -99.
-FREQUENCIES eduh.
 
-
-FREQUENCIES v206.
 COMPUTE emppt = 0.
 IF (v206 = 2 OR v206 = 3) emppt = 1.
 IF sysmis(v206) emppt = -99.
@@ -141,39 +106,30 @@ IF sysmis(v206) empau = -99.
 COMPUTE empft = 0.
 IF (v206 = 1) empft = 1.
 IF sysmis(v206) empft = -99.
-FREQUENCIES emppt empna empau empft.
 
-
-FREQUENCIES v39 v41 v42 v36.
 COMPUTE old = 0.
 IF (v39=1 OR v39 = 2) old = 1.
 IF sysmis(v39) old = -99.
-FREQUENCIES old.
 
 COMPUTE une = 0.
 IF (v41=1 OR v41 = 2) une = 1.
 IF sysmis(v41) une = -99.
-FREQUENCIES une.
 
 COMPUTE dif = 0.
 IF (v42=1 OR v42 = 2) dif = 1.
 IF sysmis(v42) dif = -99.
-FREQUENCIES dif.
 
 COMPUTE job = 0.
 IF (v36=1 OR v36 = 2) job = 1.
 IF sysmis(v36) job = -99.
-FREQUENCIES job.
 
 MISSING VALUES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job  (-99).
-FREQUENCIES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
 
 SORT CASES by cntry.
 FORMATS cntry(f3.0).
 
 SAVE OUTFILE 'ZA2900_NTA.sav'
     /KEEP v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
-
 
 
 DATASET CLOSE ALL.
@@ -195,7 +151,6 @@ FORMATS cntry(f3.0).
 
 SAVE OUTFILE 'L2data1996_NTA.sav'.
 
-
 DATASET CLOSE ALL.
 GET DATA
   /TYPE=XLS
@@ -208,8 +163,6 @@ EXECUTE.
 DATASET NAME DataSet1 WINDOW=FRONT.
 
 SELECT IF year = 2006.
-FREQUENCIES year cntry.
-
 SORT CASES BY cntry.
 FORMATS cntry(f3.0).
 
@@ -255,22 +208,15 @@ SORT CASES BY cntry.
 
 IF (v1 = 2900) year = 1996.
 IF (v1 = 4700) year = 2006.
-FREQUENCIES year.
 
 SAVE OUTFILE 'ZA2900-ZA4700_pooled.sav'.
-
 
 DATASET CLOSE ALL.
 GET FILE 'ZA2900-ZA4700_pooled.sav'.
 
-CROSSTABS country BY v1.
-
-
-
 SORT CASES  BY year.
 SPLIT FILE SEPARATE BY year.
 CROSSTABS country BY socx.
-
 
 SPLIT FILE OFF.
 SELECT IF cntry = 36 OR cntry = 124 OR cntry = 250 OR cntry = 276 OR cntry = 372 OR cntry = 392 OR cntry = 554 OR cntry = 578 OR cntry = 724 OR cntry = 752 OR cntry = 756 OR cntry = 826 OR cntry = 840.
@@ -278,30 +224,20 @@ CROSSTABS cntry BY country.
 
 SAVE OUTFILE 'ZA2900-ZA4700_pooled-13countries.sav'.
 
-
 DATASET CLOSE ALL.
 CD '\'.
 GET FILE 'ZA2900-ZA4700_pooled-13countries.sav'.
 
-FREQUENCIES cntry.
-DESCRIPTIVES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job  emprate foreignpct socx netmigpct year.
-FREQUENCIES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job  emprate foreignpct socx netmigpct country year.
-CODEBOOK  v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job  emprate foreignpct socx netmigpct country year.
-
-
 RENAME VARIABLES foreignpct = istock.
 RENAME VARIABLES netmigpct = chistock.
-FREQUENCIES istock chistock.
 
 FORMATS emprate(f6.3).
 FORMATS istock(f6.3).
 FORMATS socx(f6.3).
 FORMATS chistock(f6.3).
 
-
 IF (year = 1996) yrdm = 0.
 IF (year = 2006) yrdm = 1.
-FREQUENCIES yrdm.
 CROSSTABS year BY yrdm.
 
 IF (cntry = 36) aust = 1.
@@ -330,9 +266,6 @@ IF (cntry = 826) uk = 1.
 IF (cntry NE 826) uk = 0.
 IF (cntry = 840) us = 1.
 IF (cntry NE 840) us = 0.
-FREQUENCIES aust can fr de ir jp nz nw sp sw ch uk us.
-
-
 
 COMPUTE aged = (age/100).
 COMPUTE age2d = (age2/100).
@@ -340,10 +273,6 @@ DESCRIPTIVES aged age2d.
 FREQUENCIES aged age2d.
 RECODE aged age2d (SYSMIS = -99).
 MISSING VALUES aged age2d (-99).
-FREQUENCIES age aged age2d.
-
-FREQUENCIES sex age age2 edup eduh emppt empna empau istock yrdm aust can fr de ir jp nz nw sp sw ch uk.
-
 
 SET LOCALE = 'en_us'.
 
@@ -352,5 +281,3 @@ SAVE TRANSLATE
    /KEEP = cntry sex age age2 aged age2d edup edus eduh emppt empna empau empft old une dif job emprate socx istock chistock 
                  year yrdm aust can fr de ir jp nz nw sp sw ch uk us
    /OUTFILE = 'CRI-Mplus.dat'.
-
-

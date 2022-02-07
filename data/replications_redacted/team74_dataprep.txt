@@ -2,16 +2,13 @@ TEAM: 74
 SOFTWARE: SPSS
 VERSION: ORIGINAL
 
-
 GET 
   STATA FILE='ZA4700.dta'.
 DATASET NAME DataSet4 WINDOW=FRONT.
 SAVE OUTFILE ='ZA4700_1.sav'.
 
-
 GET FILE='ZA4700_1.sav'.
 DATASET NAME DataSet4 WINDOW=FRONT.
-
 
 recode v28 v30 v31 v25  (1 thru 2 = 1) (3 thru 4 = 0) INTO  Oldagecare  Unemployment Redincomdiff Jobs    .
 VALUE LABELS v28 v30 v31 v25 
@@ -19,17 +16,11 @@ VALUE LABELS v28 v30 v31 v25
     0 'non affirmative'.
 EXECUTE.
 
-
 compute age_sq = age * age.
-fre age_sq.
-
-fre degree.
 recode degree (0 thru 2 = 11) (3 thru 5 = 12) .
 VALUE LABELS degree 
     11 'primary or less'
     12 'secondary and university or more'.
-fre degree.
-
 
 compute emplcat = 0.
 if wrkst = 1 emplcat =  4.
@@ -46,25 +37,16 @@ VALUE LABELS emplcat
 3 'activ unemployed'
 4 'full time'.
 
-fre emplcat.
 
 SAVE OUTFILE='ZA4700_2.sav'
         /KEEP V1 V3 Oldagecare  Unemployment Redincomdiff Jobs sex age age_sq  degree emplcat.
-
-
-
-
 
 GET 
   STATA FILE='ZA2900.dta'. 
 DATASET NAME DataSet4 WINDOW=FRONT. 
 SAVE OUTFILE ='ZA2900_1.sav'.
 
-
-
 GET  FILE='ZA2900_1.sav'.
-
-
 
 recode  v39 v41 v42 v36 (1 thru 2 = 1) (3 thru 4 = 0) INTO Oldagecare  Unemployment Redincomdiff Jobs  .
 VALUE LABELS  v39 v41 v42 v36
@@ -78,19 +60,12 @@ RENAME VARIABLES V201 = age.
 compute age_sq = age * age.
 EXECUTE.
 
-fre sex.
-
 RENAME VARIABLES V205 = degree.
-fre degree.
 recode degree (1 thru 3 = 11) (4 thru 7 = 12) .
 VALUE LABELS degree 
     11 'primary or less'
     12 'secondary and university or more'.
-fre degree.
 
-
-
-fre V206.
 compute emplcat = 0.
 
 if V206= 1 emplcat =  4.
@@ -98,7 +73,6 @@ if (V206 = 2 or V206 = 3) emplcat = 1.
 
 temp. 
 sel if V206 = 4.
-fre V215.
 
 if (V206 = 4) emplcat = 1.
 if (V206 = 4 and V215 ge 35 and V215 lt 97) emplcat = 4.
@@ -121,12 +95,8 @@ SAVE OUTFILE='ZA2900_2.sav'
 
 GET  FILE='ZA2900_2.sav'.
 
-fre V3.
-
-
 if (V3 = 2 or V3 = 3) V3 = 32.
 EXECUTE.
-
 
 compute cntry = 0.
 
@@ -152,13 +122,11 @@ EXECUTE.
 
 sel if delete =0. 
 
-fre cntry.
 SAVE OUTFILE='ZA2900_3.sav'
 / DROP V3.
 
 
 GET  FILE='ZA4700_2.sav'.
-fre V3.
 
 COMPUTE cntry = v3.
 if V3 ge 276 and V3 lt 277 cntry = 276.
@@ -167,7 +135,6 @@ EXECUTE.
 if V3 ge 826 and V3 lt 827 cntry = 826.
 EXECUTE.
 
-fre cntry.
 
 compute delete = 1.
 if  (cntry = 276 or cntry = 203 or   cntry = 250 or   cntry = 348 or  cntry = 372 or   cntry = 428 or   cntry = 578 or  cntry = 616 or   cntry = 705 or  cntry = 724
@@ -175,19 +142,15 @@ if  (cntry = 276 or cntry = 203 or   cntry = 250 or   cntry = 348 or  cntry = 37
 EXECUTE.
 
 sel if delete = 0. 
-fre cntry.
 
 SAVE OUTFILE='ZA4700_3.sav'
 / DROP V3.
-
-
 
 ADD FILES /FILE= 'ZA4700_3.sav'
   /FILE='ZA2900_3.sav'.
 EXECUTE.
 SAVE OUTFILE='ISSP.sav'
 / DROP delete.
-
 
 GET FILE='ISSP.sav'.
 SAVE TRANSLATE OUTFILE='ISSP.dta'

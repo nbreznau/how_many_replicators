@@ -3,23 +3,11 @@ SOFTWARE: STATA
 VERSION: ORIGINAL
 
 
-cd " " 
-cd "\"
-cd "\"
-
-
-set more off
-
-
 use "ZA2900.dta" 
 
-
-tab v3
 recode v3 (1=36) (20=124) (14=203) (27=250) (2=276) (3=276) (8=348) (10=372) (22=376) (23=376) (24=392) (16=428) (11=528) (19=554) (12=578) (16=616) (18=643) (15=705) (25=724) (13=752) (30=756) (4=826) (6=840), into(cntry)
 
-tab v1
 gen year=1996 if v1==2900
-
 
 recode v36 (1/2=1) (3/4=0), gen(bin_jobs)
 recode v41 (1/2=1) (3/4=0), gen(bin_unemp)
@@ -28,18 +16,11 @@ recode v39 (1/2=1) (3/4=0), gen(bin_retire)
 recode v44 (1/2=1) (3/4=0), gen(bin_house) 
 recode v38 (1/2=1) (3/4=0), gen(bin_health) 
 
-tab v201
 gen age=v201
 gen agesq=age*age
 
-tab v200
 recode v200 (1 = 0 "male") (2 = 1 "female") (. = .), gen(female)
-
-tab v205
 recode v205 (1/4 = 1 "less than sec") (5 6 = 2 "secondary") (7 = 3 "university or above") (. = .), gen(edu)
-
-
-tab1 v206 v212 v213
 recode v206 (1 = 1 "full-time") (2 3 4 = 2 "part-time") (5 = 3 "unemployed") (6 7 8 9 10 = 4 "not in labor force") (. = .), gen(work)
 
 gen selfemp = 1 if v213 == 1
@@ -50,7 +31,6 @@ gen pubemp = 1 if v212 == 1 | v212 == 2
 recode pubemp (. = 0)
 replace pubemp = . if v206 == .
 
-
 gen income_standard = .
 levelsof cntry, local(countries) 
 foreach l of local countries {
@@ -58,37 +38,21 @@ sum v218 if cntry == `l'
 replace income_standard = (v218 - r(mean))/ r(sd) if cntry == `l'
 }
 
-
-tab v202
 recode v202 (1 = 1 "married") (2 = 4 "widowed") (3 4 = 3 "divorced/separated") (5 = 2 "never married") (. = .), gen(married)
-
-
-tab v275
 gen urban = v275
 
-
-tab v220
 recode v220 (6 = 1 "never") (3/5 = 2 "low religious attendance") (1 2 = 3 "high religious attendance"), gen(relatt) 
-* recode v220 (6 = 1 "never") (5 = 2 "low religious attendance") (1/4 = 3 "high religious attendance"), gen(rel) 
-
-
-tab1 v273 v274
 gen hhsize=v273
 recode v274 (2 3 4 6 7 8 10 12 14 16 18 20 22 24 26 28 = 1 "children") (1 5 9 11 13 15 17 19 21 23 25 27 95 = 0 "no children"), gen(child) 
-
 
 keep cntry year bin_jobs bin_unemp bin_incom bin_retire bin_house bin_health income_standard age agesq female edu work selfemp pubemp married urban relatt hhsize child
 save "ZA2900_edited.dta", replace
 
-
 use "ZA4700.dta" 
-
-tab1 V3 V3a 
+ 
 gen cntry = V3a 
 
-tab V1
 gen year=2006 if V1==4700
-
 
 recode V25 (1/2=1) (3/4=0), gen(bin_jobs)
 recode V30 (1/2=1) (3/4=0), gen(bin_unemp)
@@ -97,17 +61,12 @@ recode V28 (1/2=1) (3/4=0), gen(bin_retire)
 recode V33 (1/2=1) (3/4=0), gen(bin_house)
 recode V27 (1/2=1) (3/4=0), gen(bin_health)
 
-
-tab age
 gen agesq=age*age
 
-tab sex
 recode sex (1 = 0 "male") (2 = 1 "female") (. = .), gen(female)
 
-tab degree
 recode degree (0 1 2 = 1 "less than sec") (3 4 = 2 "secondary") (5 = 3 "university or above") (. = .), gen(edu)
 
-tab1 wrkst wrktype 
 recode wrkst (1 = 1 "full-time") (2 3 4 = 2 "part-time") (5 = 3 "unemployed") (6 7 8 9 10 = 4 "not in labor force") (. = .), gen(work)
 
 gen selfemp = 1 if wrktype == 4
@@ -118,7 +77,6 @@ gen pubemp = 1 if wrktype == 1 | wrktype == 2
 recode pubemp (. = 0) 
 replace pubemp = . if wrkst == .
 
-
 gen income_standard = .
 local country_var = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
 foreach l of local country_var {
@@ -127,26 +85,16 @@ replace income_standard = (`l' - r(mean))/ r(sd) if `l' !=.
 }
 
 
-tab marital
 recode marital (1 = 1 "married") (2 = 4 "widowed") (3 4 = 3 "divorced/separated") (5 = 2 "never married") (. = .), gen(married)
-
-
-tab urbrural
 recode urbrural (1 = 1 "urban") (2 3 = 2 "suburb,city,town,county seat") (4 5 = 3 "rural") (. = .), gen(urban)
-
-
-tab attend
 recode attend (8 = 1 "never") (4/7 = 2 "low religious attendance") (1/3 = 3 "high religious attendance"), gen(relatt) 
 
-
-tab1 hompop hhcycle
 gen hhsize=hompop
 recode hhcycle (2 3 4 6 7 8 10 12 14 16 18 20 22 24 26 28 = 1 "children") (1 5 9 11 13 15 17 19 21 23 25 27 95 = 0 "no children"), gen(child) 
 
 
 keep ethnic mode weight cntry year bin_jobs bin_unemp bin_incom bin_retire bin_house bin_health income_standard age agesq female edu work selfemp pubemp married urban relatt hhsize child
 save "ZA4700_edited.dta", replace
-
 
 
 use "ZA2900_edited.dta"
@@ -162,16 +110,11 @@ save "Merged.dta", replace
 tab work, gen(wk)
 tab edu, gen(ed)
 
-
 recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1), gen(country13) 
 
 global controls "bin_incom age agesq female ed1 ed3 wk2 wk3 wk4 selfemp income_standard"
 egen allcontrols = rowmiss($controls)
-tab allcontrols
 recode allcontrols (0=1) (1/11=0)
-sum $controls if allcontrols==1 & country13==1
-sum $controls if country13==1
-
 
 global controls "age agesq female ib2.edu i.work selfemp income_standard i.year"
 global DV "bin_jobs bin_unemp bin_incom bin_retire bin_house bin_health"

@@ -4,27 +4,19 @@ VERSION: ORIGINAL
 
 set more off
 
-
-//use "ZA2900_F1.dta", clear
 use "ZA2900.dta", clear
-
 
 recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
 label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
 label values v3a cntrylbl
 
-
-
 recode v4 (2=0) (8/9=.) (0=.), gen(dobeylaws)
-
 
 recode v5 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgprotest)
 recode orgprotest (1/2=0) (3/4=1), gen(dorgprotest)
 
-
 recode v6 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgmarch)
 recode orgmarch (1/2=0) (3/4=1), gen(dmarch)
-
 
 recode v7 (1=4) (2=3) (3=2) (2=1) (8/9=.), gen(orgstrike)
 recode orgstrike (1/2=0) (3/4=1), gen(dorgstrike)
@@ -102,7 +94,6 @@ recode decindjobs (1/3=0) (4/5=1), gen(ddecindjobs)
 recode v24 (1=5) (2=4) (4=2) (5=1), gen(workwk)
 recode workwk (1/3=0) (4/5=1), gen(dworkwk)
 
-
 rename v201 age
 gen agesq=age*age
 
@@ -129,7 +120,6 @@ recode v275 (2=1) (nonmiss=0), gen(suburb)
 
 rename v324 ETHNIC
 
-
 rename v204 edyears
 rename v205 edcat
 recode edcat (1/3=1) (4=2) (5=3) (6=4) (7=5), gen(degree)
@@ -139,7 +129,6 @@ label values degree edlabels
 recode degree (1/2=1) (nonmiss=0), gen(lesshs)
 recode degree (3/4=1) (nonmiss=0), gen(hs)
 recode degree (5=1) (nonmiss=0), gen(univ)
-
 
 rename v208 isco
 rename v209 occ2
@@ -179,57 +168,40 @@ rename v220 religion
 gen year=1996
 gen yr2006=0
 
-
 rename v3a cntry
-
 
 rename v325 wghts
 
-
-//save "ISSP96recode.dta", replace
 save "ISSP96recode.dta", replace
 
-
-
-//use "ZA4700_F1.dta", clear
 use "ZA4700.dta", clear
-
 
 recode V17 (1=5) (2=4) (4=2) (5=1), gen(spendenv)
 recode spendenv (1/3=0) (4/5=1), gen(dspendenv)
 
-
 recode V18 (1=5) (2=4) (4=2) (5=1), gen(spendhealth)
 recode spendhealth (1/3=0) (4/5=1), gen(dspendhealth)
-
 
 recode V19 (1=5) (2=4) (4=2) (5=1), gen(spendlaw)
 recode spendlaw (1/3=0) (4/5=1), gen(dspendlaw)
 
-
 recode V20 (1=5) (2=4) (4=2) (5=1), gen(spendedu)
 recode spendedu (1/3=0) (4/5=1), gen(dspendedu)
-
 
 recode V21 (1=5) (2=4) (4=2) (5=1), gen(spenddef)
 recode spenddef (1/3=0) (4/5=1), gen(dspenddef)
 
-
 recode V22 (1=5) (2=4) (4=2) (5=1), gen(spendret)
 recode spendret (1/3=0) (4/5=1), gen(dspendret)
-
 
 recode V23 (1=5) (2=4) (4=2) (5=1), gen(spendunemp)
 recode spendunemp (1/3=0) (4/5=1), gen(dspendunemp)
 
-
 recode V24 (1=5) (2=4) (4=2) (5=1), gen(spendart)
 recode spendart (1/3=0) (4/5=1), gen(dspendart)
 
-
 recode V35 (1=5) (2=4) (4=2) (5=1), gen(suchcare)
 recode suchcare (1/3=0) (4/5=1), gen(dsuchcare)
-
 
 recode V36 (1=5) (2=4) (4=2) (5=1), gen(sucret)
 recode sucret (1/3=0) (4/5=1), gen(dsucret)
@@ -297,14 +269,11 @@ recode workwk (1/3=0) (4/5=1), gen(dworkwk)
 rename V41 govdetain
 recode govdetain (1/2=1) (3/4=0), gen(dgovdetain)
 
-
 rename V42 govtapphone
 recode govtapphone (1/2=1) (3/4=0), gen(dgovtap)
 
-
 rename V43 govsearch
 recode govsearch (1/2=1) (3/4=0), gen(dgovsearch)
-
 
 rename V54 trustfew
 recode trustfew (1/2 = 0) (3/5 = 1), gen(dtrust)
@@ -313,17 +282,10 @@ recode trustfew (1/2 = 0) (3/5 = 1), gen(dtrust)
 rename V55 takeadv
 recode takeadv (1/2 = 0) (3/5 = 1), gen(dtakeadv)
 
-
-//rename AGE age
 gen agesq=age*age
 
-
-//recode SEX (1=0) (2=1), gen(female)
 recode sex (1=0) (2=1), gen(female)
 
-
-
-//rename MARITAL marst
 rename marital marst
 
 
@@ -332,32 +294,22 @@ recode marst (2/5=0), gen(married)
 recode marst (3/4=1) (nonmiss=0), gen(divorced)
 recode marst (2=1) (nonmiss=0), gen(widow)
 
-//recode COHAB (2=0), gen(partner)
 recode cohab (2=0), gen(partner)
 
-//rename HOMPOP hhsize
 rename hompop hhsize
 
-//recode HHCYCLE (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
 recode hhcycle (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
 
 local i = 10
 while `i' < 29 {
 	//replace kidshh=1 if HHCYCLE==`i'
 	replace kidshh=1 if hhcycle==`i'
-
-	
 	local i = `i' + 2
 }
 
-
-//recode URBRURAL (1/3=0) (4/5=1), gen(rural)
-//recode URBRURAL (2/3=1) (nonmiss=0), gen(suburb)
 recode urbrural (1/3=0) (4/5=1), gen(rural)
 recode urbrural (2/3=1) (nonmiss=0), gen(suburb)
 
-//rename EDUCYRS edyears
-//rename DEGREE edcat
 rename educyrs edyears
 rename degree edcat
 
@@ -369,34 +321,25 @@ recode degree (1/2=1) (nonmiss=0), gen(lesshs)
 recode degree (3/4=1) (nonmiss=0), gen(hs)
 recode degree (5=1) (nonmiss=0), gen(univ)
 
-//rename WRKST empstat
 rename wrkst empstat
 rename ISCO88 isco 
 
-//rename WRKHRS hourswrk
 rename wrkhrs hourswrk
-
-
 
 recode empstat (2/10=0), gen(ftemp)
 recode empstat (2/4=1) (nonmiss=0), gen(ptemp)
 recode empstat (5=1) (nonmiss=0), gen(unemp)
 recode empstat (6/10=1) (nonmiss=0), gen(nolabor)
 
-
-//gen selfemp=WRKTYPE==4
 gen selfemp=wrktype==4
-
 
 replace selfemp=. if empstat==.
 
-//gen pubemp=(WRKTYPE==1 | WRKTYPE==2)
 gen pubemp=(wrktype==1 | wrktype==2)
 
 replace pubemp=. if empstat==.
 gen pvtemp=(selfemp==0 & pubemp==0)
 replace pvtemp=. if empstat==.
-
 
 gen inczscore=.
 local incvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
@@ -411,72 +354,40 @@ gen UNION=union
 drop union
 
 recode UNION (2/3=0), gen(union)
-
-
 rename PARTY_LR party
 
-
-
-//recode ATTEND (1/3=1) (nonmiss=0), gen(highrel)
-//recode ATTEND (4/7=1) (nonmiss=0), gen(lowrel)
-//recode ATTEND (8=1) (nonmiss=0), gen(norel)
-//rename ATTEND religion
 recode attend (1/3=1) (nonmiss=0), gen(highrel)
 recode attend (4/7=1) (nonmiss=0), gen(lowrel)
 recode attend (8=1) (nonmiss=0), gen(norel)
 rename attend religion
-
-
-
-
 rename V3a cntry
 
-
-//rename WEIGHT wghts
 rename weight wghts
 
-
-// year
 gen year=2006
 gen yr2006=1
 
-
-//gen mail=MODE==34
 gen mail=mode==34
 
-
-
-
-//save "ISSP06recode.dta", replace
 save "ISSP06recode.dta", replace
 
-//append using "ISSP96recode.dta"
 append using "ISSP96recode.dta"
 
 
 sort cntry year
-
-//merge m:1 cntry year using "BradyFinnigan2014CountryData.dta"
 merge m:1 cntry year using "BradyFinnigan2014CountryData.dta"
 
 recode cntry (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig17)
 recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig13)
 
-//save "ISSP9606.dta", replace
 save "ISSP9606.dta", replace
 
-
-//global desktop "\"
 global desktop "\"
 
-//global data "ISSP9606.dta"
 global data "ISSP9606.dta"
 
 global regtable "excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) ctitle(`depvar') eform bdec(3) sdec(2) stats(coef tstat) onecol append"
 
-
-
-//use $data, clear
 use "ISSP9606.dta", clear
 
 keep if year==2006
@@ -485,7 +396,6 @@ keep if orig17
 global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
 global controls "age agesq female nevermar divorced widow hhsize kidshh rural suburb lesshs univ ptemp unemp nolabor selfemp pubemp inczscore highrel lowrel"
 
-//global cntryvars "foreignpct netmigpct cforborn socx socdem liberal emprate assim diffex multi"
 global cntryvars "foreignpct netmigpct cforborn socx socdem liberal emprate"
 
 
@@ -493,18 +403,13 @@ egen allcontrols = rowmiss($controls)
 recode allcontrols (0=1) (nonmiss=0)
 keep if allcontrols
 
-
-
 preserve
 keep if allcontrols
 
 keep $depvars $cntryvars $controls
 
-
 set matsize 800
-//outreg2 using $desktop\desc2006.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
 outreg2 using "$desktop\desc2006.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
-
 
 restore
 
@@ -512,51 +417,20 @@ preserve
 keep if allcontrols
 collapse $depvars, by(cntry)
 
-
-//outsheet cntry $depvars using $desktop\depvars2006", comma replace
 outsheet cntry $depvars using "$desktop\depvars2006", comma replace
 restore
 
 preserve
 keep if allcontrols
 keep cntry $depvars
-//bysort cntry: outreg2 using $desktop\depvars2006.xls", append noaster excel sideway bdec(2) sdec(2) sum(detail) eqkeep(mean sd)
 bysort cntry: outreg2 using "$desktop\depvars2006.xls", append noaster excel sideway bdec(2) sdec(2) sum(detail) eqkeep(mean sd)
 restore
-
-
-
-collapse $depvars foreignpct netmigpct cforborn, by(cntry)
-corr foreignpct netmigpct cforborn $depvars
-
-label define cntrylab 36 "AUS" 124 "CAN" 191 "CRO" 203 "CZR" 208 "DEN" 246 "FIN" 250 "FRA" 276 "GER" 348 "HUN" 372 "IRE" 376 "ISR" 392 "JAP" 410 "KOR" 428 "LAT" 528 "NET" 554 "NEW" 578 "NOR" 616 "POL" 620 "POR" 705 "SLO" 724 "SPA" 752 "SWE" 756 "SWZ" 826 "UKM" 840 "USA"
-label values cntry cntrylab
-
-twoway scatter dgovretire foreignpct, msymbol(i) mlabel(cntry) || lfit dgovretire foreignpct, xtitle("% Foreign Born") legend(off) name(ret_fb, replace)
-twoway scatter dgovretire netmigpct, msymbol(i) mlabel(cntry) || lfit dgovretire netmigpct, xtitle("Net Migration") legend(off) name(ret_netmig, replace)
-graph combine ret_fb ret_netmig, row(1) xsize(9) ysize(5)
-
-//graph export $desktop\figure2.tif, width(2700) height(1500) replace
-graph export "$desktop\figure2.tif", width(2700) height(1500) replace
-
-twoway scatter dgovretire cforborn, msymbol(i) mlabel(cntry) mlabp(12) || lfit dgovretire cforborn, xtitle("Change in % Foreign Born") legend(off)
-
-//graph export $desktop\appendixV.tif, width(1650) height(1200) replace
-graph export "$desktop\appendixV.tif", width(1650) height(1200) replace
-
-
-
-restore
-
-*** CONTROLS ***
 
 foreach depvar in $depvars {
 	xtlogit `depvar' $controls, i(cntry) quad(30)
 	//outreg2 using $desktop\controls2006.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	outreg2 using "$desktop\controls2006.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 }
-
-
 
 foreach depvar in $depvars {
 	rename `depvar' a
@@ -597,7 +471,6 @@ foreach depvar in $depvars {
 	outreg2 using "$desktop\forborn2006mcp.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	rename a `depvar'
 }
-
 
 
 foreach depvar in $depvars {
@@ -694,13 +567,10 @@ recode allcontrols (0=1) (nonmiss=0)
 
 quietly tab cntry, gen(cntryfe)
 
-
 preserve
 keep if allcontrols & year==1996 & dgovincdiff<.
 keep $depvars $cntryvars $controls
 
-
-//outreg2 using $desktop\desc1996.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
 outreg2 using "$desktop\desc1996.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
 restore
 
@@ -708,11 +578,7 @@ preserve
 keep if allcontrols & year==1996
 collapse $depvars, by(cntry)
 
-
-//outsheet cntry $depvars using $desktop\depvars1996", comma replace
 outsheet cntry $depvars using "$desktop\depvars1996", comma replace
-
-
 	
 restore
 

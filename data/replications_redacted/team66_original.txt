@@ -1,9 +1,7 @@
 TEAM: 66
-SOFTWARE: R (R-STUDIO)
+SOFTWARE: R
 VERSION: ORIGINAL 
 
-
-```{r setup, include=FALSE}
 stopifnot(require(dplyr))
 stopifnot(require(ggplot2))
 stopifnot(require(readr))
@@ -12,19 +10,12 @@ stopifnot(require(forcats))
 stopifnot(require(readxl))
 stopifnot(require(plm))
 stopifnot(require(lme4))
-```
 
-
-```{r}
 cri_1996 <- read_csv('ZA2900.csv')
 cri_1996[!complete.cases(cri_1996),]
 ndata <- na.omit(cri_1996)
 nrow(ndata)
-         
-```
 
-
-```{r}
 positions <- c('v1', 'v2', 'v3','v36', 'v41', 'v42', 'v39', 'v44', 'v38')
 df <- cri_1996 %>% 
     select(positions) %>% 
@@ -39,12 +30,6 @@ df <- cri_1996 %>%
     rename(respondentid='v2') %>% 
     na.omit()
 
-nrow(df)
-```
-
-
-
-```{r}
 fct_count(df$jobs)
 coltobinary <- c('jobs', 'unemployment', 'income', 'retirement', 'housing', 'healthcare')
 
@@ -67,24 +52,12 @@ df$housing <- fct_collapse(df$housing,
 df$healthcare <- fct_collapse(df$healthcare,
                          "0" = c("Definitely not", "Probably not"),
                          "1" = c("Definitely should", "Probably should"))
-View(df)
 
-
-
-```
-
-
-```{r}
 indv <- read_csv('bradyfinnigan2014countrydata.csv')
-View(indv)
 
 findv <- indv %>% 
     select(1:7, "country") %>% 
     filter(year==1996)
-```
-
-
-```{r}
 
 df$country <- df$country %>% 
     recode('aus' = 'Australia') %>% 
@@ -100,31 +73,15 @@ df$country <- df$country %>%
     recode('ch' = 'Switzerland') %>% 
     recode('usa' = "United States") %>% 
     trimws()
-table(df$country)
 
-```
-
-
-```{r}
 cwc <-  c('Australia', 'Canada', 'France','Germany', 'Ireland', 'Japan', 'New Zealand', 'Norway', 'Spain', 'Sweden', 'Switzerland', 'United States')
 df <- df[df$country %in% cwc,]
 
-```
-
-
-```{r}
 finaldf <- inner_join(df, findv, by="country")
 write_csv(finaldf, "cri_df_1996.csv")
-```
 
-```{r}
 cri_2006 <- read_csv('ZA4700.csv')
 
-```
-
-
-
-```{r}
 positions <- c('V1', 'V2', 'V3a','V25', 'V30', 'V31', 'V28', 'V33', 'V27')
 df <- cri_2006 %>% 
     select(positions) %>% 
@@ -139,10 +96,6 @@ df <- cri_2006 %>%
     rename(respondentid='V2') %>% 
     na.omit()
 
-nrow(df)
-```
-
-```{r}
 unique(df$jobs)
 fct_count(df$jobs)
 coltobinary <- c('jobs', 'unemployment', 'income', 'retirement', 'housing', 'healthcare')
@@ -167,22 +120,13 @@ df$healthcare <- fct_collapse(df$healthcare,
                          "0" = c("Definitely should not be", "Probably should not be"),
                          "1" = c("Definitely should be", "Probably should be"))
 
-
-```
-
-
-
-```{r}
 indv <- read_csv('bradyfinnigan2014countrydata.csv')
 
 
 findv <- indv %>% 
     select(1:7, "country") %>% 
     filter(year==2006)
-```
 
-
-```{r}
 unique(df$country)
 df$country <- df$country %>% 
     recode('AU-Australia' = 'Australia') %>% 
@@ -200,23 +144,12 @@ df$country <- df$country %>%
     trimws()
 table(df$country)
 
-```
-
-
-```{r}
 cwc <-  c('Australia', 'Canada', 'France','Germany', 'Ireland', 'Japan', 'New Zealand', 'Norway', 'Spain', 'Sweden', 'Switzerland', 'United States')
 df <- df[df$country %in% cwc,]
-nrow(df)
-```
 
-
-```{r}
 finaldf <- inner_join(df, findv, by="country")
 write_csv(finaldf, "cri_df_2006.csv")
-```
 
-
-```{r}
 cri_1996 <- read_csv('cri_df_1996.csv')
 
 cri_2006 <- read_csv('cri_df_2006.csv')
@@ -224,19 +157,10 @@ cri_2006 <- read_csv('cri_df_2006.csv')
 cri_combined <- rbind(cri_1996, cri_2006)
 nrow(cri_combined)
 write_csv(cri_combined, "cri_df_combined.csv")
-```
 
-
-```{r}
-setwd("/")
 all <- read.csv("cri_df_combined.csv")
-```
- 
 
-
-```{r}
 options(scipen=999)
-
 
 fe_1 = glmer(jobs ~ (1 | respondentid) + (1 | country) + as.factor(year) + foreignpct, data = all, family = binomial)
 summary(fe_1)
@@ -292,9 +216,6 @@ summary(fe_17)
 fe_18 = glmer(healthcare ~ (1 | respondentid) + (1 | country) + as.factor(year) + foreignpct + emprate, data = all, family = binomial)
 summary(fe_18)
 
-```
-
-```{r}
 
 all$netmig_pct <- (all$netmig / all$pop) * 100
 
@@ -370,6 +291,5 @@ summary(fe_41)
 fe_42 = glmer(healthcare ~ (1 | respondentid) + (1 | country) + as.factor(year) + netmig_pct + foreignpct, data = all, family = binomial)
 summary(fe_42)
 
-```
 
 

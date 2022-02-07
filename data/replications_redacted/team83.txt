@@ -24,14 +24,10 @@ if (Sys.getenv("USERNAME") == "") {
 
 country_sample <- c(36,124,250,276,372,392,554,578,724,752,756,826,840)
 
-
-
 issp1996_df <- read.csv(file="ZA2900.csv", head = TRUE, sep = ",")
 issp2006_df <- read.csv(file="ZA4700.csv", head = TRUE, sep = ",")
 context_df  <- read.csv(file="L2data.csv", head = TRUE, sep = ",") %>%
   subset(cntry %in% country_sample)
-
-
 
 df_1996 <- select(issp1996_df,v3,v39,v41,v42,v36,v200,v201,v206,v205) %>%
   rename(country = v3,

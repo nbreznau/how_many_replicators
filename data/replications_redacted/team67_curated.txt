@@ -2,10 +2,6 @@ TEAM: 67
 SOFTWARE: R
 VERSION: CURATED
 
-rm(list = ls())
-
-setwd("/")
-
 library("readr")
 library("dplyr")
 library("stringr")
@@ -13,9 +9,7 @@ library("foreign")
 library("texreg")
 
 l2 <- read.csv("L2data.csv", header = T)
-
 za29 <- foreign::read.dta("ZA2900.dta")
-
 za47 <- foreign::read.dta("ZA4700.dta")
 
 za29 <- za29 %>% 

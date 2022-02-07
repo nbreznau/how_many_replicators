@@ -2,14 +2,11 @@ TEAM: 69
 SOFTWARE: STATA
 VERSION: CURATED
 
-
-cd "/"
 use "L2data.dta", clear
 rename cntry isocode
 save "L2dataB.dta", replace
 
 use "ZA2900.dta", clear
-
 
 gen oldagecare=0
 replace oldagecare=1 if v39 ==  1 | v39 == 2
@@ -26,12 +23,10 @@ replace jobs=. if v36 ==.
 
 gen emplstatus=v206
 replace emplstatus=2 if v206==2 | v206==3
-*Note that I was unsure on how to categorize "Employed, less than part-time"
 replace emplstatus=3 if v206==4 | v206==6 | v206==7 | v206==8 | v206==9 | v206==10
 replace emplstatus=4 if v206==5
 label define emplstatus 1 "Full-time" 2 "Part-time" 3 "Not active" 4 "Active unemployed"
 label values emplstatus emplstatus
-
 
 gen edu=1
 replace edu=2 if v205==5 | v205==6
@@ -39,44 +34,32 @@ replace edu=3 if v205==7
 label define edu 1 "Primary" 2 "Secondary" 3 "University"
 label values edu edu
 
-
 rename v200 sex
 rename v201 age
-*gen age squared
 gen age2=age*age
-
 
 gen country=""
 replace country="Australia" if v3=="aus":V3
 replace country="Canada" if v3=="cdn":V3
-*replace country="Croatia" 
 replace country="Czech Republic" if v3=="cz":V3
-*replace country="Denmark" 
-*replace country="Finland" 
 replace country="France" if v3=="f":V3
-*Combine East and West Germany
 replace country="Germany" if v3=="D-W":V3 | v3=="D-E":V3
 replace country="Hungary" if v3=="h":V3
 replace country="Ireland" if v3=="irl":V3
-*Combine arab and jewish population of Israel
 replace country="Israel" if v3=="IL-J":V3 | v3=="IL-A":V3
 replace country="Japan" if v3=="j":V3
 replace country="Latvia" if v3=="lv":V3
-*replace country="Netherlands" 
 replace country="New Zealand" if v3=="nz":V3
 replace country="Norway" if v3=="n":V3
 replace country="Poland" if v3=="pl":V3
-*replace country="Portugal" 
 replace country="Russia" if v3=="rus":V3
 replace country="Slovenia" if v3=="slo":V3
-*replace country="South Korea" 
 replace country="Spain" if v3=="e":V3
 replace country="Sweden" if v3=="s":V3
 replace country="Switzerland" if v3=="ch":V3
 replace country="United Kingdom" if v3=="gb":V3
 replace country="United States" if v3=="usa":V3
 
-*gen time variable
 gen year=1996
 keep country year sex age age2 edu emplstatus oldagecare unemployed reduceincomedifferences jobs
 save "1996.dta", replace
@@ -109,10 +92,8 @@ replace edu=3 if degree==5
 label define edu 1 "Primary" 2 "Secondary" 3 "University"
 label values edu edu
 
-*gen age squared
 gen age2=age*age
 
-*gen time variable
 gen year=2006
 
 rename V3a isocode

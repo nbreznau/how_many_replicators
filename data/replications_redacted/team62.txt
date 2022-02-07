@@ -1,16 +1,13 @@
 TEAM: 62
 SOFTWARE: R
-VERSION: CURATED
+VERSION: ORIGINAL
 
 library(foreign)
 library(dplyr)
-working_dir <- "/"
-setwd(working_dir)
 
 ISSP_96 <- read.dta('ZA2900.dta')
 ISSP_06 <- read.dta('ZA4700.dta')
 country <- read.csv('L2data.csv')
-
 
 
 ISSP_96 <- ISSP_96 %>%
@@ -41,13 +38,16 @@ ISSP_96 <- ISSP_96 %>%
   mutate(year = 1996) %>%
   mutate(country = NA)
 
-ISSP_96[as.numeric(ISSP_96$v205) == 7, "education"] <- rep("univ", sum(as.numeric(ISSP_96$v205) == 7))
+
+ISSP_96[as.numeric(ISSP_96$v205) == 7, "education"] <- rep("univ", sum(ISSP_96$v205 == 7))
 ISSP_96[as.numeric(ISSP_96$v205) < 7, "education"] <- rep("secondary", sum(as.numeric(ISSP_96$v205) < 7))
 ISSP_96[as.numeric(ISSP_96$v205) < 4, "education"] <- rep("primary", sum(as.numeric(ISSP_96$v205) < 4))
+
 
 ISSP_96[as.numeric(ISSP_96$v206) == 1, "employment"] <- rep("full", sum(as.numeric(ISSP_96$v206) == 1))
 ISSP_96[as.numeric(ISSP_96$v206) == 2, "employment"] <- rep("part", sum(as.numeric(ISSP_96$v206) == 2))
 ISSP_96[as.numeric(ISSP_96$v206) == 5, "employment"] <- rep("unemployed", sum(as.numeric(ISSP_96$v206) == 5))
+
 
 ISSP_96[ISSP_96$v3 == "aus", "country"] <- rep("Australia", sum(ISSP_96$v3 == "aus"))
 ISSP_96[ISSP_96$v3 == "D-W", "country"] <- rep("Germany", sum(ISSP_96$v3 == "D-W"))
@@ -104,9 +104,11 @@ ISSP_06 <- ISSP_06 %>%
   mutate(year = 2006) %>%
   mutate(country = NA)
   
+
 ISSP_06[as.numeric(ISSP_06$degree) == 6, "education"] <- rep("univ", sum(as.numeric(ISSP_06$degree) == 6))
 ISSP_06[as.numeric(ISSP_06$degree) < 6, "education"] <- rep("secondary", sum(as.numeric(ISSP_06$degree) < 6))
 ISSP_06[as.numeric(ISSP_06$degree) < 4, "education"] <- rep("primary", sum(as.numeric(ISSP_06$degree) < 4))
+
 
 ISSP_06[as.numeric(ISSP_06$wrkst) == 1, "employment"] <- rep("full", sum(as.numeric(ISSP_06$wrkst) == 1))
 ISSP_06[as.numeric(ISSP_06$wrkst) == 2, "employment"] <- rep("part", sum(as.numeric(ISSP_06$wrkst) == 2))
@@ -145,14 +147,13 @@ ISSP_96 <- ISSP_96 %>%
   select(-v3) %>%
   select(-v205) %>%
   select(-v206)
-
 ISSP_06 <- ISSP_06 %>%
   select(-V3a) %>%
   select(-degree) %>%
   select(-wrkst)
-
 ISSP_complete <- ISSP_96 %>%
-  bind_rows(ISSP_06)
+  bind_rows(ISSP_06) %>%
+  left_join(country, by = c("country" = "country", "year" = "year"))
 
 
 displayResults <- function(model) { 

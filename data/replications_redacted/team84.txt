@@ -27,12 +27,7 @@ knitr::kable(country.diff, digits = 3, padding = 2, align='c',
 ZA2900 <- read.csv("ZA2900.csv") 
 ZA4700 <- read.csv("ZA4700.csv") 
 
-
-#levels(ZA2900$v200) 
 ZA2900$v200 <- car::recode(ZA2900$v200, "c('')=NA")
-#table(ZA2900$v200)
-#levels(ZA2900$v200)
-#levels(ZA4700$sex)
 ZA4700$sex <- car::recode(ZA4700$sex, "c('')=NA")
 
 
@@ -44,59 +39,37 @@ ZA4700 %>%
   count(sex) %>%
   mutate(prop = prop.table(n))
 
-
-#levels(ZA2900$v201)
 ZA2900$v201 <- car::recode(ZA2900$v201, "c('')=NA")
 ZA2900$v201 <- car::recode(ZA2900$v201, "c('15 years')=15")
 ZA2900$v201 <- car::recode(ZA2900$v201, "c('97 years')=97")
 ZA2900$v201 <- as.numeric(levels(ZA2900$v201))[ZA2900$v201]
-# table(ZA2900$v201, useNA = c("ifany"))
-
 
 ZA2900 %>%
   summarise_each(
     funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE), min(., na.rm = TRUE), max(., na.rm = TRUE)),
                  v201)
-
 ZA2900 %>%
   summarise_each(
     funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE), min(., na.rm = TRUE), max(., na.rm = TRUE)),
                  v201)
 
-
-#table(ZA2900$v205, useNA = c("ifany"))
 ZA2900$v205.modified <- as.numeric(ZA2900$v205)
 ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(2,3,4)='Primary or less'")
 ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(5,6,7,8)='Secondary and University or more'")
 ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(1)=NA")
-#table(ZA2900$v205.modified, useNA = c("ifany"))
 
-knitr::kable(table(ZA2900$v205.modified, useNA = c("ifany")), digits = 0, padding = 2, align='c', 
-      caption = "Education 1996")
-
-#table(ZA4700$degree, useNA = c("ifany"))
 ZA4700$degree.modified <- as.numeric(ZA4700$degree)
 ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(3,5,6)='Primary or less'")
 ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(2,4,7)='Secondary and University or more'")
 ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(1)=NA")
-#table(ZA4700$degree.modified, useNA = c("ifany"))
 
-knitr::kable(table(ZA4700$degree.modified, useNA = c("ifany")), digits = 0, padding = 2, align='c', 
-      caption = "Education 2006")
-
-# table(ZA2900$v206, useNA = c("ifany"))
 ZA2900$v206.modified <- as.numeric(ZA2900$v206)
 ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(2)='Full-time'")
 ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(7)='Part-time'")
 ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(11, 3,4,5)='Active unemployed'")
 ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(8,9,10)='Not active'")
 ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(1,6)=NA")
-#table(ZA2900$v206.modified, useNA = c("ifany"))
 
-knitr::kable(table(ZA2900$v206.modified, useNA = c("ifany")), digits = 0, padding = 2, align='c', 
-      caption = "Employment 1996")
-
-#table(ZA4700$wrkst, useNA = c("ifany"))
 ZA4700$wrkst.modified <- as.numeric(ZA4700$wrkst)
 ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(2)='Full-time'")
 ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(4)='Part-time'")
@@ -104,19 +77,12 @@ ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(11,3,5,6)='Active
 ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(8,9,10)='Not active'")
 ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(1,7)=NA")
 
-knitr::kable(table(ZA4700$wrkst.modified, useNA = c("ifany")), digits = 0, padding = 2, align='c', 
-      caption = "Employment 2006")
-
-#levels(ZA2900$v39) 
-#levels(ZA4700$V28) 
-
 ZA2900$v39.modified <- car::recode(ZA2900$v39, "c('')=NA")
 ZA2900$v39.modified <- car::recode(ZA2900$v39.modified, 
                                    "c('Definitely not', 'Probably not') = 'Negative'")
 ZA2900$v39.modified <- car::recode(ZA2900$v39.modified,
                                    "c('Definitely should', 'Probably should') = 'Affirmative'")
 
-table(ZA2900$v39.modified, useNA = c("ifany"))
 
 ZA4700$V28.modified <- car::recode(ZA4700$V28, "c('')=NA")
 ZA4700$V28.modified <- car::recode(ZA4700$V28.modified, 
@@ -124,18 +90,12 @@ ZA4700$V28.modified <- car::recode(ZA4700$V28.modified,
 ZA4700$V28.modified <- car::recode(ZA4700$V28.modified,
                                    "c('Definitely should be', 'Probably should be') = 'Affirmative'")
 
-table(ZA4700$V28.modified, useNA = c("ifany"))
-
-#levels(ZA2900$v41) 
-#levels(ZA4700$V30) 
-
 ZA2900$v41.modified <- car::recode(ZA2900$v41, "c('')=NA")
 ZA2900$v41.modified <- car::recode(ZA2900$v41.modified, 
                                    "c('Definitely not', 'Probably not') = 'Negative'")
 ZA2900$v41.modified <- car::recode(ZA2900$v41.modified,
                                    "c('Definitely should', 'Probably should') = 'Affirmative'")
 
-table(ZA2900$v41.modified, useNA = c("ifany"))
 
 ZA4700$V30.modified <- car::recode(ZA4700$V30, "c('')=NA")
 ZA4700$V30.modified <- car::recode(ZA4700$V30.modified, 
@@ -143,18 +103,12 @@ ZA4700$V30.modified <- car::recode(ZA4700$V30.modified,
 ZA4700$V30.modified <- car::recode(ZA4700$V30.modified,
                                    "c('Definitely should be', 'Probably should be') = 'Affirmative'")
 
-table(ZA4700$V30.modified, useNA = c("ifany"))
-
-#levels(ZA2900$v42) 
-#levels(ZA4700$V31) 
-
 ZA2900$v42.modified <- car::recode(ZA2900$v42, "c('')=NA")
 ZA2900$v42.modified <- car::recode(ZA2900$v42.modified, 
                                    "c('Definitely not', 'Probably not') = 'Negative'")
 ZA2900$v42.modified <- car::recode(ZA2900$v42.modified,
                                    "c('Definitely should', 'Probably should') = 'Affirmative'")
 
-table(ZA2900$v42.modified, useNA = c("ifany"))
 
 ZA4700$V31.modified <- car::recode(ZA4700$V31, "c('')=NA")
 ZA4700$V31.modified <- car::recode(ZA4700$V31.modified, 
@@ -162,17 +116,12 @@ ZA4700$V31.modified <- car::recode(ZA4700$V31.modified,
 ZA4700$V31.modified <- car::recode(ZA4700$V31.modified,
                                    "c('Definitely should be', 'Probably should be') = 'Affirmative'")
 
-table(ZA4700$V31.modified, useNA = c("ifany"))
-
-#levels(ZA2900$v36) 
-#levels(ZA4700$V25) 
 ZA2900$v36.modified <- car::recode(ZA2900$v36, "c('')=NA")
 ZA2900$v36.modified <- car::recode(ZA2900$v36.modified, 
                                    "c('Definitely not', 'Probably not') = 'Negative'")
 ZA2900$v36.modified <- car::recode(ZA2900$v36.modified,
                                    "c('Definitely should', 'Probably should') = 'Affirmative'")
 
-table(ZA2900$v36.modified, useNA = c("ifany"))
 
 ZA4700$V25.modified <- car::recode(ZA4700$V25, "c('')=NA")
 ZA4700$V25.modified <- car::recode(ZA4700$V25.modified, 
@@ -180,20 +129,6 @@ ZA4700$V25.modified <- car::recode(ZA4700$V25.modified,
 ZA4700$V25.modified <- car::recode(ZA4700$V25.modified,
                                    "c('Definitely should be', 'Probably should be') = 'Affirmative'")
 
-table(ZA4700$V25.modified, useNA = c("ifany"))
-
-#length(levels(ZA2900$v3))  
-#length(levels(ZA4700$V3))  
-#length(levels(ZA4700$V3a)) 
-
-#dput(levels(ZA2900$v3))
-#dput(levels(ZA4700$V3a))
-#dput(levels(L2data$country))
-
-#ZA2900[ZA2900$v3 == "ch","v324"]
-#ZA2900[ZA2900$v3 == "n","v324"]
-#ZA2900[ZA2900$v3 == "rp","v324"]
-#ZA2900[ZA2900$v3 == "s","v324"]
 
 ZA2900$v3.modified  <- ZA2900$v3
 ZA2900$v3.modified <- plyr::revalue(ZA2900$v3.modified, 
@@ -258,19 +193,14 @@ merged.1996.2006 <- merged.1996.2006[merged.1996.2006$Country %in%
 Cntry <- L2data[, c(7,2,3:6)]
 names(Cntry)[1:2] <- c("Country", "Year")
 
-#setdiff(merged.1996.2006$Country, Cntry$Country)
 Cntry$Country <- as.character(Cntry$Country)
 Cntry[21:22, "Country"] <- "Israel"
 
 data.merged <- merge(merged.1996.2006, Cntry)
 
-
-
 data.merged[c(1,2,5,6)] <- lapply(data.merged[c(1,2,5,6)], factor)
 
-
 data.merged$AgeSq <- (data.merged$Age)^2
-
 
 data.merged$PolPref.Old.N        <- (2-as.numeric(data.merged$PolPref.Old))
 data.merged$PolPref.Unemployed.N <- (2-as.numeric(data.merged$PolPref.Unemployed))
@@ -279,7 +209,6 @@ data.merged$PolPref.Jobs.N       <- (2-as.numeric(data.merged$PolPref.Jobs))
 
 data.merged$Education <- relevel(data.merged$Education, ref = "Secondary and University or more")
 data.merged$Employment <- relevel(data.merged$Employment, ref = "Full-time")
-
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
@@ -290,24 +219,15 @@ data.merged.13 <- data.merged[data.merged$Country %!in%
 knitr::kable(data.merged.13[c(1:3,4930:4932, 4933:4935, 7045:7050), c(1:6,11:14,16)], 
              digits = 3, padding = 1, align='c', caption = "A few rows & columns of the the merged dataset")
 
-
-
-
-#library(plm); data("Grunfeld", package = "Ecdat"); grun.tways <- plm(inv ~ value + capital, data = Grunfeld, effect = "twoways",  model = "random", random.method = "amemiya"); summary(grun.tways)
 library(epiDisplay)
 library(knitr)
 library(broom)
-#options(scipen=999)
 
 model.1 <- glm(PolPref.Old.N ~ foreignpct +
                                Sex + Age + AgeSq + Education + Employment +
                                factor(Country) + factor(Year),
                family=binomial(link='logit'),
                data = data.merged.13); summary(model.1)
-
-
-
-#knitr::kable(tidy(model.1), digits=4, caption="Fixed effects results")
 
 model.2 <- glm(PolPref.Unemployed.N ~ foreignpct +
                                       Sex + Age + AgeSq + Education + Employment +

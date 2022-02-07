@@ -2,10 +2,6 @@ TEAM: 80
 SOFTWARE: R
 VERSION: ORIGINAL
 
-
-
-setwd("/")
-
 library(haven)
 library(dplyr)
 library(labelled)
@@ -25,17 +21,10 @@ data1 <- remove_labels(data1, user_na_to_na = TRUE)
 data2 <- remove_labels(data2, user_na_to_na = TRUE)
 data.country <- remove_labels(data.country, user_na_to_na = TRUE)
 
-
-
 data1 <- data1 %>% mutate(old.age.care=v39,unemployed=v41,reduce.income.diff=v42,jobs=v36) %>%
     mutate_at(c("old.age.care","unemployed","reduce.income.diff","jobs"),funs(case_when(. == 2 ~ 1,
-                                                                                   . == 3 ~ 0,
-                                                                                   . == 4 ~0,
-                                                                                   TRUE ~ .)))
 
-# gender (female == 1) (v200)
 data1$female<-case_when(data1$v200==2~1,data1$v200==1~0)
-
 
 data1$age <- data1$v201
 data1$age2 <- data1$age*data1$age
@@ -58,7 +47,6 @@ data1$employment[data1$v206 == 9] <- "not active"
 data1$employment[data1$v206 == 10] <- "not active" 
 
 data1$employment.factor <- factor(data1$employment) %>% relevel(ref = "full-time")
-
 
 data1$country <- ""
 data1$country[data1$v3 == 1] <- "Australia"
@@ -92,25 +80,18 @@ data1$country[data1$v3 == 28] <- "Cyprus"
 data1$country[data1$v3 == 30] <- "Switzerland"
 
 data1$id <- data1$v2
-
-
 data1 <- select(data1, old.age.care, unemployed, reduce.income.diff, jobs, year, country, id,
                 age, age2, female, edu, edu.factor, employment, employment.factor)
 
-
-
-
 data2 <- data2 %>% mutate(old.age.care=V28,unemployed=V30,reduce.income.diff=V31,jobs=V25) %>%
     mutate_at(c("old.age.care","unemployed","reduce.income.diff","jobs"),funs(case_when(. == 2 ~ 1,
-                                                                                   . == 3 ~ 0,
-                                                                                   . == 4 ~0,
-                                                                                   TRUE ~ .)))
+                                                                                        . == 3 ~ 0,
+                                                                                        . == 4 ~0,  
+                                                                                        TRUE ~ .)))                                                                              TRUE ~ .)))
 
 data2$female<-case_when(data2$sex==2~1,data2$sex==1~0)
 
-
 data2$age2 <- data2$age*data2$age
-
 
 data2$edu <- case_when(is.na(data2$degree)==F & data2$degree<3 ~ "primary or less",
                        data2$degree == 3 ~ "secondary",
@@ -118,7 +99,6 @@ data2$edu <- case_when(is.na(data2$degree)==F & data2$degree<3 ~ "primary or les
                        data2$degree == 5 ~ "university or more")
 
 data2$edu.factor <- factor(data2$edu) %>% relevel(ref = "secondary")
-
 
 data2$employment <- NA
 data2$employment[data2$wrkst == 1] <- "full-time"
@@ -133,8 +113,6 @@ data2$employment[data2$wrkst == 9] <- "not active"
 data2$employment[data2$wrkst == 10] <- "not active"
 
 data2$employment.factor <- factor(data2$employment) %>% relevel(ref = "full-time")
-
-
 
 data2$country <- ""
 data2$country[data2$V3a == 36] <- "Australia"
@@ -176,7 +154,6 @@ data2$id <- data2$V2
 data2 <- select(data2, old.age.care, unemployed, reduce.income.diff, jobs, year, country, id,
                 age, age2, female, edu, edu.factor, employment, employment.factor)
 
-
 cri.data <- rbind.data.frame(data1, data2)
 cri.full <- left_join(cri.data, data.country)
 
@@ -184,7 +161,6 @@ table(cri.full$country, cri.full$year)
 
 sample <- c("Norway", "Switzerland", "Sweden", "United States", "Ireland", "Japan", "United Kingdom", "Germany", "France", "Canada", "Australia", "New Zealand", "Spain") 
 cri.full <- cri.full %>% filter(country %in% sample)
-
 
 m1a <- glm(old.age.care ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
 m1b <- glm(unemployed ~ foreignpct + factor(country) + factor(year) + female + age + age2 + edu.factor + employment.factor, data=cri.full, family = "binomial")
