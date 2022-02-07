@@ -5,11 +5,8 @@ Version: ORIGINAL
 clear
 version 15.1
 set more off
-capture log close
 
-capture ssc install estout
-
-use "Data/ZA4700.dta", clear
+use "ZA4700.dta", clear
 
 keep V3a V25 V28 V30 V31 sex age degree wrkst wrkhrs *_DEGR
 
@@ -17,14 +14,12 @@ rename V25 govresp_jobs
 rename V28 govresp_oldage
 rename V30 govresp_unempl
 rename V31 govresp_inequal
-tab wrkhrs, miss // 96 is not a missing code, means 96+
-tab wrkst
 
 compress
 tempfile tempo
 save "`tempo'"
 
-use "Data/ZA2900.dta", clear
+use "ZA2900.dta", clear
 
 keep v3 v36 v39 v41 v42 v200 v201 v205 v206 v215
 
@@ -35,9 +30,7 @@ rename v42 govresp_inequal
 rename v200 sex
 rename v201 age
 rename v206 wrkst
-tab wrkst // Coding consitent with 2006 (above)
 rename v215 wrkhrs
-tab wrkhrs, miss 
 
 append using "`tempo'", gen(year)
 recode year (0 = 1996) (1 = 2006)
@@ -53,50 +46,32 @@ replace cntry = v3 if year == 1996
 
 lab val cntry V3A
 
-tab1 govresp*
 recode govresp* (1 2 = 1) (3 4 = 0)
 
-tab age 
 gen female = sex
 recode female (1 = 0) (2 = 1)
 lab var female "Female"
 
-tab wrkst
 gen emplstat = wrkst
 recode emplstat (1 = 1) (2/3 = 2) (5 = 3) (6/10 = 4)
 lab def emplstat 1 "Fulltime" 2 "Parttime" 3 "Unemployed" 4 "Inactive"
 table emplstat if emplstat <= 2, c(mean wrkhrs p10 wrkhrs p50 wrkhrs p80 wrkhrs p90 wrkhrs)
 
-tab wrkhrs, m
 lab val emplstat emplstat
 replace emplstat = 1 if wrkst == 4 & inrange(wrkhrs, 35, .)
 replace emplstat = 2 if wrkst == 4 & wrkhrs < 35
 
-tab emplstat wrkst
-tab wrkhrs if emplstat == 4 & wrkst == 4, m
 replace emplstat = . if emplstat == 4 & wrkst == 4
 
-tab degree 
-tab v205 
-
-tab DE_DEGR
-tab DE_DEGR degree
-tab US_DEGR
-tab US_DEGR degree 
-tab NL_DEGR
-tab NL_DEGR degree 
 gen edu = degree if year == 2006
 recode edu (0 = 1) (1/3 = 2) (4/5 = 3)
 drop *_DEGR
 
-tab v205
 recode v205 (1/3 = 1) (4/5 = 2) (6/7 = 3)
 replace edu = v205 if year == 1996
 
 lab def edu 1 "Primary or less" 2 "Secondary" 3 "University or more"
 lab val edu edu
-
-tab cntry edu, nofreq row
 
 keep govresp_* cntry year female age emplstat edu
 merge m:1 cntry year using "Data/L2data.dta",nogen keep(3)
@@ -127,4 +102,38 @@ lab var socx "Social Welfare Expenditures (% of GDP)"
 lab var emprate "Employment Rate (% in LF)"
 lab var netmigpct "Change in Immigrant Stock (1-year, in %)"
 	
+local spec1 "female c.age##c.age b2.edu b1.emplstat i.cntry 2006.year"
+local spec2 "`spec1' foreignpct" 
+local spec3 "`spec1' foreignpct socx"
+local spec4 "`spec1' foreignpct emprate"
+local spec5 "`spec1' netmigpct"
+local spec6 "`spec1' netmigpct socx"
+local spec7 "`spec1' netmigpct emprate"
+
+local m=1
+ 
+
+forvalues s=2/7{ 
+	foreach var in oldage unempl inequal jobs {
+		local m=`m'+1
+		logit govresp_`var' `spec`s''
+		estimates store model`m'
+		}
+	}
+			
+estout model? model?? using "Results/logit_estimates.csv", replace eform ///
+		cells("b(star fmt(2) label(OR))" "z(par fmt(2) label((z-value)))")	///
+		mlabels(,depvar numbers)  eqlab(" ") ///
+		stat(N,fmt(0) label("Observations")) ///
+		varlab(age "Age" c.age#c.age "Age sq." female "Female" 1.edu "Low" 3.edu "Tertiary" ///
+		2.emplstat "Parttime" 3.emplstat "Unemployed" 4.emplstat "Inactive" ///
+		foreignpct "Immigrant Stock (%)" socx "Social Welfare Expenditures (% of GDP)" ///
+		emprate "Employment Rate (% in LF)" netmigpct "Change in Immigrant Stock (1-year, in %)" ///
+		_cons "Constant") ///
+		order(foreignpct socx emprate netmigpct) ///
+		refcat(1.edu "Education (ref. secondary)" 2.emplstat "Employment (ref. full-time)" ///
+		female "INDIVIDUAL-LEVEL VARIABLES" foreignpct "COUNTRY-LEVEL VARIABLES",nolab) ///
+		drop(*cntry *year 1.emplstat 2.edu)	starlevels(* .05 ** .01 *** .001)
+
+
 
