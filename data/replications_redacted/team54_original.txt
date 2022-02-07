@@ -6,16 +6,12 @@ version 15.1
 clear
 clear mata
 clear matrix
-capture log close
 set more off
-cd "\"
 
 use ZA2900.dta, clear
 
-
 keep v2 v3 v39 v41 v42 v36 v200 v201 v205 v206
 rename v2 respid
-
 
 recode v39 (1/2=1) (3/4=0), gen(oldcare)
 recode v41 (1/2=1) (3/4=0), gen(unemp)
@@ -24,22 +20,17 @@ recode v36 (1/2=1) (3/4=0), gen(jobs)
 
 drop v39 v41 v42 v36
 
-
 recode v200 (1=0) (2=1), gen(sex)
 drop v200
 
 rename v201 age
 gen age2=age^2
 
-
 recode v205 (1/3=1) (4/6=2) (7=3), gen(edu)
 drop v205
 
-
 recode v206 (1=4) (2/3=1) (4=2) (6/10=2) (5=3), gen(employ)
 drop v206
-
-
 
 recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) ///
 		(21=.) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(cntry) 
@@ -49,17 +40,11 @@ label define cntry    36  "Australia"   124 "Canada"  203 "Czech Republic"    25
 label val cntry cntry
 drop v3
 
-
 gen year=1996
-
-
 
 save issp_1996.dta, replace
 
-
-
 use ZA4700.dta,clear
-
 
 keep V2 V3a V28 V30 V31 V25 sex age degree wrkst
 rename V2 respid
@@ -71,31 +56,23 @@ recode V25 (1/2=1) (3/4=0), gen(jobs)
 
 drop V28 V30 V31 V25
 
-
 recode sex (1=0) (2=1)
 
-
 gen age2=age^2
-
 
 recode degree (0/1=1) (2/4=2) (5=3), gen(edu)
 drop degree
 
-
 recode wrkst (1=4) (2/3=1) (4=2) (6/10=2) (5=3), gen(employ)
 drop wrkst
 
-
 rename V3a cntry
-
 
 gen year=2006
 
 save issp_2006.dta, replace
 
-
 append using issp_1996.dta
-
 
 gen two_waves = .
 levelsof cntry, local(cntries)
@@ -114,14 +91,10 @@ foreach c of local cntries {
 sort cntry year
 merge m:1 cntry year using "L2data.dta"
 
-
-
 drop if _merge==2 | _merge==1
 drop if two_waves == 0
 drop if socx==.
 drop _merge two_waves
-
-
 
 #delimit ;
 order
@@ -184,30 +157,24 @@ lab val oldcare unemp income jobs POLATT
 save repli_data_final.dta, replace
 
 
-
 local indlev        "sex age age2 ib2.edu ib4.employ"
 
-
 local fixeff     "i.cntry i.year" // dummies for countries and years
-
 
 eststo m1: quietly logistic oldcare foreignpct			`indlev' `fixeff'
 eststo m2: quietly logistic unemp foreignpct			`indlev' `fixeff'
 eststo m3: quietly logistic income foreignpct			`indlev' `fixeff'
 eststo m4: quietly logistic jobs foreignpct			`indlev' `fixeff'
 
-
 eststo m5: quietly logistic oldcare foreignpct socx		`indlev' `fixeff'
 eststo m6: quietly logistic unemp foreignpct socx		`indlev' `fixeff'
 eststo m7: quietly logistic income foreignpct socx		`indlev' `fixeff'
 eststo m8: quietly logistic jobs foreignpct socx		`indlev' `fixeff'
 
-
-eststo m9:	quietly logistic oldcare foreignpct emprate	`indlev' `fixeff'
+eststo m9: quietly logistic oldcare foreignpct emprate	`indlev' `fixeff'
 eststo m10: quietly logistic unemp foreignpct emprate	`indlev' `fixeff'
 eststo m11: quietly logistic income foreignpct emprate	`indlev' `fixeff'
 eststo m12: quietly logistic jobs foreignpct emprate	`indlev' `fixeff'
-
 
 eststo m13: quietly logistic oldcare netmigpct			`indlev' `fixeff'
 eststo m14: quietly logistic unemp netmigpct			`indlev' `fixeff'
@@ -226,6 +193,5 @@ eststo m22: quietly logistic unemp netmigpct emprate	`indlev' `fixeff'
 eststo m23: quietly logistic income netmigpct emprate	`indlev' `fixeff'
 eststo m24: quietly logistic jobs netmigpct emprate		`indlev' `fixeff'
 
-********************************************************************************
-*esttab m* using tables.txt, cells(b(star) z) cons eform fixed replace
-*esttab m* using tables.csv, cells(b(star) z) cons eform replace
+esttab m* using tables.txt, cells(b(star) z) cons eform fixed replace
+esttab m* using tables.csv, cells(b(star) z) cons eform replace

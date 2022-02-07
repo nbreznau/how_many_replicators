@@ -2,15 +2,6 @@ TEAM: 52
 SOFTWARE: R (R-STUDIO)
 VERSION: ORIGINAL
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-```{r}
-m(list=ls())
-
-
 pacman::p_load(tidyverse, 
                haven,
                rvest, 
@@ -33,44 +24,18 @@ issp96.labs <- issp96 %>%
                    map_chr(~attributes(.)$label)
 issp06.labs <- issp06 %>% 
         map_chr(~attributes(.)$label)
-```
 
-
-
-```{r}
-names(issp96)
-```
-
-
-
-```{r}
 issp96.labs[grep("provide", issp96.labs)] 
 issp96.labs[grep("duce", issp96.labs)] 
 issp96.labs[grep("job", issp96.labs)] 
-```
 
 
-
-```{r}
 dep.96 <- issp96 %>% 
                 select("v39", "v41", "v42", "v36") %>% 
                 rename(old.age = v39, unemploy = v41, red.inc = v42, jobs = v36)
 
-get_labels(dep.96)
-freq(to_label(dep.96$old.age))
-summary(dep.96)
-```
-
-
-
-```{r}
 dep.96 <- as_tibble(ifelse(dep.96 <= 2, 1, ifelse(dep.96 <= 4, 0, NA)))
-freq(to_label(dep.96$old.age)) 
-summary(dep.96) 
-```
 
-
-```{r}
 issp96.labs[grep("sex", issp96.labs)]
 issp96.labs[grep(" [Aa]ge ", issp96.labs)] 
 issp96.labs[grep("ducat", issp96.labs)] 
@@ -82,56 +47,27 @@ ind.96 <- issp96 %>%
                 rename(id.r = v2, country=v3, sex = v200, age = v201, educ =
                          v205, empl = v206)
 
-
-  get_labels(ind.96)
-  freq(ind.96$sex)
   ind.96$sex= Recode(ind.96$sex,"1=0 ; 2=1")
-
-
-  freq(ind.96$educ)
   ind.96$educ <- ifelse(ind.96$educ <= 4, "Primary or less", 
                         ifelse(ind.96$educ == 5 | ind.96$educ == 6, "Secondary", ifelse(ind.96$educ == 7, "University", NA)))
   ind.96$educ <- relevel(as_factor(ind.96$educ), ref = "Secondary")
-  freq(ind.96$educ)  
-  get_labels(ind.96$educ)
-  lm(sex ~ educ, data = ind.96) # check reference
-
-
-
-  get_labels(ind.96$empl)
-  freq(ind.96$empl)
   ind.96$empl <- ifelse(ind.96$empl == 1, "Full-time", 
                  ifelse(ind.96$empl == 2 | ind.96$empl == 3, "Part-time",
                  ifelse(ind.96$empl == 4 | ind.96$empl == 5, "Active unemployed",
                  ifelse(ind.96$empl >= 6, "Not active", NA))))
 
   ind.96$empl <- relevel(as.factor(ind.96$empl), ref = "Full-time")
-  freq(ind.96$empl)
-  
   ind.96$year <- rep(1996, n = nrow(ind.96))
-```
 
 
-
-```{r}
 issp06.labs[grep("rovide", issp06.labs)]
 issp06.labs[grep("duce", issp06.labs)] 
 issp06.labs[grep("job", issp06.labs)] 
-
 dep.06 <- issp06 %>% select ("v28", "v30", "v31", "v25") %>% 
                 rename(old.age = v28, unemploy = v30, red.inc = v31, jobs = v25)
 
-summary(dep.06)
-
-get_labels(dep.06)
-freq(to_label(dep.06$old.age))
-
 dep.06 <- as_tibble(ifelse(dep.06 <= 2, 1, ifelse(dep.06 <= 4, 0, NA)))
-summary(dep.06) 
-```
 
-
-```{r}
 issp06.labs[grep("[Ss]ex", issp06.labs)] 
 issp06.labs[grep("[Aa]ge", issp06.labs)] 
 issp06.labs[grep("ducat", issp06.labs)] 
@@ -141,45 +77,21 @@ ind.06 <- issp06 %>%
                 select("v2","v3", "sex", "age", "degree", "wrkst") %>% 
                 rename(id.r = v2, country=v3, educ = degree, empl = wrkst)
 
-  get_labels(ind.06)
-
-  freq(ind.06$sex)
   ind.06$sex= Recode(ind.06$sex,"1=0 ; 2=1")
-
-  get_labels(ind.06$educ)
-  freq(ind.06$educ)
-  freq(to_label(ind.06$educ))
   ind.06$educ <- ifelse(ind.06$educ <= 2, "Primary or less", 
                         ifelse(ind.06$educ == 3 | ind.06$educ == 4, "Secondary", 
                         ifelse(ind.06$educ == 5, "University", NA)))
-  freq(ind.06$educ)  
   ind.06$educ <- relevel(as_factor(ind.06$educ), ref = "Secondary")
-
-  freq(ind.06$empl)
-  freq(to_label(ind.06$empl))
   ind.06$empl <- ifelse(ind.06$empl == 1, "Full-time", 
                       ifelse(ind.06$empl == 2 | ind.06$empl == 3, "Part-time",
                              ifelse(ind.06$empl == 4 | ind.06$empl == 5, "Active unemployed",
                                     ifelse(ind.06$empl >= 6 , "Not active", NA))))
-  freq(to_label(ind.06$empl))
   ind.06$empl <- relevel(as.factor(ind.06$empl), ref = "Full-time")
-
   ind.06$year <- rep(2006, n = nrow(ind.06))
-```
 
-
-```{r}
-unique(ind.06$country) 
 ind.06$countryiso <- as.character(as_factor(ind.06$country))
 ind.06$countryiso <- gsub("\\.[0-9]", "", ind.06$country)
 ind.06$countryiso=as.numeric(ind.06$countryiso)
-unique(ind.06$countryiso)
-```
-
-
-```{r}
-get_labels(ind.96$country) 
-unique(ind.96$country)
 
 ind.96$countryiso=Recode(ind.96$country,
 "1=036;
@@ -213,67 +125,37 @@ ind.96$countryiso=Recode(ind.96$country,
 30=756")
 
 ind.96$countryisoc   <- countrycode(ind.96$countryiso, "iso3n", "iso3c")
-get_labels(ind.96$countryisoc)
 
 ind.96 %>% group_by(country) %>% select(country,countryiso,countryisoc) %>%  summarise(countryiso=mean(countryiso),countryisoc=first(countryisoc))
 
-```
-
-
-```{r}
-
 issp <- bind_rows(bind_cols(dep.06, ind.06), 
                   bind_cols(dep.96, ind.96))
-names(issp)
 issp$country <- NULL
 issp = rename(issp, country = countryiso)
-```
 
-
-```{r}
 com.cntr <- intersect(unique(ind.06$countryiso), unique(ind.96$countryiso)) 
-com.cntr
-
 
 not.rich=c(203,348,376,428,608,616,705,724)
 
 coun.anlys <- com.cntr[!(com.cntr %in% not.rich)]
-coun.anlys
 
 isspf <- filter(issp, country  %in% coun.anlys)
-unique(isspf$country)
-summary(isspf)
-```
 
-
-```{r}
-names(l2)
 issp = rename(issp, country = countryiso)
 l2=rename(l2, country=cntry, country_lab=country)
-unique(l2$country)
+l2=rename(l2, country=cntry)
+
 issp <- merge(isspf, l2, by = c("country", "year"))
-names(issp)
 
-summary(issp)
-unique(issp$country)
-```
-
-```{r}
 issp %>% group_by(country,year) %>% summarise_if(is.numeric, mean,na.rm = TRUE)
 
 issp %>% group_by(country,year) %>% summarise(total.count=n())
-```
-
-
-
-```{r}
-save(issp, file = "issp_tidy.RData")
 
 library(foreign) 
 
-setwd('/')
 write.dta(issp,"issp.dta")
-```
+
+
 
 
 

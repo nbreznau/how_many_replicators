@@ -176,3 +176,125 @@ Female_96 age_96 age_sq_96 education_96 employment_96
 cntry emprate foreignpct socx netmigpct.
 
 
+GET DATA ZA4700.sav
+
+compute OldAgeCare=-999.
+if (v28=1 or v28=2) OldAgeCare=1.
+if (v28=3 or v28=4) OldAgeCare=0.
+
+missing values OldAgeCare (-999).
+variable labels OldAgeCare 'OldAgeCare - ...provide a decent standard of living for the old'.
+
+fre v28 OldAgeCare.
+
+
+compute Unemployed=-999.
+if (v30=1 or v30=2) Unemployed=1.
+if (v30=3 or v30=4) Unemployed=0.
+
+missing values Unemployed (-999).
+variable labels Unemployed 'Unemployed - “... reduce income differences between the rich and the poor'.
+fre v30 Unemployed.
+
+
+
+compute ReduceIncomeDifferences=-999.
+
+if (v31=1 or v31=2) ReduceIncomeDifferences=1.
+if (v31=3 or v31=4) ReduceIncomeDifferences=0.
+
+missing values ReduceIncomeDifferences (-999).
+variable labels ReduceIncomeDifferences 'ReduceIncomeDifferences - “... reduce income differences between the rich and the poor'.
+fre v31 ReduceIncomeDifferences.
+
+
+compute Jobs=-999.
+
+if (v25=1 or v25=2) Jobs=1.
+if (v25=3 or v25=4) Jobs=0.
+
+missing values Jobs (-999).
+variable labels Jobs 'Jobs - “... reduce income differences between the rich and the poor'.
+fre v25 Jobs.
+
+
+fre sex age degree wrkst.
+
+compute Female_06=-999.
+if (sex=1) Female_06=0.
+if (sex=2) Female_06=1.
+missing values Female_06 (-999).
+variable labels Female_06 'Female/Sex'.
+fre sex Female_06.
+
+compute age_06=age.
+missing values age_06 (-999).
+variable labels age_06 'Age'.
+fre age_06 age.
+
+compute age_sq_06=age_06*age_06.
+missing values age_sq_06 (-999).
+variable labels age_sq_06 'Age squared'.
+fre age_06 age_sq_06.
+
+compute education_06=-999.
+if (degree LE 2) education_06=0.
+if (degree GE 3 and degree LT 8) education_06=1.
+if (degree GE 8) education_06=-999.
+missing values education_06 (-999).
+variable labels education_06 'Education categories - high education >= higher secondary completed'.
+fre degree education_06.
+
+compute employment_06=-999.
+if (wrkst=1) employment_06=1.
+if (wrkst GE 2 and wrkst LT 96) employment_06=0.
+if (wrkst GE 97) employment_06=-999.
+missing values employment_06 (-999).
+variable labels employment_06 'Employment categories - full time employed'.
+fre wrkst employment_06.
+
+
+SAVE OUTFILE='ZA4700_di_short.sav'
+  /Keep OldAgeCare Unemployed ReduceIncomeDifferences Jobs 
+Female_06 age_06 age_sq_06 education_06 employment_06 v3
+  /COMPRESSED.
+
+compute cntry=v3.
+APPLY DICTIONARY from *
+  /SOURCE VARIABLES = v3
+  /TARGET VARIABLES = cntry.
+variable label cntry 'Country according to country file'.
+fre v3 cntry.
+
+
+sort cases by cntry. 
+
+DATASET ACTIVATE DataSet6.
+MATCH FILES /FILE=*
+  /TABLE='DataSet7'
+  /BY cntry.
+EXECUTE.
+
+fre OldAgeCare Unemployed ReduceIncomeDifferences Jobs
+Female_06 age_06 age_sq_06 education_06 employment_06
+cntry year emprate foreignpct socx netmigpct.
+
+recode age_06 (sysmis=-999).
+missing values age_06 (-999).
+fre age_06.
+
+recode age_sq_06 (sysmis=-999).
+missing values age_sq_06 (-999).
+fre age_sq_06.
+
+recode emprate foreignpct socx netmigpct (sysmis=-999).
+missing values emprate foreignpct socx netmigpct (-999).
+fre emprate foreignpct socx netmigpct.
+
+
+SET DECIMAL=DOT.
+SAVE TRANSLATE OUTFILE='06_di.dat'
+    /TYPE=TAB /MAP /REPLACE
+    /KEEP   OldAgeCare Unemployed ReduceIncomeDifferences Jobs
+Female_06 age_06 age_sq_06 education_06 employment_06 
+cntry emprate foreignpct socx netmigpct.

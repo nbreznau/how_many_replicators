@@ -12,21 +12,10 @@ library(broom)
 library(stargazer)
 
 
-setwd("/")
-
-
 ISSP96 <- read.dta("ZA2900.dta")
-#glimpse(ISSP96) 
-
-
 ISSP06 <- read_dta("ZA4700.dta") 
-#glimpse(ISSP06) 
-
 
 country <- read_dta("bradyfinnigan2014countrydata.dta")
-#glimpse(country) 
-
-
 
 ISSP96 <- ISSP96[ISSP96[["v3"]] == "aus" |
                    ISSP96[["v3"]] == "cdn" |
@@ -316,17 +305,11 @@ ISSP06[ISSP06$V3a == "GB-Great Britain", "country"] <- "United Kingdom"
 ISSP06[ISSP06$V3a == "US-United States", "country"] <- "United States"
 
 
-
-
 ISSP96 <- dplyr::select(ISSP96, age, ageSqu, female, neverMar, div, widow, hhsize, kidsHH, rural, suburb, lessHS, univ, ptemp, unempy, nolabor, selfEmpy, pubEmpy, incZScore, highRel, lowRel, d.jobs, d.unempy, d.income, d.retire, d.housing, d.health, year, country)
 ISSP06 <- dplyr::select(ISSP06, age, ageSqu, female, neverMar, div, widow, hhsize, kidsHH, rural, suburb, lessHS, univ, ptemp, unempy, nolabor, selfEmpy, pubEmpy, incZScore, highRel, lowRel, d.jobs, d.unempy, d.income, d.retire, d.housing, d.health, year, country)
 
-
-
 merged <- rbind(ISSP96, ISSP06)
 merged <- merge(merged,country2,by=c("country","year"))
-
-
 
 stargazer2 <- function(model, odd.ratio = F, ...) {
   if(!("list" %in% class(model))) model <- list(model)
@@ -343,19 +326,12 @@ stargazer2 <- function(model, odd.ratio = F, ...) {
 }
 
 Table4_1.1 <- glm(d.jobs ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1.2 <- glm(d.unempy ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1.3 <- glm(d.income ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1.4 <- glm(d.retire ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1.5 <- glm(d.housing ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1.6 <- glm(d.health ~ foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_1 <- list(Table4_1.1, Table4_1.2, Table4_1.3, Table4_1.4, Table4_1.5, Table4_1.6)
-
 
 stargazer2(Table4_1, odd.ratio = T, type = "text")
 summary(Table4_1.1)$coef[,3]
@@ -365,22 +341,13 @@ summary(Table4_1.4)$coef[,3]
 summary(Table4_1.5)$coef[,3]
 summary(Table4_1.6)$coef[,3]
 
-
-
 Table4_2.1 <- glm(d.jobs ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2.2 <- glm(d.unempy ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2.3 <- glm(d.income ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2.4 <- glm(d.retire ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2.5 <- glm(d.housing ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2.6 <- glm(d.health ~ foreignpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_2 <- list(Table4_2.1, Table4_2.2, Table4_2.3, Table4_2.4, Table4_2.5, Table4_2.6)
-
 
 stargazer2(Table4_2, odd.ratio = T, type = "text")
 summary(Table4_2.1)$coef[,3]
@@ -390,24 +357,13 @@ summary(Table4_2.4)$coef[,3]
 summary(Table4_2.5)$coef[,3]
 summary(Table4_2.6)$coef[,3]
 
-
-
-
-
 Table4_3.1 <- glm(d.jobs ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3.2 <- glm(d.unempy ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3.3 <- glm(d.income ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3.4 <- glm(d.retire ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3.5 <- glm(d.housing ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3.6 <- glm(d.health ~ foreignpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table4_3 <- list(Table4_3.1, Table4_3.2, Table4_3.3, Table4_3.4, Table4_3.5, Table4_3.6)
-
 
 stargazer2(Table4_3, odd.ratio = T, type = "text")
 summary(Table4_3.1)$coef[,3]
@@ -417,21 +373,13 @@ summary(Table4_3.4)$coef[,3]
 summary(Table4_3.5)$coef[,3]
 summary(Table4_3.6)$coef[,3]
 
-
 Table5_1.1 <- glm(d.jobs ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1.2 <- glm(d.unempy ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1.3 <- glm(d.income ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1.4 <- glm(d.retire ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1.5 <- glm(d.housing ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1.6 <- glm(d.health ~ netmigpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_1 <- list(Table5_1.1, Table5_1.2, Table5_1.3, Table5_1.4, Table5_1.5, Table5_1.6)
-
 
 stargazer2(Table5_1, odd.ratio = T, type = "text")
 summary(Table5_1.1)$coef[,3]
@@ -441,22 +389,13 @@ summary(Table5_1.4)$coef[,3]
 summary(Table5_1.5)$coef[,3]
 summary(Table5_1.6)$coef[,3]
 
-
-
 Table5_2.1 <- glm(d.jobs ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2.2 <- glm(d.unempy ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2.3 <- glm(d.income ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2.4 <- glm(d.retire ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2.5 <- glm(d.housing ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2.6 <- glm(d.health ~ netmigpct + socx + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_2 <- list(Table5_2.1, Table5_2.2, Table5_2.3, Table5_2.4, Table5_2.5, Table5_2.6)
-
 
 stargazer2(Table5_2, odd.ratio = T, type = "text")
 summary(Table5_2.1)$coef[,3]
@@ -466,24 +405,13 @@ summary(Table5_2.4)$coef[,3]
 summary(Table5_2.5)$coef[,3]
 summary(Table5_2.6)$coef[,3]
 
-
-
-
-
 Table5_3.1 <- glm(d.jobs ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3.2 <- glm(d.unempy ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3.3 <- glm(d.income ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3.4 <- glm(d.retire ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3.5 <- glm(d.housing ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3.6 <- glm(d.health ~ netmigpct + emprate + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_3 <- list(Table5_3.1, Table5_3.2, Table5_3.3, Table5_3.4, Table5_3.5, Table5_3.6)
-
 
 stargazer2(Table5_3, odd.ratio = T, type = "text")
 summary(Table5_3.1)$coef[,3]
@@ -493,23 +421,13 @@ summary(Table5_3.4)$coef[,3]
 summary(Table5_3.5)$coef[,3]
 summary(Table5_3.6)$coef[,3]
 
-
-
-
 Table5_4.1 <- glm(d.jobs ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4.2 <- glm(d.unempy ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4.3 <- glm(d.income ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4.4 <- glm(d.retire ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4.5 <- glm(d.housing ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4.6 <- glm(d.health ~ netmigpct + foreignpct + age + ageSqu + female + neverMar + div + widow + hhsize + kidsHH + rural + suburb + lessHS + univ + ptemp + unempy + nolabor + selfEmpy + pubEmpy + incZScore + highRel + lowRel + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
-
 Table5_4 <- list(Table5_4.1, Table5_4.2, Table5_4.3, Table5_4.4, Table5_4.5, Table5_4.6)
-
 
 stargazer2(Table5_4, odd.ratio = T, type = "text")
 summary(Table5_4.1)$coef[,3]

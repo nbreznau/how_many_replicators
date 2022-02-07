@@ -1,0 +1,46 @@
+Team: 59
+Software: MPlus
+Version: ORIGINAL
+
+!Note that this is just one example model
+
+TITLE: 96
+
+DATA: FILE IS 96_di.dat;
+
+    VARIABLE:
+
+
+        NAMES ARE OAgeC Uempl RedInDi Jobs
+                  Female age age_sq educ emplcat 
+                  cntry emprate foreignp socx netmigp;
+
+          MISSING ARE ALL (-999);
+
+
+        USEVARIABLE IS
+        OAgeC
+        Female age age_sq educ emplcat
+        foreignp;
+
+        CLUSTER IS cntry;
+        CATEGORICAL = OAgeC;
+
+        within = Female age age_sq educ emplcat;
+        between = foreignp;
+
+  ANALYSIS:     TYPE = TWOLEVEL;
+  model:
+     %within%
+                            
+               OAgeC on Female age age_sq educ emplcat;
+
+
+     %between%      
+
+               OAgeC ON foreignp;           
+
+  output: sampstat stdyx;
+
+
+

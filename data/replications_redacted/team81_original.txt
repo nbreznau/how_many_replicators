@@ -3,9 +3,6 @@ SOFTWARE: STATA
 VERSION: ORIGINAL
 
 clear
-
-
-clear
 use "L2data.dta"
 
 gen id=0
@@ -141,10 +138,6 @@ xtset, clear
 xtset id2
 
 
-cd "/"
-
-
-
 xtlogit jobs female agesq b2.edu b1.employed foreignpct, or
 outreg2 using "jobs_96.xls", eform cti(odds ratio) dec(2) excel replace
 
@@ -227,9 +220,6 @@ clear
 use "20180906_2006combine.dta",clear
 xtset, clear 
 xtset id2
-
-cd "/"
-
 
 xtlogit jobs female agesq b2.edu b1.employed foreignpct, or
 outreg2 using "jobs_06.xls", eform cti(odds ratio) dec(2) excel replace

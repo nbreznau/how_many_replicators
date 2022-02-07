@@ -2,9 +2,6 @@ TEAM: 55
 SOFTWARE: STATA
 VERSION: ORIGINAL
 
-
-
-
 clear
 clear matrix
 
@@ -52,46 +49,32 @@ merge m:1 year cntry using L2data.dta
 drop if _merge != 3
 drop _merge
 
-tab cntry if socx != . 
-
-
 keep if inlist(cntry, 36, 124, 250, 276, 372, 392, 578, 554, ///
 		724, 752, 756, 826, 840) 
 		
-
-fre V28 v39
 gen oldCare = .
 replace oldCare = 1 if inlist(V28, 1, 2)
 replace oldCare = 1 if inlist(v39, 1, 2)
 replace oldCare = 0 if inlist(V28, 3, 4)
 replace oldCare = 0 if inlist(v39, 3, 4)
 
-
-fre V30 v41
 gen unemp = .
 replace unemp = 1 if inlist(V30, 1, 2)
 replace unemp = 1 if inlist(v41, 1, 2)
 replace unemp = 0 if inlist(V30, 3, 4)
 replace unemp = 0 if inlist(v41, 3, 4)
 
-fre V31 v42
 gen redIneq = .
 replace redIneq = 1 if inlist(V31, 1, 2)
 replace redIneq = 1 if inlist(v42, 1, 2)
 replace redIneq = 0 if inlist(V31, 3, 4)
 replace redIneq = 0 if inlist(v42, 3, 4)
 
-fre V25 v36
 gen jobs = .
 replace jobs = 1 if inlist(V25, 1, 2)
 replace jobs = 1 if inlist(v36, 1, 2)
 replace jobs = 0 if inlist(V25, 3, 4)
 replace jobs = 0 if inlist(v36, 3, 4)
-
-
-sum emprate foreignpct socx netmigpct
-
-fre sex v200 degree v205 wrkst v206
 
 gen female = .
 replace female = 1 if sex == 2 | v200 == 2
@@ -138,8 +121,6 @@ label var year "ISSP 2006 [ref: 1996]"
 
 
 xtset cntry
-
-
 
 local dep "oldCare unemp redIneq jobs" 
 local iv "female age age2 b2.educ b4.emp"

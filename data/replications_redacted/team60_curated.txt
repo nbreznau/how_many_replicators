@@ -1,117 +1,69 @@
-TEAM: 61 
+TEAM: 60
 SOFTWARE: STATA
 VERSION: CURATED
 
-
-
-global path1 "\"
-global path2 "\"
-global path3 "\"
-
-
-
-use "$path1\ZA2900.dta", clear
+use "ZA2900.dta", clear
 
 numlabel, add
 
-
-tab v36, mi
 capture drop job
 gen job = .
 replace job = 1 if (v36==1)|(v36==2)
 replace job = 0 if (v36==3)|(v36==4)
-tab job, mi
-tab job v36
 label define yesno 1 "Yes" 0 "No"
 label values job yesno
 label variable job "Gvmt should provide jobs"
-tab job, mi
 
-
-tab v41, mi
 capture drop employ
 gen employ = .
 replace employ = 1 if (v41==1)|(v41==2)
 replace employ = 0 if (v41==3)|(v41==4)
-tab employ, mi
-tab employ v41
 label values employ yesno
 label variable employ "Gvmt should provide living for unemployed"
-tab employ
 
-
-tab v42, mi
 capture drop income
 gen income = .
 replace income = 1 if (v42==1)|(v42==2)
 replace income = 0 if (v42==3)|(v42==4)
-tab income, mi
-tab income v42
 label values income yesno
 label variable income "Gvmt should reduce income inequality"
-tab income
 
-tab v39, mi
 capture drop old
 gen old = .
 replace old = 1 if (v39==1)|(v39==2)
 replace old = 0 if (v39==3)|(v39==4)
-tab old, mi
-tab old v39
 label values old yesno
 label variable old "Gvmt should provide living for old"
-tab old
 
-tab v44, mi
 capture drop house
 gen house = .
 replace house = 1 if (v44==1)|(v44==2)
 replace house = 0 if (v44==3)|(v44==4)
-tab house, mi
-tab house v44
 label values house yesno
 label variable house "Gvmt should provide housing"
-tab house
 
-tab v38, mi
 capture drop sick
 gen sick = .
 replace sick = 1 if (v38==1)|(v38==2)
 replace sick = 0 if (v38==3)|(v38==4)
-tab sick, mi
-tab sick v38
 label values sick yesno
 label variable sick "Gvmt should provide healthcare"
-tab sick
 
-tab v201, mi
-summ v201
 capture drop age
 gen age = v201
 label variable age "Age in Years"
-tab age
 
 capture drop agesq
 gen agesq = age*age
-tab agesq
 label variable agesq "Age Squared"
 summ agesq
 
-tab v200, mi
 capture drop female
 gen female = .
 replace female = 1 if (v200==2)
 replace female = 0 if (v200==1)
-tab female, mi
-tab female v200
 label values female yesno
 label variable female "Female"
-tab female
-
-
-tab v202, mi
-tab v202, gen(marital)
-tab1 marital*
 
 rename marital1 married
 label variable married "Married"
@@ -121,43 +73,28 @@ tab married v202
 rename marital2 widowed
 label variable widowed "Widowed"
 label values widowed yesno
-tab widowed v202
 
 rename marital3 divorced
 label variable divorced "Divorced"
 label values divorced yesno
-tab divorced v202
 
 rename marital4 separated
 label variable separated "Separated"
 label values separated yesno
-tab separated v202
 
 rename marital5 single
 label variable single "Never Married"
 label values single yesno
-tab single v202
-
-
-tab divorced
-tab separated
 
 capture drop divsep
 egen divsep = rmax(divorced separated)
 tab divsep v202
 label variable divsep "Divorced or Separated"
 label values divsep yesno
-tab divsep
-
-tab v273
 
 capture drop hhsize
 gen hhsize = v273
 label variable hhsize "Household Size"
-tab hhsize
-
-
-tab v274
 
 capture drop childhh
 gen childhh = 0 if (v274!=.)
@@ -166,137 +103,86 @@ replace childhh = 1 if (v274==2)|(v274==3)|(v274==4)| ///
 						(v274==10)|(v274==12)|(v274==14)| ///
 						(v274==16)|(v274==18)|(v274==20)| ///
 						(v274==22)|(v274==24)|(v274==26)
-tab v274 childhh
 label values childhh yesno
 label variable childhh "Children in the HHld"
-tab childhh
-
-tab v275, mi
 
 capture drop urban
 gen urban = 0 if (v275!=.)
 replace urban = 1 if (v275==1)
 label values urban yesno
 label variable urban "Lives in Urban Area"
-tab v275 urban, mi
 
 capture drop town
 gen town = 0 if (v275!=.)
 replace town = 1 if (v275==2)
 label values town yesno
 label variable town "Lives in Suburbs/Town"
-tab v275 town, mi
 
 capture drop rural
 gen rural = 0 if (v275!=.)
 replace rural = 1 if (v275==3)
 label values rural yesno
 label variable rural "Lives in Rural Area"
-tab v275 rural, mi
-
-
-
-tab v205
 
 capture drop lowed
 gen lowed = 0 if (v205!=.)
 replace lowed = 1 if (v205>=1)&(v205<=4)
 label values lowed yesno
 label variable lowed "Education Less than High School"
-tab lowed, mi
-tab lowed v205
-
 
 capture drop meded
 gen meded = 0 if (v205!=.)
 replace meded = 1 if (v205>=5)&(v205<=6)
 label values meded yesno
 label variable meded "Education High School"
-tab meded, mi
-tab meded v205
 
 capture drop highed
 gen highed = 0 if (v205!=.)
 replace highed = 1 if (v205==7)
 label values highed yesno
 label variable highed "Education Degree of Above"
-tab highed, mi
-tab highed v205
-
-
-tab v206
-
-tab v212 
-
-tab v213
 
 capture drop ft
 gen ft = 0 if (v206!=.)
 replace ft = 1 if (v206==1)
 label values ft yesno
 label variable ft "Full Time Employment"
-tab ft, mi
-tab ft v206
 
 capture drop pt
 gen pt = 0 if (v206!=.)
 replace pt = 1 if (v206==2)|(v206==3)|(v206==4)
 label values pt yesno
 label variable pt "Part Time Employment"
-tab pt, mi
-tab pt v206
 
 capture drop out
 gen out = 0 if (v206!=.)
 replace out = 1 if (v206>=6)&(v206<=10)
 label values out yesno
 label variable out "Out of the Labour Market"
-tab out, mi
-tab out v206
 
 capture drop un
 gen un = 0 if (v206!=.)
 replace un = 1 if (v206==5)
 label values un yesno
 label variable un "Unemployed"
-tab un, mi
-tab un v206
-
-
-tab ft, mi
-tab v212, mi
-tab v213, mi
 
 capture drop ftself
 gen ftself = 0 if (v206!=.)
 replace ftself = 1 if (ft==1)&(v213==1)
 label values ftself yesno
 label variable ftself "Full Time Self Employed"
-tab ftself, mi
-tab ftself v213, mi
 
 capture drop ftpub
 gen ftpub = 0 if (v206!=.)
 replace ftpub = 1 if (ft==1)&((v212==1)|(v212==2))
 label values ftpub yesno
 label variable ftpub "Full Time Self Public"
-tab ftpub, mi
-tab ftpub v212, mi
 
 capture drop ftpriv
 gen ftpriv = 0 if (v206!=.)
 replace ftpriv = 1 if (ft==1)&((v212==3)|(v212==6))
 label values ftpriv yesno
 label variable ftpriv "Full Time Private"
-tab ftpriv, mi
-tab ftpriv v213, mi
-
-tab1 pt out un ftpub ftself ftpriv, mi
-
-
-tab v3
-tab v218
-
 
 capture drop incomescore
 gen incomescore = .
@@ -309,29 +195,20 @@ foreach value of local countries {
 	drop z_v218
 }
 
-tab incomescore
-
-tab v220
 capture drop religion
 gen religion = .
 replace religion = 1 if (v220==6)
-
 replace religion = 2 if (v220>=4)&(v220<=5)
 replace religion = 3 if (v220>=1)&(v220<=3)
 label define religion 1 "Never" 2 "Low" 3 "High"
 label values religion religion
 label variable religion "Religious Attendance"
-tab religion, mi
-tab religion v220
 tab religion, gen(religion)
 rename religion1 lowrelig
 label variable lowrelig "Low Religious Attendance"
 rename religion2 highrelig
 label variable highrelig "High Religious Attendance"
-tab1 lowrelig highrelig
 
-
-tab v3
 capture drop country
 gen country = .
 replace country = 1 if (v3==1)
@@ -355,9 +232,6 @@ label define country 1 "Australia" 2 "Canada"  3 "Denmark"  ///
 					16 "UK"  17 "USA" 
 label values country country
 numlabel country, add
-tab country
-
-
 
 keep lowrelig highrelig incomescore pt out un ftpub ftself ftpriv lowed meded highed ///
 		urban rural town childhh hhsize divsep single widowed married ///
@@ -367,45 +241,30 @@ capture drop year
 gen year = .
 replace year = 1996
 label variable year "Data Year"
-tab year, mi
 
 sort country
 
-save "$path3\1996ISSP.dta", replace
+save "1996ISSP.dta", replace
 
-
-
-use "$path1\ZA4700.dta", clear
+use "ZA4700.dta", clear
 
 numlabel, add
 
-
-
-tab V25, mi
 capture drop job
 gen job = .
 replace job = 1 if (V25==1)|(V25==2)
 replace job = 0 if (V25==3)|(V25==4)
-tab job, mi
-tab job V25
 label define yesno 1 "Yes" 0 "No"
 label values job yesno
 label variable job "Gvmt should provide jobs"
-tab job
 
-
-tab V30, mi
 capture drop employ
 gen employ = .
 replace employ = 1 if (V30==1)|(V30==2)
 replace employ = 0 if (V30==3)|(V30==4)
-tab employ, mi
-tab employ V30
 label values employ yesno
 label variable employ "Gvmt should provide living for unemployed"
-tab employ
 
-tab V31, mi
 capture drop income
 gen income = .
 replace income = 1 if (V31==1)|(V31==2)
@@ -414,43 +273,28 @@ tab income, mi
 tab income V31
 label values income yesno
 label variable income "Gvmt should reduce income inequality"
-tab income
 
-tab V28, mi
 capture drop old
 gen old = .
 replace old = 1 if (V28==1)|(V28==2)
 replace old = 0 if (V28==3)|(V28==4)
-tab old, mi
-tab old V28
 label values old yesno
 label variable old "Gvmt should provide living for old"
-tab old
 
-tab V33, mi
 capture drop house
 gen house = .
 replace house = 1 if (V33==1)|(V33==2)
 replace house = 0 if (V33==3)|(V33==4)
-tab house, mi
-tab house V33
 label values house yesno
 label variable house "Gvmt should provide housing"
-tab house
 
-tab V27, mi
 capture drop sick
 gen sick = .
 replace sick = 1 if (V27==1)|(V27==2)
 replace sick = 0 if (V27==3)|(V27==4)
-tab sick, mi
-tab sick V27
 label values sick yesno
 label variable sick "Gvmt should provide healthcare"
-tab sick
 
-
-tab age, mi
 summ age
 label variable age "Age in Years"
 
@@ -460,67 +304,44 @@ tab agesq
 label variable agesq "Age Squared"
 summ agesq
 
-tab sex, mi
 capture drop female
 gen female = .
 replace female = 1 if (sex==2)
 replace female = 0 if (sex==1)
-tab female, mi
-tab female sex
 label values female yesno
 label variable female "Female"
-tab female
 
-tab marital, mi
 tab marital, gen(marital)
-tab1 marital*
 
 rename marital1 married
 label variable married "Married"
 label values married yesno
-tab married marital
 
 rename marital2 widowed
 label variable widowed "Widowed"
 label values widowed yesno
-tab widowed marital
 
 rename marital3 divorced
 label variable divorced "Divorced"
 label values divorced yesno
-tab divorced marital
 
 rename marital4 separated
 label variable separated "Separated"
 label values separated yesno
-tab separated marital
 
 rename marital5 single
 label variable single "Never Married"
 label values single yesno
-tab single marital
-
-tab divorced
-tab separated
 
 capture drop divsep
 egen divsep = rmax(divorced separated)
 tab divsep marital
 label variable divsep "Divorced or Separated"
 label values divsep yesno
-tab divsep
-
-tab hompop
 
 capture drop hhsize
 gen hhsize = hompop
 label variable hhsize "Household Size"
-tab hhsize
-
-
-tab hhcycle
-
-tab hhcycle
 
 capture drop childhh
 gen childhh = 0 if (hhcycle!=.)
@@ -530,129 +351,86 @@ replace childhh = 1 if (hhcycle==2)|(hhcycle==3)|(hhcycle==4)| ///
 						(hhcycle==16)|(hhcycle==18)|(hhcycle==20)| ///
 						(hhcycle==22)|(hhcycle==24)|(hhcycle==26)| ///
 						(hhcycle==28)|(hhcycle==29)
-tab hhcycle childhh
 label values childhh yesno
 label variable childhh "Children in the HHld"
-tab childhh
-
-
-tab urbrural, mi
 
 capture drop urban
 gen urban = 0 if (urbrural!=.)
 replace urban = 1 if (urbrural==1)
 label values urban yesno
 label variable urban "Lives in Urban Area"
-tab urbrural urban, mi
 
 capture drop town
 gen town = 0 if (urbrural!=.)
 replace town = 1 if (urbrural==2)|(urbrural==3)
 label values town yesno
 label variable town "Lives in Suburbs/Town"
-tab urbrural town, mi
 
 capture drop rural
 gen rural = 0 if (urbrural!=.)
 replace rural = 1 if (urbrural==4)|(urbrural==5)
 label values rural yesno
 label variable rural "Lives in Rural Area"
-tab urbrural rural, mi
-
-tab degree
 
 capture drop lowed
 gen lowed = 0 if (degree!=.)
 replace lowed = 1 if (degree>=0)&(degree<=2)
 label values lowed yesno
 label variable lowed "Education Less than High School"
-tab lowed, mi
-tab lowed degree
 
 capture drop meded
 gen meded = 0 if (degree!=.)
 replace meded = 1 if (degree>=3)&(degree<=4)
 label values meded yesno
 label variable meded "Education High School"
-tab meded, mi
-tab meded degree
 
 capture drop highed
 gen highed = 0 if (degree!=.)
 replace highed = 1 if (degree==5)
 label values highed yesno
 label variable highed "Education Degree of Above"
-tab highed, mi
-tab highed degree
-
-tab wrkst
-tab wrktype 
 
 capture drop ft
 gen ft = 0 if (wrkst!=.)
 replace ft = 1 if (wrkst==1)
 label values ft yesno
 label variable ft "Full Time Employment"
-tab ft, mi
-tab ft wrkst
 
 capture drop pt
 gen pt = 0 if (wrkst!=.)
 replace pt = 1 if (wrkst==2)|(wrkst==3)|(wrkst==4)
 label values pt yesno
 label variable pt "Part Time Employment"
-tab pt, mi
-tab pt wrkst
 
 capture drop out
 gen out = 0 if (wrkst!=.)
 replace out = 1 if (wrkst>=6)&(wrkst<=10)
 label values out yesno
 label variable out "Out of the Labour Market"
-tab out, mi
-tab out wrkst
 
 capture drop un
 gen un = 0 if (wrkst!=.)
 replace un = 1 if (wrkst==5)
 label values un yesno
 label variable un "Unemployed"
-tab un, mi
-tab un wrkst
-
-
-tab ft, mi
-tab wrktype, mi
 
 capture drop ftself
 gen ftself = 0 if (wrkst!=.)
 replace ftself = 1 if (ft==1)&(wrktype==4)
 label values ftself yesno
 label variable ftself "Full Time Self Employed"
-tab ftself, mi
-tab ftself wrktype, mi
 
 capture drop ftpub
 gen ftpub = 0 if (wrkst!=.)
 replace ftpub = 1 if (ft==1)&((wrktype==1)|(wrktype==2))
 label values ftpub yesno
 label variable ftpub "Full Time Self Public"
-tab ftpub, mi
-tab ftpub wrktype, mi
 
 capture drop ftpriv
 gen ftpriv = 0 if (wrkst!=.)
 replace ftpriv = 1 if (ft==1)&((wrktype==3)|(wrktype==6))
 label values ftpriv yesno
 label variable ftpriv "Full Time Private"
-tab ftpriv, mi
-tab ftpriv wrktype, mi
-
-tab1 pt out un ftpub ftself ftpriv, mi
-
-
-
-tab1 *_INC
 
 capture drop incomescore
 gen incomescore = .
@@ -664,32 +442,20 @@ foreach incvar of local incvars {
 	drop z_`incvar'
 }
 
-tab incomescore, mi
-summ incomescore
-
-
-
-tab attend
 capture drop religion
 gen religion = .
 replace religion = 1 if (attend==8)
-
 replace religion = 2 if (attend>=6)&(attend<=7)
 replace religion = 3 if (attend>=1)&(attend<=5)
 label define religion 1 "Never" 2 "Low" 3 "High"
 label values religion religion
 label variable religion "Religious Attendance"
-tab religion, mi
-tab religion attend
 tab religion, gen(religion)
 rename religion1 lowrelig
 label variable lowrelig "Low Religious Attendance"
 rename religion2 highrelig
 label variable highrelig "High Religious Attendance"
-tab1 lowrelig highrelig
 
-
-tab V3
 capture drop country
 gen country = .
 replace country = 1 if (V3==36)
@@ -709,6 +475,7 @@ replace country = 14 if (V3==752)
 replace country = 15 if (V3==756)
 replace country = 16 if (V3==826.1)
 replace country = 17 if (V3==840)
+
 label define country 1 "Australia" 2 "Canada"  3 "Denmark"  ///
 					4 "Finland"  5 "France"  6 "Germany"  ///
 					7 "Ireland"  8 "Japan"  9 "Netherlands"  ///
@@ -716,11 +483,6 @@ label define country 1 "Australia" 2 "Canada"  3 "Denmark"  ///
 					13 "Spain"  14 "Sweden"  15 "Switzerland"  ///
 					16 "UK"  17 "USA" 
 label values country country
-tab country
-tab country V3
-
-
-
 
 keep lowrelig highrelig incomescore pt out un ftpub ftself ftpriv lowed meded highed ///
 		urban rural town childhh hhsize divsep single widowed married ///
@@ -732,39 +494,20 @@ replace year = 2006
 label variable year "Data Year"
 tab year, mi
 
-save "$path3\2006ISSP.dta", replace
-
-
+save "2006ISSP.dta", replace
 
 use "$path1\bradyfinnigan2014countrydata.dta", clear
 
 numlabel, add
 
-
-tab foreignpct
 label variable foreignpct "Percent Foreign Born"
-
-
-tab netmigpct
 label variable netmigpct "Net Migration PCT"
-
-tab socx
 label variable socx "Social Welfare Expenditure"
-
-tab1 socdem liberal
 label variable socdem "Social Democratic Regime"
 label variable liberal "Liberal Regime"
-
-
-tab emprate
 label variable emprate "Employment Rate"
-
-tab mcp
 label variable mcp "Multiculturalism Policy Index"
 
-tab year
-
-tab cntry
 capture drop country
 gen country = cntry
 recode country (36=1) (124=2) (208=3) (246=4) (250=5) (276=6) ///
@@ -779,20 +522,18 @@ label define country 1 "Australia" 2 "Canada"  3 "Denmark"  ///
 					13 "Spain"  14 "Sweden"  15 "Switzerland"  ///
 					16 "UK"  17 "USA" 
 label values country country
-tab country
 numlabel, add
 drop if country>17
 tab country, mi
 
-
 keep foreignpct netmigpct socx socdem liberal emprate mcp country year
 
-save "$path3\countrydata.dta", replace
+save "countrydata.dta", replace
 
 
-use "$path3\2006ISSP.dta", clear
-append using "$path3\1996ISSP.dta"
-merge m:1 country year using "$path3\countrydata.dta"
+use "2006ISSP.dta", clear
+append using "1996ISSP.dta"
+merge m:1 country year using "countrydata.dta"
 sort _merge
 keep if (_merge==3)
 drop _merge
@@ -812,29 +553,17 @@ capture drop countryfe
 quietly tab country, gen(countryfe)
 tab1 countryfe*
 
-save "$path3\ISSP9606.dta", replace
+save "ISSP9606.dta", replace
 
-
-use "$path3\ISSP9606.dta", clear
+use "ISSP9606.dta", clear
 
 numlabel, add
 
 bysort country: summ job employ income old house sick
 
-
-tab1 job employ income old house sick, mi
-
-tab1 age agesq female lowed highed pt un out ftself ftpub incomescore year06, mi
-
-tab1 foreignpct netmigpct socx emprate, mi
-
-
 global depvars "job employ income old house sick"
 global controls "age agesq female lowed highed pt un out ftself ftpub incomescore"
 global cntryvars "foreignpct netmigpct socx emprate"
-
-tab country
-tab year06
 
 capture drop miss
 egen miss = rowmiss($depvars $controls $cntryvars)
@@ -847,46 +576,41 @@ label values complete yesno
 label variable complete "Complete Case Sample"
 tab complete
 
-
-
 foreach depvar in $depvars {
 	logit `depvar' foreignpct $controls countryfe* year06
-	outreg2 using $path3\table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 	
 foreach depvar in $depvars {
 	logit `depvar' foreignpct socx $controls countryfe* year06
-	outreg2 using $path3\table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 	
 foreach depvar in $depvars {
 	logit `depvar' foreignpct emprate $controls countryfe* year06
-	outreg2 using $path3\table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table4.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 
 
 
 foreach depvar in $depvars {
 	logit `depvar' netmigpct $controls countryfe* year06
-	outreg2 using $path3\table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 
 foreach depvar in $depvars {
 	logit `depvar' netmigpct socx $controls countryfe* year06
-	outreg2 using $path3\table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 	
 foreach depvar in $depvars {
 	logit `depvar' netmigpct emprate $controls countryfe* year06
-	outreg2 using $path3\table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 	
 foreach depvar in $depvars {
 	logit `depvar' netmigpct foreignpct $controls countryfe* year06
-	outreg2 using $path3\table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	outreg2 using table5.xls, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 	}
 
-erase "$path3\2006ISSP.dta"
-erase "$path3\countrydata.dta"
-erase "$path3\ISSP9606.dta"
-erase "$path3\1996ISSP.dta"
+

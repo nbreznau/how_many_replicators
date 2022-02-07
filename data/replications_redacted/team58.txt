@@ -56,12 +56,10 @@ rename V3a cntry
 keep year g_jobs g_old g_une g_inc age age2 female edu_prim edu_sec edu_uni empl_pt empl_na empl_une cntry id weight
 
 
-
 save "2006_coded.dta", replace
 
 
 use "ZA2900.dta", clear
-
 
 gen year=1996
 
@@ -129,7 +127,6 @@ merge m:1 cntry year using "L2data13.dta"
 
 save "combined.dta", replace
   
-
 use "combined.dta", clear
 
 keep if _merge == 3
@@ -147,10 +144,8 @@ keep if allcontrols
 
 quietly tab cntry, gen(cntryfe)
 
-
 logit g_jobs $i_controls foreignpct i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
-
 
 logit g_old $i_controls foreignpct i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
@@ -160,7 +155,6 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 
 logit g_inc $i_controls foreignpct i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
-
 
 logit g_old $i_controls foreignpct socx i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
@@ -174,8 +168,6 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 logit g_jobs $i_controls foreignpct socx i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 
-
-
 logit g_old $i_controls foreignpct emprate i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 
@@ -187,8 +179,6 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 
 logit g_jobs $i_controls foreignpct emprate i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
-
-
 
 logit g_old $i_controls netmigpct i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
@@ -202,8 +192,6 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 logit g_jobs $i_controls netmigpct i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 
-
-
 logit g_old $i_controls netmigpct socx i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 
@@ -215,7 +203,6 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 
 logit g_jobs $i_controls netmigpct socx i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
-
 
 logit g_jobs $i_controls netmigpct emprate i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append

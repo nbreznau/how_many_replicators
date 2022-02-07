@@ -2,11 +2,7 @@ TEAM: 52
 SOFTWARE: STATA
 VERSION: CURATED
 
-
-
-use "issp_61.dta"
-cd "/"
-
+use issp.dta, clear
 
 gen age2=age^2 //squared age
 
