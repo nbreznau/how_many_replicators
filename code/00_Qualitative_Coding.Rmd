@@ -1,33 +1,58 @@
 ---
-title: "Qualitative Codes"
+title: "00 Qualitative Codes"
 author: "Nate Breznau"
 date: "12/12/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-# try out RQDA
-# devtools::install_github("BroVic/RQDAassist")
-# RQDAassist::install()
 
 pacman::p_load("tidyverse",
-               "quanteda",
-               "readtext")
+               "readtext",
+               "readxl")
 ```
 
+## Data Coding Report
 
-```{r data}
-teamcode <- readtext(file = here::here("data", "replications_redacted", "*"))
+```{r data, warning = F, message = F}
+teamcodes <- read_xlsx(here::here("results", "dataout_print.xlsx"),
+                      skip = 2)
+teamcodes <- teamcodes[,1:14]
+colnames(teamcodes) <- c("ID","Team","Verif_O","Exact_O","Error_O","Verif_C","Exact_C","Error_C","gap","Sources_of_Variability","Category",	"Additional_Info",	"Counterfactual",	"Group")
 
-# meta data variables
-teamcode <- teamcode %>%
-  mutate(team = str_extract(text, '\\d+'),
-         software = str_extract(text, 'Software.*'),
-         software = gsub("Software:", "", software),
-         version = str_extract(text, 'Version.*'),
-         version = gsub("Version:", "", version))
+# fix string-based NA
+teamcodes <- teamcodes %>%
+  mutate(Category = ifelse(is.na(Category), "NaN", Category),
+         Additional_Info = ifelse(is.na(Additional_Info), "NaN", Additional_Info),
+         Counterfactual = ifelse(is.na(Counterfactual), "NaN", Counterfactual))
+```
 
-# codes used
-#define and then count codes
+## Count Codes
+
+```{r counts}
+#num = number of codes, teams = number of teams
+mistakes_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Mistake"]))
+mistakes_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Mistake"]))
+procedural_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Procedural"]))
+procedural_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Procedural"]))
+interpret_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Interpretational"]))
+interpret_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Interpretational"]))
+mist_proc_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Mistake-Procedural"]))
+mist_proc_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Mistake-Procedural"]))
+
+# extract reference to missing parts of the workflow and questionable competencies as they are located in the Additional_Info column
+
+teamcodes <- teamcodes %>%
+  mutate(missing_parts = ifelse(grepl("^Missing parts", Additional_Info), TRUE, FALSE),
+         questionable = ifelse(grepl("competencies", Additional_Info), TRUE, FALSE))
+
+missingparts_num <- length(unique(teamcodes$ID[teamcodes[,"missing_parts"] == TRUE]))
+missingparts_teams <- length(unique(teamcodes$Team[teamcodes[,"missing_parts"] == TRUE]))
+
+competence_num <- length(unique(teamcodes$ID[teamcodes[,"questionable"] == TRUE]))
+
+# extract counterfactuals (where we were able to fix mistakes)
+counterfact_num <- length(unique(teamcodes$ID[teamcodes[,"Counterfactual"] == "Yes"]))
+counterfact_teams <- length(unique(teamcodes$Team[teamcodes[,"Counterfactual"] == "Yes"]))
 ```
 
