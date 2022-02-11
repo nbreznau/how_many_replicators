@@ -56,3 +56,13 @@ counterfact_num <- length(unique(teamcodes$ID[teamcodes[,"Counterfactual"] == "Y
 counterfact_teams <- length(unique(teamcodes$Team[teamcodes[,"Counterfactual"] == "Yes"]))
 ```
 
+## Qualitative summary
+```{r makedf}
+qual_out <- as.data.frame(matrix(nrow = 12, ncol = 2))
+qual_out[,1] <- c("Mistakes_Num", "Mistakes_Team", "Procedural_Num", "Procedural_Team", "MistProc_Num", "MistProc_Team", "Interpret_Num", "Interpret_Team", "Missing_Num", "Missing_Team", "Competence_Num", "Competence_Team")
+qual_out[,2] <- c(mistakes_num, mistakes_teams, procedural_num, procedural_teams, mist_proc_num, mist_proc_teams, interpret_num, interpret_teams, missingparts_num, missingparts_teams, competence_num, competence_num)
+
+write.csv(here::here("results", "qual_out.csv"), row.names = F)
+
+```
+

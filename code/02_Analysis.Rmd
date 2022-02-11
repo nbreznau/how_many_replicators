@@ -495,15 +495,17 @@ knitr::include_graphics(here::here("results", "Fig2.png"))
 
 # start with descriptive table
 
-desc <- as.data.frame(matrix(nrow = 18, ncol = 11))
+desc <- as.data.frame(matrix(nrow = 22, ncol = 11))
 
 desc[1,] <- c("","","Means by Sample","","","Pear. Correlations w/ Raw Results","","","","","")
 
 desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Verification", "Exact Verif.", "Deviance", "", "", "")
 
-desc[,1] <- c("", "Variables","Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Independent Variables", "Stata", "Sociology Degree", "Stats-Skill", "Difficulty", "Team Size", "Routine", "Transparent")
+desc[,1] <- c("", "Variables","Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Independent Variables", "Stata", "Sociology Degree", "Stats-Skill", "Difficulty", "Team Size", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
 
-desc[,2] <- c("", "Measurement","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "other software =0","other degrees =0","4-question scale, stdzd,","1-question, stdzd.","1-3 persons", "routine cause =1", "Transparent group =1")
+desc[,2] <- c("", "Measurement","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "other software =0","other degrees =0","4-question scale, stdzd,","1-question, stdzd.","1-3 persons", "see text", "see text", "see text", "see text", "see text", "see text")
+
+qual_out <- read.csv(here::here("results", "qual_out.csv"))
 
 # fill in transparent group results
 
