@@ -428,31 +428,20 @@ cri_long$degree_soc <- ifelse(cri_long$degree_soc == 1, 1, 0)
 
 ```
 
-### Create dataout file
+## Combine qualitative codes
 
-For appendix
+```{r qualdat}
+qual_out <- read.csv(here::here("results", "qual_out.csv"))
+qual_out <- qual_out %>%
+  rename(u_teamid2 = Team) # to get unique matches (no repeats)
 
-```{r dataout}
-dataout <- dplyr::select(cri_long, Exp1, u_teamid, verif, deviance_abs)
-
-dataout <- dataout %>%
-  left_join(dplyr::select(ungroup(cri_cur_long), u_teamid, verif, deviance_abs, routine), by = "u_teamid") %>%
-  mutate(Exp1 = as.numeric(Exp1)) %>%
-  ungroup()
-
-datao <- dataout %>%
-  group_by(u_teamid) %>%
-  summarise_all(mean)
-
-datao <- datao %>%
-  mutate(verif.x = round(verif.x, 3),
-         verif.y = round(verif.y, 3),
-         deviance_abs.x = round(deviance_abs.x, 3),
-         deviance_abs.y = round(deviance_abs.y, 3)) %>%
-  arrange(Exp1, u_teamid)
-
-write.csv(datao, here::here("results","dataout.csv"), row.names = F)
+cri <- cri %>%
+  left_join(qual_out, by = "u_teamid2")
 ```
+
+## Optional Variable Labels
+
+See variable_labels.R to set up haven labels (and export to Stata if desired)
 
 ## Save Data
 
