@@ -44,10 +44,10 @@ t_rct[3,2] <- round(t.test(stat_skill ~ u_expgroup1, data = cri2)[["p.value"]],2
 t_rct[2,2] <- round(t.test(degree ~ u_expgroup1, data = cri2)[["p.value"]],2)
 t_rct[1,2] <- round(t.test(stata ~ u_expgroup1, data = cri2)[["p.value"]],2)
 
-t_rct[,1] <- c("Stata","Stat Skill","Degree","Stata")
+t_rct[,1] <- c("Number in Team","Stat Skill","Degree","Stata")
 rm(cri2)
 
-kable(t_rct)
+kable_styling(kable(t_rct, caption = "Test for Random Assignment\n(NHST t-test of likelihood of observing these data if there is no difference between group means)", format = "html"))
 ```
 
 
@@ -169,7 +169,7 @@ dev.off()
 knitr::include_graphics(here::here("results","Fig1.png"))
 ```
 
-## Summary Statistics for Appendix
+## Summary Statistics 
 
 ```{r team_sums}
 cri_sum <- cri_long %>%
@@ -198,6 +198,7 @@ cri_sums <- cri_sums %>%
 
 write_csv(cri_sums, file = here::here("results","team_summary.csv"))
 
+# add qualitative categories
 qual_out <- read.csv(here::here("results", "qual_out.csv"))
 qual_out <- qual_out %>%
   rename(u_teamid2 = Team) # to get unique matches (no repeats)
@@ -533,8 +534,8 @@ desc[3:23,3] <- c("",
                   mean(cri_long$stata[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$degree_soc[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$stat_skill[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$numinteam[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_long$difficult[cri_long$Exp1 == 1], na.rm = T),
                   "",
                   length(cri_sums$Mistake[cri_sums$Exp == 1 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 1]),
                   length(cri_sums$Procedural[cri_sums$Exp == 1 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 1]),
@@ -558,8 +559,8 @@ desc[3:23,4] <- c("",
                   mean(cri_long$stata[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$degree_soc[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$stat_skill[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$numinteam[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_long$difficult[cri_long$Exp1 == 0], na.rm = T),
                   "",
                   length(cri_sums$Mistake[cri_sums$Exp == 0 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 0]),
                   length(cri_sums$Procedural[cri_sums$Exp == 0 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 0]),
@@ -583,8 +584,8 @@ desc[3:23,5] <- c("",
                   mean(cri_long$stata, na.rm = T),
                   mean(cri_long$degree_soc, na.rm = T),
                   mean(cri_long$stat_skill, na.rm = T),
-                  mean(cri_long$difficult, na.rm = T),
                   mean(cri_long$numinteam, na.rm = T),
+                  mean(cri_long$difficult, na.rm = T),
                   "",
                   length(unique(cri_sums$Team[cri_sums$Mistake != 0]))/85,
                   length(unique(cri_sums$Team[cri_sums$Procedural != 0]))/85,
