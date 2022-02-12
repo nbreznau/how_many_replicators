@@ -29,688 +29,6 @@ load(file = here::here("data","data.Rdata"))
 options(scipen = 999)
 ```
 
-## Test for Successful Randomization
-
-We compare means on key variables between the two experimental groups.
-
-```{r rct, warning = F, message = F}
-t_rct <- matrix(nrow = 4, ncol = 2)
-colnames(t_rct) <- c("Attribute", "ttest_p")
-# make a Stata variable for the wide form
-cri2 <- cri %>%
-  mutate(stata = ifelse(software_final_models == "Stata", 1, 0))
-t_rct[4,2] <- round(t.test(numinteam ~ u_expgroup1, data = cri2)[["p.value"]],2)
-t_rct[3,2] <- round(t.test(stat_skill ~ u_expgroup1, data = cri2)[["p.value"]],2)
-t_rct[2,2] <- round(t.test(degree ~ u_expgroup1, data = cri2)[["p.value"]],2)
-t_rct[1,2] <- round(t.test(stata ~ u_expgroup1, data = cri2)[["p.value"]],2)
-
-t_rct[,1] <- c("Number in Team","Stat Skill","Degree","Stata")
-rm(cri2)
-
-kable_styling(kable(t_rct, caption = "Test for Random Assignment\n(NHST t-test of likelihood of observing these data if there is no difference between group means)", format = "html"))
-```
-
-
-A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid))` teams
-
-## Figure 1
-
-This plots how many replicators it would take to achieve replication reliability defined as the minimum number of replicators to result in a majority coming to the correct answer (here a verification) at a confidence level of 95%. 
-
-We calculate *P* as the probability that X=x (that a replicator will get the correct answer more than 50% of the time; for simplicity we assign 51% to x)
-
-$P(X=x)=(\frac{n}{x}) p^x(1-p)^{(n-x)}$
-
-Then we calculate n for different values of P and p. 
-
-First we need to map values of *x* for *n* trials (so that *x* is always at least 51% of n). We do this in a matrix to make plotting of the figure easy.
-
-```{r fig1_prep}
-# calculate x for each value of n
-# use a simple 25 n by 25 x matrix
-
-fig1 <- data.frame(n = rep(1:25,25))
-fig1 <- data.frame(fig1[order(fig1$n),])
-colnames(fig1) <- c("n")
-fig1$x <- rep(1:25,25)
-
-fig1 <- fig1 %>%
-  mutate(x_t = round(n/1.99,0),
-         x_min = ifelse(n/x_t == 2, x_t + 1, x_t),
-         x = ifelse(x < x_min, x_min, x), # remove cases where x is less than 51%
-         p_75 = 1-pbinom(x-1,n,0.75)) # compute cumulative probability of all values less than x, then subtract this from 1 to get all values greater than or equal to x
-
-#loop to generate columns for remaining values of p
-for (p in 76:99) {
-fig1 <- fig1 %>%
-  mutate(hold = 1-pbinom(x-1,n,p/100))
-
-assign(paste0("p_",p), data.frame(fig1$hold))
-
-}
-
-ps <- cbind(p_76,p_77,p_78,p_79,p_80,p_81,p_82,p_83,p_84,p_85,p_86,p_87,p_88,p_89,p_90,p_91,p_92,p_93,p_94,p_95,p_96,p_97,p_98,p_99)
-
-colnames(ps) <- c("p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_84","p_85","p_86","p_87","p_88","p_89","p_90","p_91","p_92","p_93","p_94","p_95","p_96","p_97","p_98","p_99")
-
-fig1 <- cbind(fig1,ps)
-
-rm(p_76,p_77,p_78,p_79,p_80,p_81,p_82,p_83,p_84,p_85,p_86,p_87,p_88,p_89,p_90,p_91,p_92,p_93,p_94,p_95,p_96,p_97,p_98,p_99,ps,p)
-
-fig1 <- fig1[!(fig1$x > fig1$n),] #remove rows where x is greater than n         
-
-fig1 <- fig1 %>%
-  select(-hold)
-
-# now create a df for plotting with the minimum n for each threshold of P
-fig1_plot <- data.frame(matrix(nrow=25,ncol=4))
-colnames(fig1_plot) <- c("P_90","P_95","P_99","p")
-
-
-i = 1
-for (col in c("p_75","p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_84","p_85","p_86","p_87","p_88","p_89","p_90","p_91","p_92","p_93","p_94","p_95","p_96","p_97","p_98","p_99")) {
-  figx <- fig1 %>%
-  select(n, col) 
-  colnames(figx) <- c("n","p")
-  fig1_plot[i,1] <- min(figx$n[figx$p > 0.90])
-  fig1_plot[i,2] <- min(figx$n[figx$p > 0.95])
-  fig1_plot[i,3] <- min(figx$n[figx$p > 0.99])
-  i = i + 1
-} 
-
-fig1_plot$p <- seq(75,99)
-
-```
-
-## Figure 1. Simulated Replication Reliabilities
-
-```{r fig1_out, warning = F, message = F}
-yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
-xl <- expression(paste("Binomial Probability that a Single Replication is Accurate (", italic("p"), ")", sep = ""))
-P99 <- expression(paste(italic("P"), " > 99% confidence"))
-P95 <- expression(paste(italic("P"), " > 95%"))
-P90 <- expression(paste(italic("P"), " > 90%"))
-
-reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4 of these 7) are successful in 99% of\nall potential replication trials"
-
-agg_png(filename = here::here("results","Fig1.png"), res = 144, width = 1000, height = 700)
-fig1_plot %>%
-  mutate(P_90 = P_90 - 0.05,
-         P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
-  ggplot(aes(x = p)) +
-  geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5) +
-  geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5) +
-  geom_line(aes(y = P_90), color = "#453781FF", size = 1.5) +
-  # P labels
-  annotate("label", x = 83, y = 10, label = P99, color = "#3CBB75FF", fill = "white") +
-  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white") +
-  annotate("label", x = 80.5, y = 4, label = P90, color = "#453781FF", fill = "white") +
-  # text box and curved arrow
-  geom_curve(
-    aes(x = 93, y = 11, xend = 89.1, yend = 7.5),
-    arrow = arrow(length = unit(0.03, "npc"), type = "closed", angle = 20),
-    color = "grey40", curvature = -0.3, lwd = 0.3) +
-  annotate("label", x = 98, y = 13, label = reps, color = "grey40", size = 3, hjust = 0, fill = "white") +
-  # add white points on top of lines
-  geom_point(aes(y = P_99), color = "white", size = 0.8) +
-  geom_point(aes(y = P_95), color = "white", size = 0.8) +
-  geom_point(aes(y = P_90), color = "white", size = 0.8) +
-  scale_x_reverse() +
-
-  ylim(1,20) +
-  labs(y = yl, x = xl) +
-  scale_y_continuous(breaks = waiver(), n.breaks = 20) +
-  theme_classic() +
-  theme(axis.title.x = element_text(vjust=-1),
-        axis.title.y = element_text(vjust=2),
-        panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig1.png"))
-```
-
-## Summary Statistics 
-
-```{r team_sums}
-cri_sum <- cri_long %>%
-  group_by(u_teamid2) %>%
-  mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
-  select(verif, exact, deviance_abs, Exp) %>%
-  summarise_all(.funs = c(mean))
-
-cri_sum_cur <- cri_cur_long %>%
-  group_by(u_teamid2) %>%
-  mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
-  select(verif, exact, deviance_abs, Exp) %>%
-  mutate(verif_cur = verif,
-         exact_cur = exact,
-         deviance_cur = deviance_abs) %>%
-  select(-c(verif, exact, deviance_abs, Exp)) %>%
-  summarise_all(.funs = c(mean))
-
-cri_sums <- left_join(cri_sum, cri_sum_cur, by = "u_teamid2")
-
-cri_sums <- cri_sums %>%
-  arrange(Exp, u_teamid2) %>%
-  select(u_teamid2, verif, exact, deviance_abs, verif_cur, exact_cur, deviance_cur, Exp) %>%
-  mutate(Team = ifelse(u_teamid2 == 591, 59,
-                       ifelse(u_teamid2 == 8101, 81, u_teamid2)))
-
-write_csv(cri_sums, file = here::here("results","team_summary.csv"))
-
-# add qualitative categories
-qual_out <- read.csv(here::here("results", "qual_out.csv"))
-qual_out <- qual_out %>%
-  rename(u_teamid2 = Team) # to get unique matches (no repeats)
-
-cri_sums <- cri_sums %>%
-  left_join(qual_out, by = "u_teamid2")
-
-cri_sums[is.na(cri_sums)] <- 0
-```
-
-## Figure 2. Comparing Replication Outcomes
-
-### Part A. Effect-Level
-
-#### Prep Fig2a Data
-```{r fig2prep, warning = F, message = F}
-fig2 <- cri_long %>%
-  select(verif, exact, deviance_abs, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Original Results",
-         stat = "Verification")
-
-fig2cur <- cri_cur_long %>%
-  select(verif, exact, deviance_abs, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Curated Results",
-         stat = "Verification")
-
-fig2 <- rbind(fig2, fig2cur)
-
-fig2[5:8, "verif_fn1"] <- fig2[1:4, "exact_fn1"] # put in long form
-fig2[9:12, "verif_fn1"] <- fig2[1:4, "deviance_abs_fn1"] 
-fig2[5:8, "verif_fn2"] <- fig2[1:4, "exact_fn2"]
-fig2[9:12, "verif_fn2"] <- fig2[1:4, "deviance_abs_fn2"]
-
-
-fig2[5:8, "stat"] <- "Exact Replication"
-fig2[9:12, "stat"] <- "Replication Error"
-
-fig2[5:8, "group"] <- fig2[1:4, "group"]
-fig2[9:12, "group"] <- fig2[1:4, "group"]
-
-fig2[5:8, "version"] <- fig2[1:4, "version"]
-fig2[9:12, "version"] <- fig2[1:4, "version"]
-
-fig2$result <- fig2$verif_fn1*100 # put in % scale
-fig2$se <- (fig2$verif_fn2/sqrt(1874))*100 # add standard error in % scale
-
-fig3 <- fig2[9:12,]
-fig2 <- fig2[1:8,]
-
-rm(fig2cur)
-
-f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
-
-fig2$result <- round(fig2$result,1)
-```
-
-
-#### Produce Fig2a
-```{r fig2out}
-agg_png(here::here("results","Fig2a.png"), height = 700, width = 900, res = 144)
-fig2a <- ggplot(data = fig2) +
-  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors,
-                    labels = c(" \nCURATED\n   Opaque\n   Group\n ",
-                               " \nCURATED\n   Transparent\n   Group\n ",
-                               " \nORIGINAL\n   Opaque\n   Group\n ",
-                               " \nORIGINAL\n   Transparent\n   Group\n "),
-                    guide = guide_legend(reverse = TRUE)) +
-  geom_vline(aes(xintercept = 4.75)) +
-  #annotate("text", x = 2.5, y = 34, label = "Verification\n(same sign)", angle = 90) +
-    geom_richtext(aes(x = 2.5, y = 32, label = "VERIFICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt")
-                ) +
-  geom_richtext(aes(x = 2.5, y = 34, label = "<p style = 'font-size:10px; text-align:justify'><i>(same sign)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA) +
-  geom_richtext(aes(x = 7, y = 32, label = "EXACT<br>REPLICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt")) +
-  geom_richtext(aes(x = 7, y = 35.5, label = "<p style = 'font-size:10px; text-align:justify'><i>(within 0.01)</i></p>"), 
-                angle = 90, fill = NA, label.color = NA) +
-  geom_text(aes(y = result - c(7,7,7,7,7,-7,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2$result)) +
-  ylab("Percent of Replicated Effects") +
-  xlab(" ") +
-  labs(title = "A. Effect-Level Results, N = 3,742") +
-  coord_flip(ylim = c(25,100), clip = "on") +
-  scale_x_reverse() +
-  theme_classic() +
-  theme(axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0))
-fig2a
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2a.png"))
-```
-### Part B. ICC
-
-```{r fig2b_icc}
-# calculate ICC/rho
-
-#1. estimate empty model
-m1t <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
-m1o <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
-m2t <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
-m2o <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
-m3t <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
-m3o <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
-m4t <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
-m4o <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
-
-#2. icc
-a <- icc_specs(m1t) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Original, transparent, verification") %>%
-  subset(grp == "Residual")
-aa <- icc_specs(m1o) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Original, opaque, verification") %>%
-  subset(grp == "Residual")
-b <- icc_specs(m2t) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Curated, transparent, verification") %>%
-  subset(grp == "Residual")
-bb <- icc_specs(m2o) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Curated, opaque, verification") %>%
-  subset(grp == "Residual")
-c <- icc_specs(m3t) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Original, transparent, exact replication") %>%
-  subset(grp == "Residual")
-cc <- icc_specs(m3o) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Original, opaque, exact replication") %>%
-  subset(grp == "Residual")
-d <- icc_specs(m4t) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Curated, transparent, exact replication") %>%
-  subset(grp == "Residual")
-dd <- icc_specs(m4o) %>%
-  mutate_if(is.numeric, round, 2) %>%
-  mutate(test = "Curated, opaque, exact replication") %>%
-  subset(grp == "Residual")
-
-
-icc_out <- rbind(a,aa,b,bb,c,cc,d,dd)
-rm(a,aa,b,bb,c,cc,d,dd)
-```
-
-### Part C. Team Level
-
-#### Prep Fig2b Data
-```{r fig2b_teamsummaries}
-fig2b <- cri_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = round(ifelse(deviance_abs_fn1 <= 0.01, 1, 0),2), # if replication error for the entire team is less than 0.01 then they get a zero for error and we round to the 2nd decimal then after
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2b_c <- fig2b %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Original Results",
-         stat = "Verification")
-  
-  
-
-fig2bcur <- cri_cur_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = round(ifelse(deviance_abs_fn1 <= 0.01, 1, 0),2), # if replication error for the entire team is less than 0.01 then they get a zero for error and we round to the 2nd decimal then after
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2bcur_c <- fig2bcur %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Curated Results",
-         stat = "Verification")
-
-fig2b <- rbind(fig2b_c, fig2bcur_c)
-rm(fig2b_c, fig2bcur, fig2bcur_c)
-
-fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
-fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
-fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
-fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
-
-
-fig2b[5:8, "stat"] <- "Exact Replication"
-fig2b[9:12, "stat"] <- "Replication Error"
-
-fig2b[5:8, "group"] <- fig2b[1:4, "group"]
-fig2b[9:12, "group"] <- fig2b[1:4, "group"]
-
-fig2b[5:8, "version"] <- fig2b[1:4, "version"]
-fig2b[9:12, "version"] <- fig2b[1:4, "version"]
-
-fig2b$result <- fig2b$verif_fn1*100 # put in % scale
-fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
-
-fig3b <- fig2b[9:12,]
-fig2b <- fig2b[1:8,]
-
-fig2b$result <- round(fig2b$result,1)
-
-```
-
-#### Produce Fig2b
-
-```{r fig2bout}
-agg_png(here::here("results","Fig2b.png"), height = 700, width = 900, res = 144)
-fig2bb <- ggplot(data = fig2b) +
-  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors) +
-  geom_vline(aes(xintercept = 4.75)) +
-  geom_richtext(aes(x = 2.5, y = 30, label = "VERIFICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt")
-                ) +
-  geom_richtext(aes(x = 2.5, y = 33, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA) +
-  geom_richtext(aes(x = 7, y = 30, label = "EXACT<br>REPLICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt")) +
-  geom_richtext(aes(x = 7, y = 33.5, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects</i>)"), 
-                angle = 90, fill = NA, label.color = NA) +
-  
-  # add ICC to plot
-  # title
-  annotate("text", x = 0.7, y = 89, parse = T, label = expression(paste("Within ", sigma^{2})), size = 3, color = "grey20") +
-  annotate("text", x = 1, y = 89, label = paste0(round(icc_out$percent[1],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 2, y = 89, label = paste0(round(icc_out$percent[2],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 3, y = 89, label = paste0(round(icc_out$percent[3],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 4, y = 89, label = paste0(round(icc_out$percent[4],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 5.5, y = 89, label = paste0(round(icc_out$percent[5],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 6.5, y = 89, label = paste0(round(icc_out$percent[6],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 7.5, y = 89, label = paste0(round(icc_out$percent[7],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  annotate("text", x = 8.5, y = 89, label = paste0(round(icc_out$percent[8],0),"%"), size = 3, hjust = 0, color = "grey20") +
-  # add percentages
-  geom_text(aes(y = result - c(7,7,7,7,7,-6,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2b$result)) +
-  ylab("Percent of Teams") +
-  xlab(" ") +
-  labs(title = "B. Team-Level Results, N = 87*") +
-  coord_flip(ylim = c(5,100), clip = "on") +
-  scale_x_reverse() +
-  theme_classic() +
-  theme(axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
-        legend.position = "none",
-        plot.title = element_text(hjust = 0))
-fig2bb
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2b.png"))
-```
-### Figure 2 Combined
-
-```{r fig2final}
-agg_png(here::here("results","Fig2.png"), width = 1300, height = 800, res = 144)
-ggarrange(fig2a,fig2bb, ncol = 2, nrow = 1, widths = c(1.4,1))
-dev.off()
-
-knitr::include_graphics(here::here("results", "Fig2.png"))
-```
-
-
-## Table 1
-
-### Setup
-
-```{r table2}
-
-# start with descriptive table
-
-desc <- as.data.frame(matrix(nrow = 23, ncol = 11))
-
-desc[1,] <- c("","","Means by Sample","","","Pear. Correlations w/ Raw Results","","","","","")
-
-desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Verification", "Exact Verif.", "Deviance", "", "", "")
-
-desc[,1] <- c("", "Variables","Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Independent Variables", "Stata", "Sociology Degree", "Stats-Skill", "Difficulty", "Team Size", "Qualitative Categories", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
-
-desc[,2] <- c("", "Measurement","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "other software =0","other degrees =0","4-question scale, stdzd,","1-question, stdzd.","1-3 persons", "", "see text", "see text", "see text", "see text", "see text", "see text")
-
-
-
-
-# fill in transparent group results
-
-desc[3:23,3] <- c("", 
-                  mean(cri_long$verif[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$exact[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
-                  "",
-                  mean(cri_cur_long$verif[cri_cur_long$Exp1 == 1], na.rm = T),
-                  mean(cri_cur_long$exact[cri_cur_long$Exp1 == 1], na.rm = T),
-                  mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 1], na.rm = T),
-                  "",
-                  mean(cri_long$stata[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$degree_soc[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$stat_skill[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$numinteam[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 1], na.rm = T),
-                  "",
-                  length(cri_sums$Mistake[cri_sums$Exp == 1 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 1]),
-                  length(cri_sums$Procedural[cri_sums$Exp == 1 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 1]),
-                  length(cri_sums$Mistake_Procedural[cri_sums$Exp == 1 & cri_sums$Mistake_Procedural != 0])/length(cri_sums$Mistake_Procedural[cri_sums$Exp == 1]),
-                  length(cri_sums$Missing_Parts[cri_sums$Exp == 1 & cri_sums$Missing_Parts != 0])/length(cri_sums$Missing_Parts[cri_sums$Exp == 1]),
-                  length(cri_sums$Interpretational[cri_sums$Exp == 1 & cri_sums$Interpretational != 0])/length(cri_sums$Interpretational[cri_sums$Exp == 1]),
-                  length(cri_sums$Questionable_Skills[cri_sums$Exp == 1 & cri_sums$Questionable_Skills != 0])/length(cri_sums$Questionable_Skills[cri_sums$Exp == 1])
-                  )
-
-# opaque
-
-desc[3:23,4] <- c("", 
-                  mean(cri_long$verif[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$exact[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
-                  "",
-                  mean(cri_cur_long$verif[cri_cur_long$Exp1 == 0], na.rm = T),
-                  mean(cri_cur_long$exact[cri_cur_long$Exp1 == 0], na.rm = T),
-                  mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 0], na.rm = T),
-                  "",
-                  mean(cri_long$stata[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$degree_soc[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$stat_skill[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$numinteam[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 0], na.rm = T),
-                  "",
-                  length(cri_sums$Mistake[cri_sums$Exp == 0 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 0]),
-                  length(cri_sums$Procedural[cri_sums$Exp == 0 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 0]),
-                  length(cri_sums$Mistake_Procedural[cri_sums$Exp == 0 & cri_sums$Mistake_Procedural != 0])/length(cri_sums$Mistake_Procedural[cri_sums$Exp == 0]),
-                  length(cri_sums$Missing_Parts[cri_sums$Exp == 0 & cri_sums$Missing_Parts != 0])/length(cri_sums$Missing_Parts[cri_sums$Exp == 0]),
-                  length(cri_sums$Interpretational[cri_sums$Exp == 0 & cri_sums$Interpretational != 0])/length(cri_sums$Interpretational[cri_sums$Exp == 0]),
-                  length(cri_sums$Questionable_Skills[cri_sums$Exp == 0 & cri_sums$Questionable_Skills != 0])/length(cri_sums$Questionable_Skills[cri_sums$Exp == 0])
-                  )
-
-# pooled
-
-desc[3:23,5] <- c("", 
-                  mean(cri_long$verif, na.rm = T),
-                  mean(cri_long$exact, na.rm = T),
-                  mean(cri_long$deviance_abs, na.rm = T),
-                  "",
-                  mean(cri_cur_long$verif, na.rm = T),
-                  mean(cri_cur_long$exact, na.rm = T),
-                  mean(cri_cur_long$deviance_abs, na.rm = T),
-                  "",
-                  mean(cri_long$stata, na.rm = T),
-                  mean(cri_long$degree_soc, na.rm = T),
-                  mean(cri_long$stat_skill, na.rm = T),
-                  mean(cri_long$numinteam, na.rm = T),
-                  mean(cri_long$difficult, na.rm = T),
-                  "",
-                  length(unique(cri_sums$Team[cri_sums$Mistake != 0]))/85,
-                  length(unique(cri_sums$Team[cri_sums$Procedural != 0]))/85,
-                  length(unique(cri_sums$Team[cri_sums$Mistake_Procedural != 0]))/85,
-                  length(unique(cri_sums$Team[cri_sums$Missing_Parts != 0]))/85,
-                  length(unique(cri_sums$Team[cri_sums$Interpretational != 0]))/85,
-                  length(unique(cri_sums$Team[cri_sums$Questionable_Skills != 0]))/85
-                  )
-
-
-
-
-```
-
-### Make Table
-
-```{r tbl2corr, warning = F, message = F}
-cri_long <- cri_long %>%
-  ungroup()
-cri_cur_long <- cri_cur_long %>%
-  ungroup()
-
-desc_c1 <- select(cri_long, verif, exact, deviance_abs, stata, degree_soc, stat_skill, difficult, numinteam, routine, u_expgroup1)
-
-desc_c1$u_expgroup1 <- as.numeric(desc_c1$u_expgroup1)
-
-cor1 <- as.data.frame(cor(desc_c1, use = "pairwise"))
-
-desc_c2 <- select(cri_cur_long, verif, exact, deviance_abs, stata, degree_soc, stat_skill, difficult, numinteam, routine, u_expgroup1)
-
-
-
-desc_c2$u_expgroup1 <- as.numeric(desc_c2$u_expgroup1)
-
-cor2 <- as.data.frame(cor(desc_c2, use = "pairwise"))
-
-# test for sig of corrs
-
-test1 <- psych::corr.test(desc_c1)
-test2 <- psych::corr.test(desc_c2)
-
-test1df <- as.data.frame(round(test1[["p"]],3))[4:10,1:3]
-test2df <- as.data.frame(round(test2[["p"]],3))[4:10,1:3]
-
-# we drop 'other' as a degree because it does not have enough of any one degree type to be meaningful, and thus we just compare sociology and political science
-
-desc_c1a <- subset(cri_long, degree != 3, select = c(verif, exact, deviance_abs, degree))
-desc_c2a <- subset(cri_cur_long, degree != 3, select = c(verif, exact, deviance_abs, degree))
-
-test1a <- psych::corr.test(desc_c1a)
-test2a <- psych::corr.test(desc_c2a)
-
-test1adfr <- as.data.frame(round(test1a[["r"]],3))[4,1:3]
-test2adfr <- as.data.frame(round(test2a[["r"]],3))[4,1:3]
-
-test1adfp <- as.data.frame(round(test1a[["p"]],3))[4,1:3]
-test2adfp <- as.data.frame(round(test2a[["p"]],3))[4,1:3]
-
-# update p value table with adjusted scores for degree
-
-test1df[2,1:3] <- test1adfp
-test2df[2,1:3] <- test2adfp
-
-# many teams made both routine and non-routine mistakes, these should not be counted as "routine" as mistakes are generally far more serious in their impact on results. Therefore, recode teams that had non-routine errors as well that could not be counterfactual corrected.
-
-desc_c1b <- select(cri_long, verif, exact, deviance_abs, routine, u_teamid)
-desc_c2b <- select(cri_cur_long, verif, exact, deviance_abs, routine, u_teamid)
-
-desc_c1b <- desc_c1b %>%
-  mutate(routine = ifelse(u_teamid == 28 | u_teamid == 33 | u_teamid == 70 | u_teamid == 101 , NA, routine))
-desc_c1b <- desc_c1b %>%
-  mutate(routine = ifelse(u_teamid == 60, 1, routine)) %>%
-  select(-c(u_teamid))
-
-desc_c2b <- desc_c2b %>%
-  mutate(routine = ifelse(u_teamid == 28 | u_teamid == 33 | u_teamid == 70 | u_teamid == 101 , NA, routine))
-desc_c2b <- desc_c2b %>%
-  mutate(routine = ifelse(u_teamid == 60, 1, routine)) %>%
-  select(-c(u_teamid))
-
-test1b <- psych::corr.test(desc_c1b)
-test2b <- psych::corr.test(desc_c2b)
-
-test1bdfr <- as.data.frame(round(test1b[["r"]],3))[4,1:3]
-test2bdfr <- as.data.frame(round(test2b[["r"]],3))[4,1:3]
-
-test1bdfp <- as.data.frame(round(test1b[["p"]],3))[4,1:3]
-test2bdfp <- as.data.frame(round(test2b[["p"]],3))[4,1:3]
-
-# update p value table with adjusted scores for routine
-
-test1df[6,1:3] <- test1bdfp
-test2df[6,1:3] <- test2bdfp
-
-# add correlations to table
-
-desc[4:6,6:8] <- cor1[1:3,1:3]
-
-desc[12:18,6:8] <- cor1[4:10,1:3]
-
-desc[8:10,9:11] <- cor2[1:3,1:3]
-
-desc[12:18,9:11] <- cor2[4:10,1:3]
-
-# add adjusted degree and routine correlations
-desc[13,6:8] <- test1adfr
-desc[13,9:11] <- test2adfr
-
-desc[17,6:8] <- test1bdfr
-desc[17,9:11] <- test2bdfr
-
-write.csv(desc, file = here::here("results","Tbl2.csv"))
-
-# remove factor
-cri_long$Exp1 <- as.numeric(cri_long$Exp1)
-cri_cur_long$Exp1 <- as.numeric(cri_cur_long$Exp1)
-
-cri_agg <- aggregate(cri_long, by = list(cri_long$u_teamid), FUN = mean)
-cri_cur_agg <- aggregate(cri_cur_long, by = list(cri_cur_long$u_teamid), FUN = mean)
-
-rm(test1, test2, test1a, test2a, test1df, test2df, test1adfp, test2adfp, test1adfr, test2adfr, test1bdfp, test2bdfp, test1bdfr, test2bdfr)
-
-
-```
-
 
 ## Explaining Variance
 
@@ -719,23 +37,11 @@ Our observations take place only at the team level, therefore it is only necessa
 Aggregate data to team-level
 
 ```{r aggregate_team}
-# many teams made both routine and non-routine mistakes, these should not be counted as "routine" as mistakes are generally far more serious in their impact on results. Therefore, recode teams that had non-routine errors as well that could not be counterfactual corrected.
-
-cri_long <- cri_long %>%
-  mutate(routine = ifelse(u_teamid == 28 | u_teamid == 33 | u_teamid == 70 | u_teamid == 101 , NA, routine))
-cri_long <- cri_long %>%
-  mutate(routine = ifelse(u_teamid == 60, 1, routine))
-
-cri_cur_long <- cri_cur_long %>%
-  mutate(routine = ifelse(u_teamid == 28 | u_teamid == 33 | u_teamid == 70 | u_teamid == 101 , NA, routine))
-cri_cur_long <- cri_cur_long %>%
-  mutate(routine = ifelse(u_teamid == 60, 1, routine))
-
 
 # curated
 cri_team <- cri_cur_long %>%
   mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
-  group_by(u_teamid2) %>%
+  group_by(u_teamid) %>%
   summarize(verif_m = mean(verif, na.rm = T),
             verif_sd = sd(verif, na.rm = T),
             exact_m = mean(exact, na.rm = T),
@@ -751,7 +57,7 @@ cri_team <- cri_cur_long %>%
             routine = mean(routine, na.rm = T))
 
 cri_team_orig <- cri_long %>%
-  group_by(u_teamid2) %>%
+  group_by(u_teamid) %>%
   mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
   summarize(verif_m = mean(verif, na.rm = T),
             verif_sd = sd(verif, na.rm = T),
@@ -764,8 +70,7 @@ cri_team_orig <- cri_long %>%
             stat_skill = mean(stat_skill, na.rm = T),
             numinteam = mean(numinteam, na.rm = T),
             exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T),
-            routine = mean(routine, na.rm = T)) # routine is an old code, remove for final version
+            difficult = mean(difficult, na.rm = T))
 
 cri_team$degree <- factor(cri_team$degree, labels = c("Sociology", "Political Science", "Other"))
 cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Political Science", "Other"))
@@ -774,387 +79,123 @@ cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Po
 cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
 cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
 
+# merge qualitative features
+qual_out <- qual_out %>%
+  rename(u_teamid = u_teamid2)
 
+cri_team <- cri_team %>%
+  left_join(qual_out, by = "u_teamid")
+
+cri_team_orig <- cri_team_orig %>%
+  left_join(qual_out, by = "u_teamid")
 
 
 ```
-Variance decomposition
 
-```{r decomp}
-# curated
-mlm01_verif <- glmer(verif ~ (1 | u_teamid2), family = binomial, data = cri_cur_long)
+## What predicts replication results?
 
-mlm11_exact <- glmer(exact ~ (1 | u_teamid2), family = binomial, data = cri_cur_long)
+### Correlations
 
-mlm21_deviance <- lmer(deviance_abs ~ (1 | u_teamid2), data = cri_cur_long)
-
-# original
-mlm01_verif_orig <- glmer(verif ~ (1 | u_teamid2), family = binomial, data = cri_long)
-
-mlm11_exact_orig <- glmer(exact ~ (1 | u_teamid2), family = binomial, data = cri_long)
-
-mlm21_deviance_orig <- lmer(deviance_abs ~ (1 | u_teamid2), data = cri_long)
-
-tab_model(mlm01_verif, mlm01_verif_orig, mlm11_exact, mlm11_exact_orig, mlm21_deviance, mlm21_deviance_orig,show.ci = F, file = here::here("results","mlm.htm"))
-
-mlm <- as.data.frame(read_html(here::here("results","mlm.htm")) %>% html_table(fill=TRUE))
-
-kable_styling(kable(mlm))
-  
-```
-
-Variance decomposition reveals that of the total variance, `r paste0(100*(as.numeric(mlm$verif[mlm$Var.1 == "ICC"])),"%")` of *Verification*, `r paste0(100*(as.numeric(mlm$exact[mlm$Var.1 == "ICC"])),"%")` of *Exact Verification*, and `r paste0(100*(as.numeric(mlm$deviance_abs[mlm$Var.1 == "ICC"])),"%")` of *Replication Deviance* occurs between-teams (as opposed to within-teams).
-
-
-
-
-### Variance Plots
-
-```{r var_plot}
-cri_cur_long <- cri_cur_long %>%
-  mutate(degreeF = as.factor(degree),
-         stataF = as.factor(stata),
-         stat_skillF = as.factor(ifelse(stat_skill > 0, 1, 0)),
-         dev_abs_log = log(deviance_abs+0.001),
-         dev_abs_min = min(dev_abs_log, na.rm = T),
-         dev_abs_log_c = dev_abs_log - dev_abs_min)
-
-# alt summary stats by group
-cri_sum_plot <- cri_cur_long %>%
-  group_by(degree) %>%
-  summarise(dev_degree = mean(deviance_abs, na.rm = T),
-            dev_degree_sd = sd(deviance_abs, na.rm = T),
-            dev_degree_n = n())
-
-cri_sum_plot2 <- cri_cur_long %>%
-  group_by(stataF, u_expgroup1) %>%
-  summarise(dev_stataex = mean(deviance_abs, na.rm = T),
-            dev_stataex_sd = sd(deviance_abs, na.rm = T),
-            dev_stataex_n = n())  
-
-cri_sum_plot3 <- cri_cur_long %>%
-  group_by(stat_skillF) %>%
-  summarise(dev_stat = mean(deviance_abs, na.rm = T),
-            dev_stat_sd = sd(deviance_abs, na.rm = T),
-            dev_stat_n = n())
-
-# routine errors
-cri_sum_plot4 <- cri_cur_long %>%
-  group_by(routine, u_expgroup1) %>%
-  summarise(dev_routine = mean(deviance_abs, na.rm = T),
-            dev_routine_sd = sd(deviance_abs, na.rm = T),
-            dev_routine_n = n())
-
-cri_sum_plot4 <- cri_sum_plot4[1:4,]
-
-
-
-cri_sum_plot$degree <- as.factor(cri_sum_plot$degree)
-cri_sum_plot2$stataF <- as.factor(cri_sum_plot2$stataF)
-cri_sum_plot3$stat_skillF <- as.factor(cri_sum_plot3$stat_skillF)
-
-# reorder for 4-category plots
-cri_sum_plot2[,1] <- as.factor(c(1,3,2,4))
-cri_sum_plot4[,1] <- as.factor(c(1,3,2,4))
+```{r corr}
 
 ```
 
+### Regressions Predicting Reproducibility
 
 
-```{r bar1}
-ggplot(cri_sum_plot) +
-  geom_bar(aes(y=dev_degree, x=degree, fill=degree), stat = 'identity') +
-  geom_errorbar(aes(x=degree, ymin=dev_degree-(dev_degree_sd/sqrt(dev_degree_n)), ymax = dev_degree+(dev_degree_sd/sqrt(dev_degree_n)), fill=degree)) +
-  coord_flip() +
-  scale_fill_manual(values = c("#D55E00","#009E73","goldenrod")) +
-  annotate(geom="text", x=2.8, y=0.001, label = paste0("Other"),
-              color="black", size = 4, hjust = 0) +
-  annotate(geom="text", x=1.8, y=0.001, label = paste0("Political Science"),
-              color="black", size = 4, hjust = 0) +
-  annotate(geom="text", x=0.8, y=0.001, label = paste0("Sociology"),
-              color="black", size = 4, hjust = 0) +
-  ylab(label = "Deviance from Original Results") +
-  theme_classic() +
-  theme(
-    legend.position = "none",
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    axis.title.y = element_blank()
-  )
+```{r regs}
+# original - pooled
+O_1 <- lm(exact_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
+O_2 <- lm(verif_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
+O_3 <- lm(dev_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
+
+# original - by group
+O_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+O_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+O_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+
+O_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+O_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+O_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+
+# curated - pooled
+M_1 <- lm(exact_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
+M_2 <- lm(verif_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
+M_3 <- lm(dev_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
+
+# curated - by group
+M_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+
+M_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+
+orig_results <- mget(ls(pattern = "O_"))
+cur_results <- mget(ls(pattern = "M_"))
+```
+
+### Results
+
+Saved in Word for paper
+```{r results}
+tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Orig.doc"))
+
+tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Cur.doc"))
+```
+
+Printed here in workflow
+
+#### Original
+```{r results2}
+tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
 ```
 
 
-```{r bar2}
-
-agg_png(filename = here::here("results","Fig2.png"), width = 800, height = 600, res = 144)
-ggplot(cri_sum_plot2) +
-  geom_bar(aes(y=dev_stataex, x=stataF, fill=stataF), stat = 'identity') +
-  geom_errorbar(aes(x=stataF, ymin=dev_stataex-(dev_stataex_sd/sqrt(dev_stataex_n)), ymax = dev_stataex+(dev_stataex_sd/sqrt(dev_stataex_n)), width = 0.4)) +
-  coord_flip() +
-  scale_fill_manual(values = c("#D55E00","#009E73","goldenrod","mediumturquoise")) +
-  geom_label(aes(x=3.8, y=0.0005, label = "Stata"), fill = "white",
-              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  geom_label(aes(x=2.8, y=0.0005, label = "Other"), fill = "white",
-              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  geom_label(aes(x=1.8, y=0.0005, label = "Stata"), fill = "white",
-              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  geom_label(aes(x=0.8, y=0.0005, label = "Other"), fill = "white",
-              color="black", label.size = NA, hjust = 0, label.r = unit(0, "lines")) +
-  annotate(geom = "text", label = "Transparent Group", y = -0.001, x = 3.5, angle = 90, vjust = 0) +
-  annotate(geom = "text", label = "Opaque Group", y = -0.001, x = 1.5, angle = 90, vjust = 0) +
-  geom_vline(xintercept = 2.5, color = "grey23") +
-  ylab(label = "Deviance from Original Results") +
-  theme_classic() +
-  theme(
-    legend.position = "none",
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    axis.title.y = element_blank()
-  )
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2.png"))
+#### Curated
+```{r results3}
+tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
 ```
 
-A total of `r length(unique(cri_long$u_teamid[cri_long$routine == 1])) + 4` teams had routine searcher variability, but 4 of these teams also had mistakes that could not be counterfactually repaired. Thus, not counting these 4 teams, `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1])))/(length(unique(cri_long$u_teamid))-4),1)` percent of the CRI teams had routine researcher variability, but this was far more common in the opaque group which had `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "0"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "0"]))-4)),1)` percent of teams with routine variability compared to only `r  round((100*(length(unique(cri_long$u_teamid[cri_long$routine == 1 & cri_long$u_expgroup1 == "1"])))/(length(unique(cri_long$u_teamid[cri_long$u_expgroup1 == "1"]))-4)),1)` percent in the transparent group.
+### Regressions Predicting Error Sources
 
-Those who had no routine error in the transparent group had an exact replication rate of `r  round(100*mean(cri_cur_long$exact[cri_cur_long$routine == 0 & cri_cur_long$u_expgroup1 == "1"], na.rm = T),1)`
+we investigate the multivariate associations of team-level variables and whether they made mistakes and/or had procedural variations. To do this we subset our team sample first to include only those teams that had at least one instance of the category Mistake or Mistake-Procedural (=1) and all other teams except those with instances of Procedural (=0). If a team has a Mistake and Procedural code they are coded as = 1. Next we do a similar subset where cases are kept with at least one instance of Procedural and Mistake-Procedural (=1) with those having any Mistake dropped.
+
+```{r reg_error}
+# set up data
+cri_team_mistake <- cri_team %>%
+  mutate(Mistake_DV = ifelse(Mistake == 1 | Mistake_Procedural == 1, 1, 0),
+         drop = ifelse(Mistake_DV != 1 & Procedural == 1, 0, 1)) %>%
+  subset(drop == 1)
+
+cri_team_proc <- cri_team %>%
+  mutate(Procedural_DV = ifelse(Procedural == 1 | Mistake_Procedural == 1, 1, 0),
+         drop = ifelse(Procedural_DV !=1 & Mistake == 1, 0, 1)) %>%
+  subset(drop == 1)
+
+MIS_1 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake)
+PRO_1 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc)
+MIS_2 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 1))
+PRO_2 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 1))
+MIS_3 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 0))
+PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 0))
+```
+
+### Results
+
+```{r results}
+tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
+
+tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
+```
 
 ## Comparing Stata and R Users
 
 ```{r r_vs_stata}
 r_vs_stata <- read_csv(here::here("data","r_vs_stata.csv"))
 
-
 ```
 
-
-
-```{r var_plot4}
-ggplot(cri_cur_long, aes(y=deviance_abs, x=stat_skillF, fill=stat_skillF)) +
-  coord_flip(ylim = c(0,0.02)) +
-  #coord_cartesian(ylim = c(0,0.15)) +
-  geom_violinhalf() +
-  theme_classic() +
-  ylab(label = "Replicated Effect Deviance (logged)") +
-  scale_fill_manual(values = c("#D55E00","#009E73")) +
-  annotate(geom="text", x=1.9, y=0.001, label = paste0("Less Stats Skills/Experience"),
-              color="#009E73", size = 4, hjust = 0) +
-  annotate(geom="text", x=0.9, y=0.001, label = paste0("More Stats Skills/Experience"),
-              color="#D55E00", size = 4, hjust = 0) +
-  theme(
-    legend.position = "none",
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
-
-```
-
-These regressions are interesting
-
-### Regressions predicting within-team variance **curated**
-
-```{r varexp}
-
-
-# variables, researcher aspects
-
-# MEANS
-m01_verif_mean <- lm(verif_m ~ exp + stata + stat_skill , data = cri_team)
-
-m11_exact_mean <- lm(exact_m ~ exp + stata + stat_skill , data = cri_team)
-
-m21_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill , data = cri_team)
-
-#SDs
-m001_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill , data = cri_team)
-
-m011_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill , data = cri_team)
-
-m021_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill , data = cri_team)
-
-
-# unimportant criteria
-
-# MEANS
-m02_verif_mean <- lm(verif_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
-
-m12_exact_mean <- lm(exact_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
-
-m22_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team)
-
-#SDs
-m002_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
-
-m012_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
-
-m022_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill  + difficult, data = cri_team)
-
-
-# difficulty
-
-# MEANS
-m03_verif_mean <- lm(verif_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
-
-m13_exact_mean <- lm(exact_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
-
-m23_deviance_mean <- lm(dev_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team)
-
-#SDs
-m003_verif_sd <- lm(verif_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
-
-m013_exact_sd <- lm(exact_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
-
-m023_deviance_sd <- lm(dev_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team)
-
-
-
-```
-
-### Regressions predicting within-team variance **original**
-
-```{r varexp_orig}
-
-
-# variables, researcher aspects
-
-# MEANS
-m01_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill , data = cri_team_orig)
-
-m11_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill , data = cri_team_orig)
-
-m21_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill , data = cri_team_orig)
-
-#SDs
-m001_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill , data = cri_team_orig)
-
-m011_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill , data = cri_team_orig)
-
-m021_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill , data = cri_team_orig)
-
-
-# Unimportant criteria
-
-# MEANS
-m02_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-m12_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-m22_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-#SDs
-m002_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-m012_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-m022_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill  + degree + numinteam, data = cri_team_orig)
-
-
-# Difficulty
-
-# MEANS
-m03_verif_mean_orig <- lm(verif_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
-
-m13_exact_mean_orig <- lm(exact_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
-
-m23_deviance_mean_orig <- lm(dev_m ~ exp + stata + stat_skill + degree + numinteam + difficult + exp, data = cri_team_orig)
-
-#SDs
-m003_verif_sd_orig <- lm(verif_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
-
-m013_exact_sd_orig <- lm(exact_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
-
-m023_deviance_sd_orig <- lm(dev_sd ~ exp + stata + stat_skill  + difficult + exp, data = cri_team_orig)
-
-```
-
-```{r cor}
-cor <- select(cri_team, verif_m, exact_m, dev_m, stata, stat_skill, difficult)
-cor1 <- cor(cor, use = "pairwise.complete.obs")
-
-cor_orig <- select(cri_team_orig, verif_m, exact_m, dev_m, stata, stat_skill, difficult)
-cor1_orig <- cor(cor_orig, use = "pairwise.complete.obs")
-
-```
-
-
-### Regression Tables Curated
-```{r regtbl}
-tab_model(m01_verif_mean, m02_verif_mean, m03_verif_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-tab_model(m11_exact_mean, m12_exact_mean, m13_exact_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-
-tab_model(m21_deviance_mean, m22_deviance_mean, m23_deviance_mean, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-```
-
-### Regression Tables Original
-```{r regtbl_orig}
-tab_model(m01_verif_mean_orig, m02_verif_mean_orig, m03_verif_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-
-tab_model(m11_exact_mean_orig, m12_exact_mean_orig, m13_exact_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-
-tab_model(m21_deviance_mean_orig, m22_deviance_mean_orig, m23_deviance_mean_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-
-```
-
-### Indirect Effects
-
-There are clearly effects of these through perceived difficulty
-
-```{r diff_dv}
-m1_diff <- lm(difficult ~ stata + stat_skill, data = cri_team)
-
-m1_diff_orig <- lm(difficult ~ stata + stat_skill, data = cri_team_orig)
-
-tab_model(m1_diff, m1_diff_orig, p.threshold = c(0.1, 0.05, 0.01), p.style = "star", show.ci = F)
-```
-
-### SEM
-
-```{r sem}
-m1 <- 'verif_m ~ exp + stata + stat_skill'
-m2 <- 'verif_m ~ exp + stata + stat_skill + difficult'
-m3 <- 'verif_m ~ exp + a2*stata + b2*stat_skill + m*difficult
-       difficult ~ a1*stata + b1*stat_skill
-       # total effects
-         total_stata := a2 + (a1*m)
-         total_stat_skill := b2 + (b1*m)
-       # indirect effects
-         indir_stata := a1*m
-         indir_stat_skill := b1*m'
-
-m1fit <- sem(m1, data = cri_team_orig)
-m2fit <- sem(m2, data = cri_team_orig)
-m3fit <- sem(m3, data = cri_team_orig)
-
-m1out <- summary(m1fit, fit.measures = T)
-m2out <- summary(m2fit, fit.measures = T)
-m3out <- summary(m3fit, fit.measures = T)
-
-# not really ideal for showing all features of the model
-# lavaanPlot(model = m3fit, coefs = T, stand = T, sig = 1.00)
-
-# m1out[["FIT"]][["aic"]]
-```
-
-
-### Plotting the model
-
-What led to mistakes - lack of transparency, working in the same software as the original - some kind of procedural similarity that is unique to softwares. 
-
-Show all three models and their fit statistics, then plot the direct and indirect effects.
-
-```{r}
-
-
-```
-
-
-### Predict routine v. non-routine
 
 
