@@ -1,7 +1,10 @@
 ---
-title: "Tables and Figures"
+title: "03 Tables and Figures"
 output: html_document
 ---
+
+NOTE: File 02_Analysis must be run first for this file to run in its entirety
+
 
 |Metric|Definition|Measure|
 |------|----------|---------|
@@ -612,37 +615,45 @@ knitr::include_graphics(here::here("results","Fig2c2.png"))
 
 ### Setup
 
-```{r table2}
+```{r table2, message = F}
+cri_team <- readRDS(here::here("data","cri_team.RDS"))
 
 # start with descriptive table
 
-desc <- as.data.frame(matrix(nrow = 24, ncol = 8))
+desc <- as.data.frame(matrix(nrow = 31, ncol = 8))
 
 desc[1,] <- c("","","Team-Level","","","Effect-Level","","")
 
 desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Transparent","Opaque", "Pooled")
 
-desc[,1] <- c("", "Variables","Cases", "Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Independent Variables", "Stata", "Sociology Degree", "Stats-Skill", "Difficulty", "Team Size", "Qualitative Categories", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
+desc[,1] <- c("", "Variables","Cases", "Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Independent Variables", "Stata", "SD", "Sociology Degree","SD", "Stats-Skill","SD", "Difficulty","SD", "Team Size", "SD","Qualitative Categories", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
 
-desc[,2] <- c("", "Measurement","", "", "same direction =1","identical at two decimals =1", "absolute difference with original","", "same direction =1","identical at two decimals =1", "absolute difference with original","", "other software =0","other degrees =0","4-question scale, stdzd,","1-question, stdzd.","1-3 persons", "", "see text", "see text", "see text", "see text", "see text", "see text")
+desc[,2] <- c("", "Measurement","", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD","", "other software =0","", "other degrees =0","","4-question scale, stdzd,","","1-question, stdzd.","","1-3 persons","", "", "see text", "see text", "see text", "see text", "see text", "see text")
 
 
 # fill in transparent group results
 
-desc[3:24,6] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])),"", 
+desc[3:31,6] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])),"", 
                   mean(cri_long$verif[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$exact[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
+                  sd(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
                   "",
                   mean(cri_cur_long$verif[cri_cur_long$Exp1 == 1], na.rm = T),
                   mean(cri_cur_long$exact[cri_cur_long$Exp1 == 1], na.rm = T),
                   mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 1], na.rm = T),
+                  sd(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 1], na.rm = T),
                   "",
-                  mean(cri_long$stata[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$degree_soc[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$stat_skill[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$numinteam[cri_long$Exp1 == 1], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 1], na.rm = T),
+                  mean(cri_team$stata[cri_team$exp == 1], na.rm = T),
+                  sd(cri_team$stata[cri_team$exp == 1], na.rm = T),
+                  mean(cri_team$degree_soc[cri_team$exp == 1], na.rm = T),
+                  sd(cri_team$degree_soc[cri_team$exp == 1], na.rm = T),
+                  mean(cri_team$stat_skill[cri_team$exp == 1], na.rm = T),
+                  sd(cri_team$stat_skill[cri_team$exp == 1], na.rm = T),
+                  mean(cri_team$numinteam[cri_team$exp == 1], na.rm = T),
+                  sd(cri_team$numinteam[cri_team$exp == 1], na.rm = T),
+                  mean(cri_team$difficult[cri_team$exp == 1], na.rm = T),
+                  sd(cri_team$difficult[cri_team$exp == 1], na.rm = T),
                   "",
                   length(cri_sums$Mistake[cri_sums$Exp == 1 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 1]),
                   length(cri_sums$Procedural[cri_sums$Exp == 1 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 1]),
@@ -654,20 +665,27 @@ desc[3:24,6] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])),"",
 
 # opaque
 
-desc[3:24,7] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])),"", 
+desc[3:31,7] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])),"", 
                   mean(cri_long$verif[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$exact[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
+                  sd(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
                   "",
                   mean(cri_cur_long$verif[cri_cur_long$Exp1 == 0], na.rm = T),
                   mean(cri_cur_long$exact[cri_cur_long$Exp1 == 0], na.rm = T),
                   mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 0], na.rm = T),
+                  sd(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 0], na.rm = T),
                   "",
-                  mean(cri_long$stata[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$degree_soc[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$stat_skill[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$numinteam[cri_long$Exp1 == 0], na.rm = T),
-                  mean(cri_long$difficult[cri_long$Exp1 == 0], na.rm = T),
+                  mean(cri_team$stata[cri_team$exp == 0], na.rm = T),
+                  sd(cri_team$stata[cri_team$exp == 0], na.rm = T),
+                  mean(cri_team$degree_soc[cri_team$exp == 0], na.rm = T),
+                  sd(cri_team$degree_soc[cri_team$exp == 0], na.rm = T),
+                  mean(cri_team$stat_skill[cri_team$exp == 0], na.rm = T),
+                  sd(cri_team$stat_skill[cri_team$exp == 0], na.rm = T),
+                  mean(cri_team$numinteam[cri_team$exp == 0], na.rm = T),
+                  sd(cri_team$numinteam[cri_team$exp == 0], na.rm = T),
+                  mean(cri_team$difficult[cri_team$exp == 0], na.rm = T),
+                  sd(cri_team$difficult[cri_team$exp == 0], na.rm = T),
                   "",
                   length(cri_sums$Mistake[cri_sums$Exp == 0 & cri_sums$Mistake != 0])/length(cri_sums$Mistake[cri_sums$Exp == 0]),
                   length(cri_sums$Procedural[cri_sums$Exp == 0 & cri_sums$Procedural != 0])/length(cri_sums$Procedural[cri_sums$Exp == 0]),
@@ -679,20 +697,27 @@ desc[3:24,7] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])),"",
 
 # pooled
 
-desc[3:24,8] <- c(sum(!is.na(cri_long$verif)),"", 
+desc[3:31,8] <- c(sum(!is.na(cri_long$verif)),"", 
                   mean(cri_long$verif, na.rm = T),
                   mean(cri_long$exact, na.rm = T),
                   mean(cri_long$deviance_abs, na.rm = T),
+                  sd(cri_long$deviance_abs, na.rm = T),
                   "",
                   mean(cri_cur_long$verif, na.rm = T),
                   mean(cri_cur_long$exact, na.rm = T),
                   mean(cri_cur_long$deviance_abs, na.rm = T),
+                  sd(cri_cur_long$deviance_abs, na.rm = T),
                   "",
-                  mean(cri_long$stata, na.rm = T),
-                  mean(cri_long$degree_soc, na.rm = T),
-                  mean(cri_long$stat_skill, na.rm = T),
-                  mean(cri_long$numinteam, na.rm = T),
-                  mean(cri_long$difficult, na.rm = T),
+                  mean(cri_team$stata, na.rm = T),
+                  sd(cri_team$stata, na.rm = T),
+                  mean(cri_team$degree_soc, na.rm = T),
+                  sd(cri_team$degree_soc, na.rm = T),
+                  mean(cri_team$stat_skill, na.rm = T),
+                  sd(cri_team$stat_skill, na.rm = T),
+                  mean(cri_team$numinteam, na.rm = T),
+                  sd(cri_team$numinteam, na.rm = T),
+                  mean(cri_team$difficult, na.rm = T),
+                  sd(cri_team$difficult, na.rm = T),
                   "",
                   length(unique(cri_sums$Team[cri_sums$Mistake != 0]))/85,
                   length(unique(cri_sums$Team[cri_sums$Procedural != 0]))/85,
@@ -762,15 +787,15 @@ cri_long_cur_pool_o <- cri_cur_long %>%
 # team-level
 
 desc[3,3:5] <- c(39,46,85)
-desc[5:7,5] <- t(cri_long_pool[1,1:3])
-desc[5:7,3] <- t(cri_long_pool_t[1,1:3])
-desc[5:7,4] <- t(cri_long_pool_o[1,1:3])
+desc[5:8,5] <- as.numeric(c(t(cri_long_pool[1,1:3]),cri_long_pool[1,9]))
+desc[5:8,3] <- as.numeric(c(t(cri_long_pool_t[1,1:3]),cri_long_pool_t[1,9]))
+desc[5:8,4] <- as.numeric(c(t(cri_long_pool_o[1,1:3]),cri_long_pool_o[1,9]))
 
-desc[9:11,5] <- t(cri_long_cur_pool[1,1:3])
-desc[9:11,3] <- t(cri_long_cur_pool_t[1,1:3])
-desc[9:11,4] <- t(cri_long_cur_pool_o[1,1:3])
+desc[10:13,5] <- as.numeric(c(t(cri_long_cur_pool[1,1:3]),cri_long_cur_pool[1,9]))
+desc[10:13,3] <- as.numeric(c(t(cri_long_cur_pool_t[1,1:3]),cri_long_cur_pool_t[1,9]))
+desc[10:13,4] <- as.numeric(c(t(cri_long_cur_pool_o[1,1:3]),cri_long_cur_pool_o[1,9]))
 
-write.csv(desc, file = here::here("results","Tbl2.csv"))
+write.csv(desc, file = here::here("results","Tbl1.csv"), row.names = F)
 
 ```
 

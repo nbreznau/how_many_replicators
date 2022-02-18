@@ -74,10 +74,15 @@ cri_team_orig <- cri_long %>%
 
 cri_team$degree <- factor(cri_team$degree, labels = c("Sociology", "Political Science", "Other"))
 cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Political Science", "Other"))
+cri_team_orig <- cri_team_orig %>%
+  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
 
 # trim outlier
 cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
 cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
+
+# make an easy file for descriptives for 03_Figures workflow
+write_rds(cri_team_orig, here::here("data","cri_team.RDS"))
 
 # merge qualitative features
 qual_out <- qual_out %>%
