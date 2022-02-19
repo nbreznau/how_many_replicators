@@ -77,6 +77,9 @@ cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Po
 cri_team_orig <- cri_team_orig %>%
   mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
 
+cri_team <- cri_team %>%
+  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
+
 # trim outlier
 cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
 cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
@@ -99,10 +102,57 @@ cri_team_orig <- cri_team_orig %>%
 
 ## What predicts replication results?
 
-### Correlations
+### Correlations by Group
 
 ```{r corr}
+cri_team_c<- cri_team %>%
+  select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
 
+cri_team_orig_c <- cri_team_orig %>%
+  select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
+
+cri_team_c_T <- cri_team_c %>%
+  subset(exp == 1) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_c_T[upper.tri(cri_team_c_T)] <- ""
+
+cri_team_c_O <- cri_team_c %>%
+  subset(exp == 0) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_c_O[upper.tri(cri_team_c_O)] <- ""
+
+cri_team_orig_c_T <- cri_team_orig_c %>%
+  subset(exp == 1) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_orig_c_T[upper.tri(cri_team_orig_c_T)] <- ""
+
+cri_team_orig_c_O <- cri_team_orig_c %>%
+  subset(exp == 0) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_orig_c_O[upper.tri(cri_team_orig_c_O)] <- ""
+
+write.csv(cri_team_c_T, here::here("results","Tbl9_1.csv"), row.names = F)
+write.csv(cri_team_c_O, here::here("results","Tbl9_2.csv"), row.names = F)
+write.csv(cri_team_orig_c_T, here::here("results","Tbl9_3.csv"), row.names = F)
+write.csv(cri_team_orig_c_O, here::here("results","Tbl9_4.csv"), row.names = F)
+
+   
 ```
 
 ### Regressions Predicting Reproducibility
@@ -110,9 +160,9 @@ cri_team_orig <- cri_team_orig %>%
 
 ```{r regs}
 # original - pooled
-O_1 <- lm(exact_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
-O_2 <- lm(verif_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
-O_3 <- lm(dev_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team_orig)
+O_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
+O_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
+O_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
 
 # original - by group
 O_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
@@ -124,9 +174,9 @@ O_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_or
 O_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
 
 # curated - pooled
-M_1 <- lm(exact_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
-M_2 <- lm(verif_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
-M_3 <- lm(dev_m ~ stata + stat_skill + difficult + factor(degree) + exp, data = cri_team)
+M_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
 
 # curated - by group
 M_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
