@@ -1,0 +1,211 @@
+Team: 50
+SOFTWARE: R
+VERSION: CURATED
+
+rm(list=ls())
+setwd("/")
+
+library(tidyverse)
+library(readr)
+library(haven)
+library(lfe)
+library(car)
+
+ZA4700 <- read_dta("ZA4700.dta")
+ZA2900 <- read_dta("ZA2900.dta")
+L2data <- read_dta("L2data.dta")
+
+ZA4700 <- ZA4700 %>% select(-ends_with("DEGR"), -ends_with("INC"), -ends_with("PRTY"),
+                            -ends_with("REG"), -ends_with("SIZE"))
+
+ISSP96 <- ZA2900 %>% select(v2, v3, v36, v39, v41, v42, v200, v201, v205, v206)
+ISSP06 <- ZA4700 %>% select(V2, V3a, V25, V28, V30, V31, sex, age, degree, wrkst)
+rm(ZA2900, ZA4700)
+
+colnames(ISSP96) <- c("ID", "code96", "Jobs", "OldAge", "Unemployed", 
+                      "Reduce", "Sex", "Age", "Educ", "Employ")
+colnames(ISSP06) <- c("ID", "code06", "Jobs", "OldAge", "Unemployed", 
+                      "Reduce", "Sex", "Age", "Educ", "Employ")
+
+country_data <- L2data[complete.cases(L2data),]
+colnames(country_data) <- c("code06", "year", "emprate", "foreignpct", "socx", "netmigpct", "country")
+country_data96 <- country_data %>% filter(year==1996)
+country_data06 <- country_data %>% filter(year==2006)
+
+rm(country_data, L2data)
+
+countrycodes96 <- data.frame( code96=c(1:4,6,8,9:10,12:28,30),
+                               countrynames=c("AUS","D-W","D-E","GB","US",
+                                              "HU", "I", "IRL", "NO", "SE", "CZ",
+                                              "SLO", "PL", "BG", "RUS", "NZ",
+                                              "CDN", "PH", "IL-J", "IL-A", "JP",
+                                              "ES", "LV", "FR", "CY", "CH"))
+                               
+countrycodes06 <- data.frame( code06=c(36,124,152,158,191,203,208,214,246,
+                                       250,2761,2762,348,372,3761,3762,392,
+                                       410,428,528,554,561,578,608,616,620,
+                                       643,703,705,710,724,752,756,8261,840,858,862),
+                              countrynames=c("AUS","CDN","CL","TW","HR","CZ",
+                                             "DK","DO","FI","FR","D-W","D-E",
+                                             "HU","IRL","IL-J","IL-A", "JP",
+                                             "KR", "LV", "NL","NZ","FLA",
+                                             "NO","PH","PL","PT","RUS","SK",
+                                             "SLO","ZA","ES","SE","CH","GB",
+                                             "US","UY","VE"))  
+
+countrycodesjoined <- inner_join(countrycodes96,countrycodes06,by=c("countrynames"))
+rm(countrycodes06, countrycodes96)
+
+b1 <- inner_join(ISSP96,countrycodesjoined,by=c("code96"))
+b1$code06 <- ifelse(b1$code06 == 2761 | b1$code06 == 2762 , 276, b1$code06)
+b <- inner_join(b1,country_data96,by=c("code06")) #Watch out for the variable to match on
+b <- b %>% select(-c("code96", "code06"))
+
+b$Educ <- as.factor(recode(b$Educ, "1:3=1;4:6=2;7=3; else=NA"))
+b$Employ <- as.factor(recode(b$Employ, "2:3=1; 4=2; 6:10=2; 5=3; 1=4; else=NA"  ))
+
+countrycodesjoined$code06 <- ifelse(countrycodesjoined$code06 == 2761 | countrycodesjoined$code06 == 2762 ,
+                                    276, countrycodesjoined$code06)
+a1 <- inner_join(ISSP06,countrycodesjoined,by=c("code06"))
+a <- inner_join(a1, country_data06, by=c("code06"))
+a <- a %>% select(-c("code96", "code06"))
+
+a$Educ <- as.factor(car::recode(a$Educ, "0:1=1;2:4=2;5=3; else=NA"))
+a$Employ <- as.factor(recode(a$Employ, "2:3=1; 4=2; 6:10=2; 5=3; 1=4; else=NA"  ))
+
+b$ID <- b$ID * 10
+
+colnames(a) <- c("ID","Jobs","OldAge","Unemployed","Reduce","Sex","Age","Educ","Employ","countrynames","year","emprate","foreignpct","socx","netmigpct","country")
+colnames(b) <- c("ID","Jobs","OldAge","Unemployed","Reduce","Sex","Age","Educ","Employ","countrynames","year","emprate","foreignpct","socx","netmigpct","country")
+write.csv(a, "acri59.csv")
+write.csv(b, "bcri59.csv")
+a <- read.csv("acri59.csv")
+b <- read.csv("bcri59.csv")
+#b <- select(b, -c("X"))
+finaldata <- rbind(a,b)
+rm(a,a1,b,b1)
+
+finaldata$Jobs <- car::recode(finaldata$Jobs, "1:2=1;3:4=0;else=NA")
+finaldata$OldAge <- car::recode(finaldata$OldAge, "1:2=1;3:4=0;else=NA")
+finaldata$Unemployed <- car::recode(finaldata$Unemployed, "1:2=1;3:4=0;else=NA")
+finaldata$Reduce <- car::recode(finaldata$Reduce, "1:2=1;3:4=0;else=NA")
+
+finaldata$Sex <- car::recode(finaldata$Sex, "1=0;2=1;else=NA")
+
+finaldata <- data.frame(finaldata)
+finaldata$year <- as.factor(finaldata$year)
+finaldata$country <- as.factor(finaldata$country)  #12 countries: but 1 is 2.
+
+finaldata <- finaldata %>%
+  mutate(Educ = as.factor(Educ),
+         Employ = as.factor(Employ),
+         Jobs = as.numeric(Jobs),
+         OldAge = as.numeric(OldAge),
+         Unemployed = as.numeric(Unemployed),
+         Reduce = as.numeric(Reduce))
+finaldata <- within(finaldata, Educ <- relevel(Educ, ref=2))
+finaldata <- within(finaldata, Employ <- relevel(Employ, ref=4))
+
+
+model11 <- glm(OldAge ~ foreignpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model11))
+summary(model1)
+model12 <- glm(Unemployed ~ foreignpct + Sex + Age + Age^2 + Educ + Employ +  year + country , data =  finaldata, family="binomial")
+exp(coef(model2))
+summary(model2)
+model13 <- glm(Reduce ~ foreignpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model3))
+summary(model3)
+model14 <- glm(Jobs ~ foreignpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model4))
+summary(model4)
+
+model15 <- glm(OldAge ~ foreignpct + socx + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model5))
+summary(model5)
+model16 <- glm(Unemployed ~ foreignpct + socx + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model6))
+summary(model6)
+model17 <- glm(Reduce ~ foreignpct +  socx + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model7))
+summary(model7)
+model18 <- glm(Jobs ~ foreignpct +  socx + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model8))
+summary(model8)
+
+model19 <- glm(OldAge ~ foreignpct + emprate  + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model9))
+summary(model9)
+model20 <- glm(Unemployed ~ foreignpct + emprate  + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model10))
+summary(model10)
+
+model21 <- glm(Reduce ~ foreignpct +  emprate  + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model11))
+summary(model11)
+model22 <- glm(Jobs ~ foreignpct +  emprate  + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model12))
+summary(model12)
+
+model23 <- glm(OldAge ~ netmigpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model13))
+summary(model13)
+model24 <- glm(Unemployed ~ netmigpct + Sex + Age + Age^2 + Educ + Employ +   year + country, data =  finaldata, family="binomial")
+exp(coef(model14))
+summary(model14)
+model25 <- glm(Reduce ~ netmigpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model15))
+summary(model15)
+model26 <- glm(Jobs ~ netmigpct + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model16))
+summary(model16)
+
+model27 <- glm(OldAge ~ netmigpct  + socx + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model17))
+summary(model17)
+model28 <- glm(Unemployed ~ netmigpct  + socx + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model18))
+summary(model18)
+model29 <- glm(Reduce ~ netmigpct  +  socx + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model19))
+summary(model19)
+model30<- glm(Jobs ~ netmigpct  +  socx + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model20))
+summary(model20)
+
+model31 <- glm(OldAge ~ netmigpct + emprate + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model21))
+summary(model21)
+model32 <- glm(Unemployed ~ netmigpct + emprate  + Sex + Age + Age^2 + Educ + Employ + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
+exp(coef(model22))
+summary(model22)
+model33 <- glm(Reduce ~ netmigpct  +  emprate  + Sex + Age + Age^2 + Educ + Employ + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model23))
+summary(model23)
+model34 <- glm(Jobs ~ netmigpct +  emprate  + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
+exp(coef(model24))
+summary(model24)
+
+
+models <- list(model11,model12,model13,model14,model15,model16 ,model17 ,model18 ,model19 ,model20 ,model21 ,model22 ,model23 ,model24 ,model25 ,model26 ,model27 ,model28 ,model29 ,model30 ,model31 ,model32 ,model33 ,model34)
+
+
+
+pacman::p_load("textreg")
+library(tidyverse)
+library(haven)
+library(foreign)
+library(MASS)
+library(openxlsx)
+library(knitr)
+library(broom)
+library(stargazer)
+library(texreg)
+htmlreg(models,
+        override.coef = lapply(models, function(x) exp(coef(x))),
+        override.se = lapply(models, function(x) coef(x)/sqrt(diag(vcov(x)))),
+        caption.above = TRUE, 
+        single.row = FALSE, stars = c(0.001,  0.01, 0.05),
+        digits = 3,
+        file = "table_team57.doc")
+

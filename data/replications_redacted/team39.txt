@@ -1,0 +1,375 @@
+Team: 39
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta", clear
+
+gen year=1996
+
+recode v3 (1=36 "AUS")(20=124 "CDN")(27=250 "FR") ///
+	(2 3=276 "DE")(10=372 "IE")(24=392 "JP")(19=554 "NZ") ///
+	(12=578 "NO")(25=724 "ES")(13=752 "SE")(30=756 "CH") ///
+	(4=826 "GB")(6=840 "USA")(else=.), gen(country)
+
+keep if country!=.
+
+recode v36 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(jobs)
+recode v41 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(unemp)
+recode v42 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(inc)
+recode v39 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(retire)
+recode v44 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(house)
+recode v38 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(health)
+
+clonevar age = v201
+gen age2 = age*age
+recode v200 (1=0 "male") (2=1 "female"), gen(sex)
+recode v202 (1=1 "married")(2=2 "widowed")(3=3 "divorced")(5=5 "not married")(else=.), gen(marital)
+
+clonevar hhsize = v273
+
+recode v274 (1 5 9 11 13 15 17 19 21 23 27=0 "no children") ///
+	(2/4 6/8 10 12 14 16 18 20 22 24 26=1 "children in household")(else=.), gen(child)
+	
+clonevar urban = v275
+
+recode v205 (2/4 = 1 "less than secondary")(5=2 "secondary") ///
+	(6 7 = 3 "higher than secondary")(else=.), gen(edu)
+
+recode v206 (2 3=1 "part-time")(1 5/10=0 "other")(else=.), gen(parttime)
+recode v206 (5=1 "unemployed")(1/3 6/10=0 "other")(else=.), gen(unemployed)
+recode v206 (6/10=1 "not in labour force")(1/3 5 =0 "other")(else=.), gen(not_lf)
+recode v213 (1=1 "self-employed")(else=0 "work for someone else"), gen (selfemp)
+gen public = 1 if v206==1 & (v212==1 | v212==2)	// public full-time
+gen private = 1 if v206==1 & v212==3	// private full-time
+
+gen inczscore=.
+levelsof country, local(cntry)
+foreach cntryval of local cntry {
+	zscore v218 if country==`cntryval', listwise
+	replace inczscore=z_v218 if country==`cntryval'
+	drop z_v218
+}
+
+recode v220 (5 6=0 "low religious attendance")(1/4=1 "high religious attendance"), gen(religious)
+
+use "ZA4700.dta", clear
+
+gen year=2006
+
+recode V3a (36=36 "AUS")(124=124 "CDN")(208=208 "DK")(246=246 "FI")(250=250 "FR") ///
+	(276=276 "DE")(372=372 "IE")(392=392 "JP")(528=528 "NL")(554 = 554 "NZ") ///
+	(578=578 "NO")(620=620 "PT")(724=724 "ES")(752=752 "SE")(756=756 "CH") ///
+	(826=826 "GB")(840=840 "USA")(else=.), gen(country)
+
+keep if country != .	
+	
+	
+recode V25 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(jobs)
+recode V30 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(unemp)
+recode V31 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(inc)
+recode V28 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(retire)
+recode V33 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(house)
+recode V27 (1 2 = 1 "should be")(3 4 = 0 "should not be"), gen(health)
+
+gen age2 = age*age
+rename sex gender
+recode gender (1=0 "male") (2=1 "female"), gen(sex)
+replace marital = . if marital==4
+clonevar hhsize = hompop
+
+recode hhcycle (1 5 9 11 13 15 17 19 21=0 "no children") ///
+	(2/4 6/8 10 12 14 16 18 20=1 "children in household")(else=.), gen(child)
+
+recode urbrural (1=1 "urban")(2 3=2 "suburb/town")(4 5=3 "rural")(else=.), gen(urban)
+
+recode degree (0/2 = 1 "less than secondary")(3=2 "secondary") ///
+	(4 5 = 3 "higher than secondary")(else=.), gen(edu)
+
+recode wrkst (2 3=1 "part-time")(1 5/10=0 "other")(else=.), gen(parttime)
+recode wrkst (5=1 "unemployed")(1/3 6/10=0 "other")(else=.), gen(unemployed)
+recode wrkst (6/10=1 "not in labour force")(1/3 5 =0 "other")(else=.), gen(not_lf)
+recode wrktype (4=1 "self-employed")(else=0 "work for someone else"), gen (selfemp)
+gen public = 1 if wrkst==1 & (wrktype==1 | wrktype==2)	// public full-time
+gen private = 1 if wrkst==1 & wrktype==3	// private full-time
+
+gen inczscore=.
+local incvars = "AU_INC CA_INC CH_INC DE_INC DK_INC ES_INC FI_INC FR_INC GB_INC IE_INC JP_INC NL_INC NO_INC NZ_INC PT_INC SE_INC US_INC" 
+foreach incvar of local incvars {
+	zscore `incvar', listwise
+	replace inczscore=z_`incvar' if z_`incvar'!=.
+	drop z_`incvar'
+}
+
+
+recode attend (6/8=0 "low religious attendance")(1/5=1 "high religious attendance"), gen(religious)
+
+
+save "issp06.dta", replace
+
+import excel "bradyfinnigan2014countrydata.xls", clear firstrow
+
+rename country country_str
+
+recode cntry (36=36 "AUS")(124=124 "CDN")(208=208 "DK")(246=246 "FI")(250=250 "FR") ///
+	(276=276 "DE")(372=372 "IE")(392=392 "JP")(528=528 "NL")(554 = 554 "NZ") ///
+	(578=578 "NO")(620=620 "PT")(724=724 "ES")(752=752 "SE")(756=756 "CH") ///
+	(826=826 "GB")(840=840 "USA")(else=.), gen(country)
+
+keep if country != .
+
+sort country year
+
+save "country_data.dta", replace
+
+use "issp96.dta", clear
+append using "issp06.dta"
+sort country year
+
+merge m:1 country year using "country_data.dta"
+
+save "issp9606.dta", replace
+
+use "issp9606.dta", clear
+
+drop if country==208 | country==246 | country==528 | country==620
+
+recode year (2006=1)(1996=0), gen(yr2006)		
+
+global depvars jobs unemp inc retire house health
+global controls c.age c.age2 i.sex c.inczscore ///
+		i.parttime i.unemployed i.not_lf i.selfemp  ///
+		i.yr2006 ib840.country 
+
+
+		
+foreach var of varlist $depvars {
+	quiet logit `var' c.foreignpct $controls , or
+	eststo `var'_m1
+	quiet logit `var' c.foreignpct c.socx $controls , or
+	eststo `var'_m2
+	quiet logit `var' c.foreignpct c.emprate $controls , or
+	eststo `var'_m3
+}
+
+esttab jobs_m1 unemp_m1 inc_m1 retire_m1 house_m1 health_m1 ///
+	using "tab4_m1.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels( foreignpct "Pct foreigners" ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+
+esttab jobs_m2 unemp_m2 inc_m2 retire_m2 house_m2 health_m2 ///
+	using "tab4_m2.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels( foreignpct "Pct foreigners" ///
+		socx "Soc. Welf. Exp." ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+esttab jobs_m3 unemp_m3 inc_m3 retire_m3 house_m3 health_m3 ///
+	using "tab4_m3.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels( foreignpct "Pct foreigners" ///
+		emprate "Empl. rate" ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+
+
+
+foreach var of varlist $depvars {
+	quiet logit `var' c.netmigpct $controls , or
+	eststo `var'_m1
+	quiet logit `var' c.netmigpct c.socx $controls , or
+	eststo `var'_m2
+	quiet logit `var' c.netmigpct c.emprate $controls , or
+	eststo `var'_m3
+	quiet logit `var' c.netmigpct c.foreignpct $controls , or
+	eststo `var'_m4
+}
+
+esttab jobs_m1 unemp_m1 inc_m1 retire_m1 house_m1 health_m1 ///
+	using "tab5_m1.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels(netmigpct "Net mig pct" ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+
+esttab jobs_m2 unemp_m2 inc_m2 retire_m2 house_m2 health_m2 ///
+	using "tab5_m2.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels(netmigpct "Net mig pct" ///
+		socx "Soc. Welf. Exp." ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+esttab jobs_m3 unemp_m3 inc_m3 retire_m3 house_m3 health_m3 ///
+	using "tab5_m3.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels(netmigpct "Net mig pct" ///
+		emprate "Empl. rate" ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+
+esttab jobs_m4 unemp_m4 inc_m4 retire_m4 house_m4 health_m4 ///
+	using "tab5_m4.rtf", replace ///
+	b(3) eform constant z(3) noparentheses drop(0.sex 0.parttime 0.unemployed ///
+	0.not_lf 0.selfemp 0.yr2006 840.country) nogaps compress ///
+	varlabels(netmigpct "Net mig pct" ///
+		emprate "Empl. rate" ///
+		age "Age" ///
+		age2 "Age squared" ///
+		1.sex "Sex" ///
+		inczscore "Income z-score" ///
+		1.parttime "Part-time" ///
+		1.unemployed "Unemployed" ///
+		1.not_lf "Not in LF" ///
+		1.selfemp "Self-Employed" ///
+		1.yr2006 "2006" ///
+		36.country "AUS" ///
+		124.country "CDN" ///
+		250.country "FR" ///
+		276.country "DE" ///
+		372.country "IE" ///
+		392.country "JP" ///
+		554.country "NZ" ///
+		578.country "NO" ///
+		724.country "ES" ///
+		752.country "SE" ///
+		756.country "CH" ///
+		826.country "GB" )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

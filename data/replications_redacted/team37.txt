@@ -1,0 +1,433 @@
+Team: 37
+Software: Stata
+Version: ORIGINAL
+
+clear
+version 14
+set more off, permanently
+
+import excel using "bradyfinnigan2014countrydata.xls", clear firstrow
+drop if year == 2006
+recode cntry (36 = 1 "Australia") (124 = 9 "Canada") (276 = 2 "Germany") ///
+(372 = 5 "Ireland") (392 = 10 "Japan") (554 = 8 "New Zealand") ///
+(578 = 6 "Norway") (724 = 11 "Spain") (752 = 7 "Sweden") (756 = 13 "Switzerland") ///
+(826 = 3 "United Kingdom") (840 = 4 "United States") (250 = 12 "France") ///
+(191 203 208 246 250 348 376  410 428 528 616 620 643 705 = .), gen(cntry1) 
+drop if cntry1 == .
+
+keep foreignpct socx emprate netmig pop socdem liberal cntry1
+gen netmigperc = 100*(netmig/pop)
+
+save "countryprep1996.dta", replace
+
+import excel using "bradyfinnigan2014countrydata.xls", clear firstrow
+drop if year == 1996
+recode cntry (36 = 1 "Australia") (124 = 9 "Canada") (276 = 2 "Germany") ///
+(372 = 5 "Ireland") (392 = 10 "Japan") (554 = 8 "New Zealand") ///
+(578 = 6 "Norway") (724 = 11 "Spain") (752 = 7 "Sweden") (756 = 13 "Switzerland") ///
+(826 = 3 "United Kingdom") (840 = 4 "United States") (250 = 12 "France") ///
+(191 203 208 246 250 348 376  410 428 528 616 620 643 705 = .), gen(cntry1) 
+drop if cntry1 == .
+
+keep foreignpct socx emprate netmig pop socdem liberal cntry1
+gen netmigperc = 100*(netmig/pop)
+
+save "countryprep2006.dta", replace
+
+
+use "ZA2900.dta", clear
+recode v3 (1=1 "Australia") (2 3 = 2 "Germany") (4 5 = 3 "United Kingdom") ///
+(6 = 4 "United States") (10 = 5 "Ireland")(12 = 6 "Norway") (13 = 7 "Sweden") ///
+(19 = 8 "New Zealand") (20 = 9 "Canada") (24 = 10 "Japan") (25 = 11 "Spain") ///
+(27 = 12 "France") (30 = 13 "Switzerland") ///
+(7 8 9 11 14 15 16 17 18 21 22 23 26 28 = .), gen(cntry1)
+drop if cntry1 == .
+
+foreach var in v36 v41 v42 v39 v44 v38 {
+recode `var' 1 2 = 1  3 4 = 0
+label define dependent 1"should be" 0"should not be", replace
+label value `var' dependent
+}
+
+renames v36 v41 v42 v39 v44 v38 \ jobs unemployment income retirement housing healthcare
+
+rename v201 age
+gen agesqr = age*age
+rename v200 female
+recode female 2=1 1=0
+
+recode v205 (1 2 3 4 = 1 "less than secondary") (5 = 2 "Secondary") (6 7 = 3 "University or above"), ///
+gen(edu)
+
+gen empl = v206
+recode empl 1 4 8= 1 2 3=2  5 = 3  10 6 7 9 = 4
+replace empl = 5 if v213 == 1
+label define empl ///
+1 "full-time"  ///
+2 "part time" ///
+3 "unemployed"  ///
+4 "not in the labor force" ///
+5 "self-employed" ///
+, replace
+label value empl empl
+ 
+foreach i of num 1/13 {
+sum v218 if cntry1 == `i'
+gen zincome`i' = (v218-r(mean))/r(sd) if cntry1 == `i'
+recode zincome`i' . = 0
+} 
+
+gen zincome = zincome1 +zincome2+zincome3 +zincome4+ zincome5 +zincome6+ zincome7+ ///
+zincome8+zincome9+ zincome10+ zincome11+ zincome12+ zincome13
+
+gen year = 1996
+
+recode v202 (1 4 = 1 "married") (5=2 "never married") (3=3 "Divorced") (2=4 "Widowed"), gen(famstat) 
+
+rename v2 id
+
+merge m:1 cntry1 using "countryprep1996.dta", keep(1 3)
+
+save "prep1996.dta", replace
+
+use "ZA4700.dta", clear
+recode V3a (36 = 1 "Australia") (124 = 9 "Canada") (276 = 2 "Germany") ///
+(372 = 5 "Ireland") (392 = 10 "Japan") (554 = 8 "New Zealand") ///
+(578 = 6 "Norway") (724 = 11 "Spain") (752 = 7 "Sweden") (756 = 13 "Switzerland") ///
+(826 = 3 "United Kingdom") (840 = 4 "United States") (250 = 12 "France") ///
+(191 203 208 246 250 348 376  410 428 528 616 620 643 705 152 158 ///
+214 608 710 858 862 = .), gen(cntry1) 
+drop if cntry1 == .
+
+foreach var in V25 V30 V31 V28 V33 V27 {
+recode `var' 1 2 = 1  3 4 = 0
+label define dependent 1"should be" 0"should not be", replace
+label value `var' dependent
+} 
+
+renames V25 V30 V31 V28 V33 V27 
+
+gen agesqr = age*age
+rename sex female
+recode female 2=1 1=0
+
+recode degree (0 1 2 = 1 "less than secondary") (3 = 2 "Secondary") (4 5 = 3 "University or above"), ///
+gen(edu)
+
+gen empl = wrkst
+recode empl 1 4 8= 1 2 3=2  5 = 3  10 6 7 9 = 4
+replace empl = 5 if wrktype == 4
+label define empl ///
+1 "full-time"  ///
+2 "part time" ///
+3 "unemployed"  ///
+4 "not in the labor force" ///
+5 "self-employed" ///
+, replace
+label value empl empl
+ 
+foreach var in VE_RINC UY_RINC US_RINC TW_RINC CH_RINC SE_RINC ES_RINC KR_RINC ///
+ZA_RINC SI_RINC RU_RINC PT_RINC PL_RINC PH_RINC NO_RINC NZ_RINC NL_RINC LV_RINC ///
+JP_RINC IL_RINC IE_RINC HU_RINC GB_RINC DE_RINC FI_RINC FR_RINC DO_RINC DK_RINC ///
+CZ_RINC HR_RINC CL_RINC CA_RINC AU_RINC {
+recode `var' . = 0
+}
+
+gen income_cn = VE_RINC +UY_RINC +US_RINC+ TW_RINC+ CH_RINC+ SE_RINC +ES_RINC +KR_RINC ///
++ZA_RINC +SI_RINC +RU_RINC +PT_RINC +PL_RINC +PH_RINC +NO_RINC +NZ_RINC +NL_RINC +LV_RINC ///
++JP_RINC +IL_RINC +IE_RINC +HU_RINC+GB_RINC +DE_RINC+ FI_RINC+ FR_RINC +DO_RINC +DK_RINC ///
++CZ_RINC +HR_RINC +CL_RINC +CA_RINC +AU_RINC
+
+foreach i of num 1/13 {
+sum income_cn if cntry1 == `i'
+gen zincome`i' = (income-r(mean))/r(sd) if cntry1 == `i'
+recode zincome`i' . = 0
+} 
+
+gen zincome = zincome1 +zincome2+zincome3 +zincome4+ zincome5 +zincome6+ zincome7+ ///
+zincome8+zincome9+ zincome10+ zincome11+ zincome12+ zincome13
+
+gen year = 2006
+
+rename V2 id
+
+recode marital (1 4 = 1 "married") (5=2 "never married") (3=3 "Divorced") (2=4 "Widowed"), gen(famstat) 
+
+merge m:1 cntry1 using "countryprep2006.dta", keep(1 3)
+save "prep2006.dta", replace
+
+use "prep2006.dta", clear
+append using "prep1996.dta"
+
+
+eststo m1: logit jobs foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+
+esttab m1 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m2: logit jobs foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m2 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m3: logit jobs foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m3 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+
+eststo m4:logit unemployment foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m4 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m5: logit unemployment foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m5 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m6: logit unemployment foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m6 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m7: logit income foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m7 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m8: logit income foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m8 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m9: logit income foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m9 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m10: logit retirement foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m10 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m11: logit retirement foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m11 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m12: logit retirement foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m12 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m13: logit housing foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m13 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m14: logit housing foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m14 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m15: logit housing foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m15 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+
+eststo m16: logit healthcare foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m16 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m17: logit healthcare foreignpct socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m17 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m18: logit healthcare foreignpct emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m18 using "table4.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+
+
+eststo m1: logit jobs netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m1 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m2: logit jobs netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m2 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m3: logit jobs netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m3 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m4: logit jobs netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m4 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+				
+				
+eststo m5: logit unemployment netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m5 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m6: logit unemployment netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m6 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m7: logit unemployment netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m7 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m8: logit unemployment netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m8 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+				
+				
+				
+eststo m9: logit income netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m9 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m10: logit income netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m10 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m11: logit income netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m11 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m12: logit income netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m12 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace		
+				
+				
+
+eststo m13: logit retirement netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m13 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m14: logit retirement netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m14 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m15: logit retirement netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m15 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m16: logit retirement netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m16 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace		
+				
+
+				
+eststo m17: logit housing netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m17 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m18: logit housing netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m18 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m19: logit housing netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m19 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m20: logit housing netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m20 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace		
+				
+
+
+
+eststo m21: logit healthcare netmigperc age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m21 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m22: logit healthcare netmigperc socx age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m22 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+
+eststo m23: logit healthcare netmigperc emprate age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m23 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace
+				
+eststo m24: logit healthcare netmigperc foreignpct age agesqr female ib(2).edu i.empl zincome i.year i.cntry1, or
+esttab m24 using "table5.rtf", eform ///
+				varwidth(15) modelwidth(15) ///
+				legend label varlabels(_cons Constant) ///
+				pr2 constant replace	
+
+
+

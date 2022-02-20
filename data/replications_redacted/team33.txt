@@ -1,0 +1,250 @@
+Team: 33
+Software: Stata
+Version: ORIGINAL
+
+clear all
+version 15
+
+use "ZA2900.dta", clear
+numlabel _all, add
+
+gen year = 1996
+label var year "year of data collection"
+
+tab v3
+recode v3 ///
+	(1   =  36) ///
+	(20  = 124) ///
+	(27  = 250) ///
+	(2 3 = 276) ///
+	(10  = 372) ///
+	(24  = 392) ///
+	(19  = 554) ///
+	(12  = 578) ///
+	(25  = 724) ///
+	(13  = 752) ///
+	(30  = 756) ///
+	(4 5 = 826) ///
+	(6   = 840) ///
+	(else = .) ///
+	, gen(country)
+
+label define country ///
+	36  "Australia" ///
+	124 "Canada" ///
+	250 "France" ///
+	276 "Germany" ///
+	372 "Ireland" ///
+	392 "Japan" ///
+	554 "New Zealand" ///
+	578 "Norway" ///
+	724 "Spain" ///
+	752 "Sweden" ///
+	756 "Switzerland" ///
+	826 "United Kingdom" ///
+	840 "United States" 
+label values country country
+numlabel country, add
+drop if country == .
+label var country "country (ISO 3166)"
+
+recode v39 (1 2 = 1) (3 4 = 0) (. = .), gen(old_age)
+label variable old_age "Old age care"
+recode v41 (1 2 = 1) (3 4 = 0) (. = .), gen(unemployed)
+label variable unemployed "Unemployed"
+recode v42 (1 2 = 1) (3 4 = 0) (. = .), gen(income)
+label variable income "Reduce income differences"
+recode v36 (1 2 = 1) (3 4 = 0) (. = .), gen(jobs)
+label variable jobs "Jobs"
+
+recode v200 (1 = 0) (2 = 1) (. = .), gen(female)
+label var female "Female"
+
+gen age = v201
+label var age "Age (years)"
+
+recode v205 (2 3 4 = 1) (5 6 = 2) (7 = 3) (1 . = .), gen(education) 
+label define education ///
+	1 "Primary or less" ///
+	2 "Secondary" ///
+	3 "University or more" 
+label values education education
+label var education "education (3 categories)"
+
+recode v206 (1 = 1) (2 3 = 2) (5 = 3) (4 6 7 8 9 10 = 4) (. = .), gen(employment)  
+label define employment ///
+	1 "Full time" ///
+	2 "Part time" ///
+	3 "Active unemployed" ///
+	4 "Not active"
+label values employment employment
+tab v206 employment, mis
+label var employment "employment (4 categories)"
+
+sum v215 if v206 == 2, d // part-time
+sum v215 if v206 == 3, d // less than part-time
+sum v215 if v206 == 4, d // helping family member
+
+keep year country old_age unemployed income jobs female age education employment
+compress
+save "prepared_1996.dta", replace
+
+use "ZA4700.dta", clear
+numlabel _all, add
+
+gen year = 2006
+label var year "year of data collection"
+
+tab V3a
+gen country = V3a
+
+label define country ///
+	36  "Australia" ///
+	124 "Canada" ///
+	250 "France" ///
+	276 "Germany" ///
+	372 "Ireland" ///
+	392 "Japan" ///
+	554 "New Zealand" ///
+	578 "Norway" ///
+	724 "Spain" ///
+	752 "Sweden" ///
+	756 "Switzerland" ///
+	826 "United Kingdom" ///
+	840 "United States" 
+label values country country
+numlabel country, add
+label var country "country (ISO 3166)"
+
+
+egen sample = anymatch(country), values(36 124 250 276 372 392 554 578 724 752 756 826 840)
+keep if sample
+drop sample
+
+recode V28 (1 2 = 1) (3 4 = 0) (. = .), gen(old_age)
+label variable old_age "Old age care"
+recode V30 (1 2 = 1) (3 4 = 0) (. = .), gen(unemployed)
+label variable unemployed "Unemployed"
+recode V31 (1 2 = 1) (3 4 = 0) (. = .), gen(income)
+label variable income "Reduce income differences"
+recode V25 (1 2 = 1) (3 4 = 0) (. = .), gen(jobs)
+label variable jobs "Jobs"
+
+recode sex (1 = 0) (2 = 1) (. = .), gen(female)
+label var female "Female"
+
+
+label var age "Age (years)"
+
+recode degree (0 1 = 1) (2 3 4 = 2) (5 = 3) (. = .), gen(education) 
+label define education ///
+	1 "Primary or less" ///
+	2 "Secondary" ///
+	3 "University or more" 
+label values education education
+
+label var education "education (3 categories)"
+
+recode wrkst (1 = 1) (2 3 = 2) (5 = 3) (4 6 7 8 9 10 = 4) (. = .), gen(employment) 
+label define employment ///
+	1 "Full time" ///
+	2 "Part time" ///
+	3 "Active unemployed" ///
+	4 "Not active"
+label values employment employment
+
+keep year country old_age unemployed income jobs female age education employment
+compress
+save "prepared_2006.dta", replace
+
+use "L2data.dta", clear
+
+drop if missing(emprate, foreignpct, socx, netmigpct)
+
+rename country country_old
+gen country = cntry
+label define country ///
+	36  "Australia" ///
+	124 "Canada" ///
+	208 "Denmark" ///
+	246 "Finland" ///
+	250 "France" ///
+	276 "Germany" ///
+	372 "Ireland" ///
+	392 "Japan" ///
+	528 "Netherlands" ///
+	554 "New Zealand" ///
+	578 "Norway" ///
+	620 "Portugal" ///
+	724 "Spain" ///
+	752 "Sweden" ///
+	756 "Switzerland" ///
+	826 "United Kingdom" ///
+	840 "United States" 
+label values country country
+numlabel country, add
+
+drop country_old
+
+egen sample = anymatch(country), values(36 124 250 276 372 392 554 578 724 752 756 826 840)
+keep if sample
+drop sample
+
+compress
+save "prepared_level2.dta", replace
+
+use "prepared_1996.dta", clear
+append using "prepared_2006.dta"
+merge m:1 country year using "prepared_level2.dta"
+drop _merge cntry
+
+misstable sum, all
+egen miss = rowmiss(_all)
+gen sample = (miss == 0)
+misstable sum if sample == 1, all
+	
+compress
+save "finaldata.dta", replace
+
+use "finaldata.dta", clear
+	
+global depvar = "old_age unemployed income jobs"
+global l1covar = "i.female c.age##c.age i.education i.employment i.country i.year"
+	
+
+preserve
+drop if sample == 0
+
+foreach v of varlist $depvar {	
+	qui: logit `v' c.foreignpct 			$l1covar
+	estimates store `v'
+	qui: logit `v' c.foreignpct c.socx 		$l1covar
+	estimates store `v'2
+	qui: logit `v' c.foreignpct c.emprate 	$l1covar
+	estimates store `v'3
+	qui: logit `v' c.netmigpct 				$l1covar
+	estimates store `v'4
+	qui: logit `v' c.netmigpct c.socx		$l1covar
+	estimates store `v'5
+	qui: logit `v' c.netmigpct c.emprate	$l1covar
+	estimates store `v'6
+}
+restore
+
+forvalues x=2/6 {
+	global depvar`x' = "old_age`x' unemployed`x' income`x' jobs`x'"	
+}
+
+global confg = "z label nobaselevel nonote nonum b(3) t(3) star(* 0.05 ** 0.01 *** 0.001) mtitle($depvar) compress eform constant"
+
+esttab $depvar, $confg 
+esttab $depvar2, $confg
+esttab $depvar3, $confg
+esttab $depvar4, $confg
+esttab $depvar5, $confg
+esttab $depvar6, $confg
+
+esttab $depvar $depvar2 $depvar3 using table1.csv, $confg order(foreignpct socx emprate netmigpct) replace
+esttab $depvar4 $depvar5 $depvar6 using table2.csv, $confg order(foreignpct socx emprate netmigpct) replace
+
+

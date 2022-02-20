@@ -1,0 +1,187 @@
+Team: 77
+Software: STATA
+Version: CURATED 
+
+clear all 
+use "L2data.dta", clear
+
+rename country countrylabel
+clonevar country=cntry
+
+lab var foreignpct "Immigrant Stock"
+lab var netmigpct "Change in Immigrant Stock"
+lab var socx "Social Welfare Expenditures"
+lab var emprate "Employment Rate"
+
+sort country year
+save "macro.dta", replace
+
+use "ZA2900.dta", clear
+numlabel, add
+
+clonevar id_96=v2
+gen year=1996
+recode v3 (1=36) (2/3=276) (4=826) (5=826) (6=840) (8=348) (9=380 "Italy") (10=372) (11=528) (12=578) (13=752) ///
+(14=203) (15=705) (16=616) (17=100 "Bulgaria") (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=196 "Cyprus") (30=756), gen(country)
+
+gen oldagecare=inlist(v39, 1, 2)
+replace oldagecare=. if v39==.
+lab var oldagecare "Old Age Care"
+
+gen unemployed=inlist(v41, 1, 2)
+replace unemployed=. if v41==.
+label var unemployed "Unemployed"
+
+gen income=inlist(v42, 1, 2)
+replace income=. if v42==.
+label var income "Reduce Income Differences"
+
+gen jobs=inlist(v36, 1, 2)
+replace jobs=. if v36==.
+label var jobs "Jobs"
+
+gen female=1 if v200==2
+replace female=0 if v200==1
+lab var female "Female"
+lab def sex 0"male" 1"female"
+lab val female sex
+
+gen age=v201
+lab var age "Age"
+
+gen education=1 if inlist(v205,2,3,4)		
+replace education=2 if inlist(v205,5,6)
+replace education=3 if v205==7
+lab var education "Education"
+lab def education 1"Primary or less" 2"Secondary" 3"University or more"
+lab val education education
+
+gen employment=1 if v206==1 
+replace employment=2 if inlist(v206,2,3)	
+replace employment=3 if inlist(v206,4,6,7,8,9,10) 
+replace employment=4 if v206==5		
+lab var employment "Employment"
+lab def employment 1"Full-time" 2"Part-time" 3"Not active" 4"Active unemployed"
+lab val employment employment
+tab v206 employment, m
+
+keep id_96 year country oldagecare unemployed income job female age education employment
+sort country
+save "ISSP1996.dta", replace
+
+use "ZA4700.dta", clear
+
+clonevar id_06=V2
+clonevar country=V3a
+gen year=2006
+
+numlabel, add
+gen oldagecare=inlist(V28, 1, 2)
+replace oldagecare=. if V28==.
+lab var oldagecare "Old Age Care"
+
+gen unemployed=inlist(V30, 1, 2)
+replace unemployed=. if V30==.
+label var unemployed "Unemployed"
+
+gen income=inlist(V31, 1, 2)
+replace income=. if V31==.
+label var income "Reduce Income Differences"
+
+gen jobs=inlist(V25, 1, 2)
+replace jobs=. if V25==.
+label var jobs "Jobs"
+
+gen female=1 if sex==2
+replace female=0 if sex==1
+lab var female "Female"
+lab def sex 0"male" 1"female"
+lab val female sex
+lab var age "Age"
+
+gen education=1 if inlist(degree,0,1,2)		
+replace education=2 if inlist(degree, 3,4) 
+replace education=3 if degree==5 
+replace education=. if inlist(educyrs, 95, 96) 
+lab var education "Education"
+lab def education 1"Primary or less" 2"Secondary" 3"University or more"
+lab val education education
+
+gen employment=1 if wrkst==1
+replace employment=2 if inlist(wrkst,2,3)	
+replace employment=3 if inlist(wrkst,4,6,7,8,9,10) 
+replace employment=4 if wrkst==5		
+lab var employment "Employment"
+lab def employment 1"Full-time" 2"Part-time" 3"Not active" 4"Active unemployed"
+lab val employment employment
+
+keep id_06 year country oldagecare unemployed income job female age education employment
+sort country
+save "ISSP2006.dta", replace
+
+append using "ISSP1996.dta"
+
+sort country year
+
+merge m:1 country year using "macro.dta"
+bysort _merge: tab country year, m
+
+drop if _merge==1
+drop if _merge==2
+drop if emprate==. | foreignpct==. | socx==. | netmigpct==.
+drop if inlist(country, 191, 208, 246, 410, 528, 620)
+
+gen cyid=country
+replace cyid=cyid+1000 if year==2006
+
+egen varmiss=rowmiss(oldagecare unemployed income job female age education employment)
+drop if varmiss>0
+
+gen c_age=age-r(mean)
+lab var c_age "age (centered)"
+
+global ilcontrols "female c.c_age##c.c_age i.b2.education i.b1.employment i.country i.year, or cluster(country)" 
+
+local i=1
+foreach var in oldagecare unemployed income job {
+	logit `var' foreignpct $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+	
+local i=5
+foreach var in oldagecare unemployed income job {
+	logit `var' foreignpct socx $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+		
+local i=9
+foreach var in oldagecare unemployed income job {
+	logit `var' foreignpct emprate $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+	
+local i=13
+foreach var in oldagecare unemployed income job {
+	logit `var' netmigpct $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+
+local i=17
+foreach var in oldagecare unemployed income job {
+	logit `var' netmigpct socx $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+
+local i=21
+foreach var in oldagecare unemployed income job {
+	logit `var' netmigpct emprate $ilcontrols
+	estimates store M_`i'
+	local i=`i'+1
+	}
+	
+esttab M* using table1.csv, eform label z replace	

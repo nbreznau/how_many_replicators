@@ -1,0 +1,287 @@
+Team: 61
+Software: Stata
+Version: Original
+
+use "ZA2900.dta", clear
+
+lab def country1996 1 "AU" 2 "DE" 3 "DE" 4 "GB" 6 "US" 8 "HU" 9 "IT" 10 "IE" 12 "NO" 13 "SE" 14 "CZ" 15 "SI" ///
+	16 "PL" 17 "BG" 18 "RU" 19 "NZ" 20 "CA" 21 "PH" 22 "IL" 23 "IL" 24 "JP" 25 "ES" 26 "LV" 27 "FR" ///
+	28 "CY" 30 "CH"
+	
+gen country1996 = v3	
+lab val country1996 country1996
+
+decode country1996, gen(iso2)
+
+kountry iso2, from(iso2c) to(iso3n)
+rename _ISO3N_ cntry
+
+
+recode v36 (1 2 = 1) (3 4 = 0), gen(govjobs)
+recode v38 (1 2 = 1) (3 4 = 0), gen(govsick)
+recode v39 (1 2 = 1) (3 4 = 0), gen(govold)
+recode v41 (1 2 = 1) (3 4 = 0), gen(govunempl)
+recode v42 (1 2 = 1) (3 4 = 0), gen(govincome)
+recode v44 (1 2 = 1) (3 4 = 0), gen(govhousing)
+
+
+
+gen respid = v2
+gen weight = v325
+
+gen age = v201
+gen age_sq = age * age
+recode v200 (1=0) (2=1), gen(female)
+
+recode v202 (1 3 4 5 = 0) (2 = 1), gen(marital_widowed)
+recode v202 (1 2 5 = 0) (3 4 = 1), gen(marital_divorced) // separated added to divorced
+recode v202 (1 2 3 4 = 0) (5 = 1), gen(marital_notmarried)
+
+recode v205 (1 2 3 4 = 1) (5 6 7 = 0), gen(educ_incompl)
+recode v205 (7 = 1) (1 2 3 4 5 6 = 0), gen(educ_higher)
+
+gen hhsize = v273
+
+recode v274 (2 3 4 6 7 8 10 12 14 16 18 20 22 24 26 = 1) ///
+	(1 5 9 11 13 15 17 19 21 23 27 = 0) (95 = .), gen(hhkids)
+
+recode v275 (2=1) (1 3 = 0), gen(suburban)
+recode v275 (3=1) (1 2 = 0), gen(rural)	
+
+recode v206 (2 3 = 1) (1 4 5 6 7 8 9 10 = 0), gen(empl_parttime) // less than part-time added to part-time
+recode v206 (5 = 1) (1 2 3 4 6 7 8 9 10 = 0), gen(empl_unempl)
+recode v206 (4 6 7 8 9 10 = 1) (1 2 3 5 = 0), gen(empl_notinlf)
+recode v213 (1 = 1) (2 = 0), gen(empl_selfempl)
+	recode empl_selfempl (.=0) if empl_parttime != .
+	replace empl_parttime = 0 if empl_selfempl == 1 
+	replace empl_unempl = 0 if empl_selfempl == 1 
+	replace empl_notinlf = 0 if empl_selfempl == 1 
+
+gen zincome = .
+levelsof cntry if v218 != ., local(surveys)
+foreach s of local surveys {
+	di "`s'"
+	egen zincome_1 = std(v218) if cntry == `s'
+		replace zincome = zincome_1 if cntry == `s'
+		drop zincome_1			
+}	
+
+gen ln_zincome = ln(zincome +1)
+
+recode v220 (4 3 2 1 = 1) (5 6 = 0), gen(rel_high)
+recode v220 (6 4 3 2 1 = 0) (5 = 1), gen(rel_low)
+
+***
+keep respid weight country1996 iso2 cntry govjobs govsick govold govunempl govincome govhousing ///
+	educ_incompl educ_higher marital_widowed marital_divorced marital_notmarried female ///
+	age age_sq hhkids suburban rural hhsize empl_parttime empl_unempl empl_notinlf ///
+	empl_selfempl zincome ln_zincome rel_low rel_high
+	
+save "ISSP_1996.dta", replace
+***
+
+
+*** Cleaning ISSP 2006 ***
+
+use "ZA4700.dta", clear
+
+gen cntry = V3a
+
+
+
+recode V25 (1 2 = 1) (3 4 = 0), gen(govjobs)
+recode V27 (1 2 = 1) (3 4 = 0), gen(govsick)
+recode V28 (1 2 = 1) (3 4 = 0), gen(govold)
+recode V30 (1 2 = 1) (3 4 = 0), gen(govunempl)
+recode V31 (1 2 = 1) (3 4 = 0), gen(govincome)
+recode V33 (1 2 = 1) (3 4 = 0), gen(govhousing)
+
+*** Individual-level variables
+
+gen respid = V2
+
+gen age_sq = age * age
+recode sex (1=0) (2=1), gen(female)
+
+recode marital (1 3 4 5 = 0) (2 = 1), gen(marital_widowed)
+recode marital (1 2 5 = 0) (3 4 = 1), gen(marital_divorced) // separated added to divorced
+recode marital (1 2 3 4 = 0) (5 = 1), gen(marital_notmarried)
+
+recode degree (1 2 = 1) (3 4 5 = 0), gen(educ_incompl)
+recode degree (5 = 1) (1 2 3 4 = 0), gen(educ_higher)
+
+gen hhsize = hompop
+
+recode hhcycle (2 3 4 6 7 8 10 12 14 16 18 20 22 24 26 28 = 1) ///
+	(1 5 9 11 13 15 17 19 21 23 25 = 0) (95 = .), gen(hhkids)
+
+recode urbrural (2=1) (1 3 4 5 = 0), gen(suburban)
+recode urbrural (4 5 = 1) (1 2 3 = 0), gen(rural)
+
+recode wrkst (2 3 = 1) (1 4 5 6 7 8 9 10 = 0), gen(empl_parttime)
+recode wrkst (5 = 1) (1 2 3 4 6 7 8 9 10 = 0), gen(empl_unempl)
+recode wrkst (4 6 7 8 9 10 = 1) (1 2 3 5 = 0), gen(empl_notinlf)
+recode wrktype (4 = 1) (1 2 3 6 = 0), gen(empl_selfempl)
+	recode empl_selfempl (.=0) if empl_parttime != .
+	replace empl_parttime = 0 if empl_selfempl == 1 
+	replace empl_unempl = 0 if empl_selfempl == 1 
+	replace empl_notinlf = 0 if empl_selfempl == 1 	
+
+egen income = rowtotal(AU_INC-ZA_INC), missing
+	
+gen zincome = .
+levelsof cntry if income != ., local(surveys)
+foreach s of local surveys {
+	di "`s'"
+	egen zincome_1 = std(income) if cntry == `s'
+		replace zincome = zincome_1 if cntry == `s'
+		drop zincome_1			
+}	
+
+gen ln_zincome = ln(zincome +1)
+
+recode attend (5 4 3 2 1 = 1) (6 7 8 = 0), gen(rel_high)
+recode attend (8 5 4 3 2 1 = 0) (6 7 = 1), gen(rel_low)
+
+***
+keep respid weight cntry govjobs govsick govold govunempl govincome govhousing ///
+	educ_incompl educ_higher marital_widowed marital_divorced marital_notmarried female ///
+	age age_sq hhkids suburban rural hhsize empl_parttime empl_unempl empl_notinlf ///
+	empl_selfempl zincome ln_zincome rel_low rel_high
+	
+save "ISSP_2006.dta", replace
+***
+
+use "ISSP_1996.dta", clear
+gen year = 1996
+append using "ISSP_2006.dta"
+recode year (.=2006)
+
+
+gen sample13 = 1 if inlist(cntry, 36, 124, 250, 276, 372, 392, 554, ///
+	578, 724, 752, 756, 826, 840)
+	
+save "ISSP_merged.dta", replace
+
+merge m:1 cntry year using "\CRI BandF Shared Data Folder\bradyfinnigan2014countrydata.dta"
+drop if _merge==2
+drop _merge
+
+save "ISSP_merged_cntry.dta", replace
+
+kountry cntry, from(iso3n) to(iso2c)
+
+egen cntry_year = concat(_ISO2C_ year)
+
+
+/* WITH WEIGHTS
+
+local controls "age age_sq female educ_incompl educ_higher empl_parttime empl_unempl empl_notinlf empl_selfempl zincome"
+foreach var of varlist govjobs govunempl govincome govold govhousing govsick {
+
+logit `var' foreignpct `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m4_1_`var'
+	
+logit `var' foreignpct socx `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m4_2_`var'
+	
+logit `var' foreignpct emprate `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m4_3_`var'
+}	
+
+esttab m4_1_govjobs m4_1_govunempl m4_1_govincome m4_1_govold m4_1_govhousing m4_1_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m4_2_govjobs m4_2_govunempl m4_2_govincome m4_2_govold m4_2_govhousing m4_2_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m4_3_govjobs m4_3_govunempl m4_3_govincome m4_3_govold m4_3_govhousing m4_3_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+
+***
+
+local controls "age age_sq female educ_incompl educ_higher empl_parttime empl_unempl empl_notinlf empl_selfempl zincome"
+foreach var of varlist govjobs govunempl govincome govold govhousing govsick {
+
+logit `var' netmigpct `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m5_1_`var'
+	
+logit `var' netmigpct socx `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m5_2_`var'
+	
+logit `var' netmigpct emprate `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m5_3_`var'
+	
+logit `var' netmigpct foreignpct `controls' i.cntry i.year if sample13 == 1 [pw = weight], or
+	est store m5_4_`var'
+}	
+
+esttab m5_1_govjobs m5_1_govunempl m5_1_govincome m5_1_govold m5_1_govhousing m5_1_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_2_govjobs m5_2_govunempl m5_2_govincome m5_2_govold m5_2_govhousing m5_2_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_3_govjobs m5_3_govunempl m5_3_govincome m5_3_govold m5_3_govhousing m5_3_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_4_govjobs m5_4_govunempl m5_4_govincome m5_4_govold m5_4_govhousing m5_4_govsick, z eform ///
+	scalars(ll N) b(%4.3f) 	
+*/	
+	
+	
+*** WITHOUT WEIGHTS
+
+local controls "age age_sq female educ_incompl educ_higher empl_parttime empl_unempl empl_notinlf empl_selfempl zincome"
+foreach var of varlist govjobs govunempl govincome govold govhousing govsick {
+
+logit `var' foreignpct `controls' i.cntry i.year if sample13 == 1 , or
+	est store m4_1_`var'_nw
+	
+logit `var' foreignpct socx `controls' i.cntry i.year if sample13 == 1 , or
+	est store m4_2_`var'_nw
+	
+logit `var' foreignpct emprate `controls' i.cntry i.year if sample13 == 1 , or
+	est store m4_3_`var'_nw
+}	
+
+esttab m4_1_govjobs_nw m4_1_govunempl_nw m4_1_govincome_nw m4_1_govold_nw m4_1_govhousing_nw m4_1_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m4_2_govjobs_nw m4_2_govunempl_nw m4_2_govincome_nw m4_2_govold_nw m4_2_govhousing_nw m4_2_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m4_3_govjobs_nw m4_3_govunempl_nw m4_3_govincome_nw m4_3_govold_nw m4_3_govhousing_nw m4_3_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+
+local controls "age age_sq female educ_incompl educ_higher empl_parttime empl_unempl empl_notinlf empl_selfempl zincome"
+foreach var of varlist govjobs govunempl govincome govold govhousing govsick {
+
+logit `var' netmigpct `controls' i.cntry i.year if sample13 == 1 , or
+	est store m5_1_`var'_nw
+	
+logit `var' netmigpct socx `controls' i.cntry i.year if sample13 == 1 , or
+	est store m5_2_`var'_nw
+	
+logit `var' netmigpct emprate `controls' i.cntry i.year if sample13 == 1 , or
+	est store m5_3_`var'_nw
+	
+logit `var' netmigpct foreignpct `controls' i.cntry i.year if sample13 == 1 , or
+	est store m5_4_`var'_nw
+}	
+
+esttab m5_1_govjobs_nw m5_1_govunempl_nw m5_1_govincome_nw m5_1_govold_nw m5_1_govhousing_nw m5_1_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_2_govjobs_nw m5_2_govunempl_nw m5_2_govincome_nw m5_2_govold_nw m5_2_govhousing_nw m5_2_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_3_govjobs_nw m5_3_govunempl_nw m5_3_govincome_nw m5_3_govold_nw m5_3_govhousing_nw m5_3_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 
+	
+esttab m5_4_govjobs_nw m5_4_govunempl_nw m5_4_govincome_nw m5_4_govold_nw m5_4_govhousing_nw m5_4_govsick_nw, z eform ///
+	scalars(ll N) b(%4.3f) 	
+	
+	
+	

@@ -1,0 +1,158 @@
+Team: 74 
+Software: SPSS
+Version: ORIGINAL
+
+GET 
+  STATA FILE='ZA4700.dta'.
+DATASET NAME DataSet4 WINDOW=FRONT.
+SAVE OUTFILE ='ZA4700_1.sav'.
+
+GET FILE='ZA4700_1.sav'.
+DATASET NAME DataSet4 WINDOW=FRONT.
+
+recode v28 v30 v31 v25  (1 thru 2 = 1) (3 thru 4 = 0) INTO  Oldagecare  Unemployment Redincomdiff Jobs    .
+VALUE LABELS v28 v30 v31 v25 
+    1 'affirmative'
+    0 'non affirmative'.
+EXECUTE.
+
+compute age_sq = age * age.
+recode degree (0 thru 2 = 11) (3 thru 5 = 12) .
+VALUE LABELS degree 
+    11 'primary or less'
+    12 'secondary and university or more'.
+
+compute emplcat = 0.
+if wrkst = 1 emplcat =  4.
+if (wrkst = 2 or wrkst = 3) emplcat = 1.
+if (wrkst = 4) emplcat = 1.
+if (wrkst = 4 and wrkhrs ge 35 and wrkhrs lt 97) emplcat = 4.
+if (wrkst = 4 and wrkhrs lt 35 or wrkhrs ge 97) emplcat = 1.
+if (wrkst = 5 ) emplcat = 3.
+if (wrkst ge 6 and wrkst le 10) emplcat = 2.
+
+VALUE LABELS emplcat
+1 'part-time'
+2 'not active'
+3 'activ unemployed'
+4 'full time'.
+
+
+SAVE OUTFILE='ZA4700_2.sav'
+        /KEEP V1 V3 Oldagecare  Unemployment Redincomdiff Jobs sex age age_sq  degree emplcat.
+
+GET 
+  STATA FILE='ZA2900.dta'. 
+DATASET NAME DataSet4 WINDOW=FRONT. 
+SAVE OUTFILE ='ZA2900_1.sav'.
+
+GET  FILE='ZA2900_1.sav'.
+
+recode  v39 v41 v42 v36 (1 thru 2 = 1) (3 thru 4 = 0) INTO Oldagecare  Unemployment Redincomdiff Jobs  .
+VALUE LABELS  v39 v41 v42 v36
+    1 'affirmative'
+    0 'non affirmative'.
+EXECUTE.
+
+
+RENAME VARIABLES V200 = sex.
+RENAME VARIABLES V201 = age.
+compute age_sq = age * age.
+EXECUTE.
+
+RENAME VARIABLES V205 = degree.
+recode degree (1 thru 3 = 11) (4 thru 7 = 12) .
+VALUE LABELS degree 
+    11 'primary or less'
+    12 'secondary and university or more'.
+
+compute emplcat = 0.
+
+if V206= 1 emplcat =  4.
+if (V206 = 2 or V206 = 3) emplcat = 1.
+
+temp. 
+sel if V206 = 4.
+
+if (V206 = 4) emplcat = 1.
+if (V206 = 4 and V215 ge 35 and V215 lt 97) emplcat = 4.
+if (V206 = 4 and V215 lt 35 or V215 ge 97) emplcat = 1.
+
+if (V206 = 5 ) emplcat = 3.
+
+if (V206 ge 6 and V206 le 10) emplcat = 2.
+
+VALUE LABELS emplcat
+1 'part-time'
+2 'not active'
+3 'activ unemployed'
+4 'full time'.
+
+SAVE OUTFILE='ZA2900_2.sav'
+    /KEEP V1 V3 Oldagecare  Unemployment Redincomdiff Jobs sex age age_sq  degree emplcat.
+
+GET  FILE='ZA2900_2.sav'.
+
+if (V3 = 2 or V3 = 3) V3 = 32.
+EXECUTE.
+
+compute cntry = 0.
+
+if V3 = 32 cntry = 276.
+if V3 = 14 cntry = 203.
+if V3 = 27 cntry = 250.
+if V3 = 8 cntry = 348.
+if V3 = 10 cntry = 372.
+if V3 = 26 cntry = 428.
+if V3 = 12 cntry = 578.
+if V3 = 16 cntry = 616.
+if V3 = 15 cntry = 705.
+if V3 = 25 cntry = 724.
+if V3 = 13 cntry = 752.
+if V3 = 30 cntry = 756.
+if V3 = 4 cntry = 826.
+EXECUTE.
+
+compute delete = 0.
+if cntry  lt 100  delete = 1.
+EXECUTE.
+
+sel if delete =0. 
+
+SAVE OUTFILE='ZA2900_3.sav'
+/ DROP V3.
+
+
+GET  FILE='ZA4700_2.sav'.
+
+COMPUTE cntry = v3.
+if V3 ge 276 and V3 lt 277 cntry = 276.
+EXECUTE.
+
+if V3 ge 826 and V3 lt 827 cntry = 826.
+EXECUTE.
+
+
+compute delete = 1.
+if  (cntry = 276 or cntry = 203 or   cntry = 250 or   cntry = 348 or  cntry = 372 or   cntry = 428 or   cntry = 578 or  cntry = 616 or   cntry = 705 or  cntry = 724
+ or   cntry = 752 or   cntry = 756 or   cntry = 826) delete = 0. 
+EXECUTE.
+
+sel if delete = 0. 
+
+SAVE OUTFILE='ZA4700_3.sav'
+/ DROP V3.
+
+ADD FILES /FILE= 'ZA4700_3.sav'
+  /FILE='ZA2900_3.sav'.
+EXECUTE.
+SAVE OUTFILE='ISSP.sav'
+/ DROP delete.
+
+GET FILE='ISSP.sav'.
+SAVE TRANSLATE OUTFILE='ISSP.dta'
+  /TYPE=STATA
+  /VERSION=13
+  /EDITION=INTERCOOLED
+  /MAP
+  /REPLACE.

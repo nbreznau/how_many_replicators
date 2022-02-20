@@ -1,0 +1,142 @@
+Team: 57
+Software: Stata
+Version: ORIGINAL
+
+use ZA2900.dta, clear
+
+recode v39 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(age_care)
+label var age_care "Old age care" 
+
+recode v41 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(unemp)
+label var unemp "Unemployed" 
+
+recode v42 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(inc_diff)
+label var inc_diff "Reduce Income Differences" 
+
+recode v36 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(jobs)
+label var jobs "Jobs" 
+
+recode v200 (1 = 0 "male")(2 = 1 "female"), gen(female)
+label var female "Female"
+tab v200 female, m
+
+gen age = v201
+label var age "Age"
+
+gen age_2 = age*age
+label var age_2 "Age-squared"
+
+recode v205 (1 2 3 = 1 "primary or less") (4 5 = 0 "secondary") ///
+			(6 7 = 2 "university"), gen(edu)
+recode v206 (1 = 0 "full time") (2 3 = 1 "part time") (5 = 2 "active unemployed") ///
+			(4 6 7 8 9 10 = 3 "not active") , gen(emp_cat)
+	
+recode v3   (1 = 36 "AU-Australia") ///       			
+			(20 = 124 "CA-Canada") ///            			
+			(14 = 203 "CZ-Czech Republic") ///     
+			(27 = 250 "FR-France") ///             
+			(2 3 = 276 "DE-Germany") ///            
+			(8 = 348 "HU-Hungary") ///            
+			(10 = 372 "IE-Ireland") ///            
+			(22 23 = 376 "IL-Israel") ///             
+			(24 = 392 "JP-Japan") ///               
+			(26 = 428 "LV-Latvia") ///                   
+			(19 = 554 "NZ-New Zealand") ///        
+			(12 = 578 "NO-Norway") ///             
+			(21 = 608 "PH-Philippines") ///        
+			(16 = 616 "PL-Poland") ///                     
+			(18 = 643 "RU-Russia") ///             
+			(15 = 705 "SI-Slovenia") ///           
+			(25 = 724 "ES-Spain") ///              
+			(13 = 752 "SE-Sweden") ///             
+			(30 = 756 "CH-Switzerland") ///        
+			(4 = 826 "GB-Great Britain") ///      
+			(6 = 840 "US-United States") ///     
+			(9 17 28 = .), gen(cntry)
+
+gen year=1996
+
+
+keep v2 age_care unemp inc_diff jobs female age age_2 edu emp_cat cntry year
+
+save w1.dta, replace
+
+use ZA4700.dta, clear
+
+recode V28 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(age_care)
+label var age_care "Old age care" 
+
+recode V30 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(unemp)
+label var unemp "Unemployed" 
+
+recode V31 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(inc_diff)
+label var inc_diff "Reduce Income Differences" 
+
+recode V25 (1 2 = 1 "agree") (3 4= 0 "disagree"), gen(jobs)
+label var jobs "Jobs" 
+
+recode sex (1 = 0 "male")(2 = 1 "female"), gen(female)
+label var female "Female"
+
+label var age "Age"
+
+gen age_2 = age*age
+label var age_2 "Age-squared"
+
+recode degree (0 1 = 1 "Primary or less") (2 3 = 0 "Secondary") ///
+			(4 5 = 2 "University or more"), gen(edu)
+label variable edu "Education"			
+
+recode wrkst (1 = 0 "Full time") (2 3 = 1 "Part time") (5 = 2 "Active unemployed") ///
+			(4 6 7 8 9 10 = 3 "Not active") , gen(emp_cat)
+label variable emp_cat "Employment"			
+
+rename V3a cntry
+
+gen year=2006      
+
+keep V2 age_care unemp inc_diff jobs female age age_2 edu emp_cat cntry year
+
+append using w1.dta
+
+order v2 V2 year age_care unemp inc_diff jobs female age age_2 edu emp_cat cntry 
+
+bysort cntry: egen year_mean = mean(year)
+keep if year_mean>1996 & year_mean<2006
+
+merge m:1 cntry year using "L2data.dta", keep(3)
+
+label var foreignpct "Immigrant Stock"
+label var netmigpct "Change in Immigrant Stock"
+label var socx "Social Welfare Expenditures"
+label var emprate "Employment Rate"
+
+reg emprate-netmigpct
+keep if e(sample)
+
+loc av age_care unemp inc_diff jobs
+
+loc i=1
+foreach x of loc av {
+	logit `x' foreignpct female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m1`i'
+	logit `x' foreignpct socx female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m2`i'
+	logit `x' foreignpct emprate female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m3`i'	
+	logit `x' netmigpct female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m4`i'
+	logit `x' netmigpct socx female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m5`i'
+	logit `x' netmigpct emprate female c.age##c.age i.edu i.emp_cat i.cntry i.year
+	est sto m6`i'	
+	
+	loc ++i
+}
+
+foreach x of numlist 1/6 {
+	esttab m`x'1 m`x'2 m`x'3 m`x'4, eform label z cons
+}
+
+esttab m11 m12 m13 m14 m21 m22 m23 m24 m31 m32 m33 m34 m41 m42 m43 m44 m51 m52 m53 m54 m61 m62 m63 m64 using "$path\results", eform z label nobase  scsv replace cons order(foreignpct socx emprate netmigpct) nogap
+

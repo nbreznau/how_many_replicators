@@ -1,0 +1,460 @@
+Team: 19
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta", clear
+ 
+recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
+label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values v3a cntrylbl
+
+recode v4 (2=0) (8/9=.) (0=.), gen(dobeylaws)
+
+cap drop orgprotest orgmarch orgstrike 
+cap drop dorgprotest dorgmarch dorgstrike
+tab1 v5 v6 v7,nol
+foreach var of varlist v5 v6 v7 {
+ recode `var' (1=4) (2=3) (3=2) (4=1), gen(`var'b)
+ recode `var'b (1/2=0) (3/4=1), gen(`var'c)
+}
+
+rename (v5b v6b v7b) (orgprotest orgmarch orgstrike)
+rename (v5c v6c v7c) (dorgprotest dorgmarch dorgstrike)
+
+foreach var of varlist v25-v32{
+ recode `var' (1=5) (2=4) (3=3) (4=2) (5=1), gen(`var'b)
+ recode `var' (1/3=0) (4/5=1), gen(`var'c)
+}
+rename (v25b v26b v27b v28b v29b v30b v31b v32b) (spendenv spendhealth spendlaw spendedu spenddef spendret spendunemp spendart)
+rename (v25c v26c v27c v28c v29c v30c v31c v32c) (dspendenv dspendhealth dspendlaw dspendedu dspenddef dspendret dspendunemp dspendart)
+
+foreach var of varlist v36 v37 v38 v39 v40 v41 v42 v43 v44 v45{
+ recode `var' (1=4) (2=3) (3=2) (4=1), gen(`var'b)
+ recode `var'b (1/2=0) (3/4=1), gen(`var'c)
+}
+rename (v36b v37b v38b v39b v40b v41b v42b v43b v44b v45b) (govjobs govprices govhcare govretire indgrow govunemp govincdiff govstudents govhousing lawsenv) 
+rename (v36c v37c v38c v39c v40c v41c v42c v43c v44c v45c) (dgovjobs dgovprices dhcare dgovretire dindgrow dgovunemp dgovincdiff dgovstud dgovhous dlawsenv) 
+
+sum  v19 v20 v21 v22 v23 v24
+foreach var of varlist v19 v20 v21 v22 v23 v24 {
+recode `var' (1=5) (2=4) (3=3) (4=2) (5=1), gen(`var'b)
+recode `var'b (1/3=0) (4/5=1), gen(`var'c)
+}
+rename (v19b v20b v21b v22b v23b v24b) (cutspend projjobs regbus indnewprod decindjobs workwk)
+rename (v19c v20c v21c v22c v23c v24c) (dcutspend dprojjobs dregbus dindnewprod ddecindjobs dworkwk)
+
+rename v201 age
+gen agesq=age*age
+
+recode v200 (1=0) (2=1), gen(female)
+
+rename v202 marst
+recode marst (5=1) (nonmiss=0), gen(nevermar)
+recode marst (2/5=0), gen(married)
+recode marst (3/4=1) (nonmiss=0), gen(divorced)
+recode marst (2=1) (nonmiss=0), gen(widow)
+
+recode v203 (2=0), gen(partner)
+rename v273 hhsize
+
+recode v274 (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
+local i = 10
+while `i' < 27 {
+	replace kidshh=1 if v274==`i'
+	local i = `i' + 2
+}
+
+recode v275 (3=1) (nonmiss=0), gen(rural)
+recode v275 (2=1) (nonmiss=0), gen(suburb)
+
+rename v324 ETHNIC
+
+rename v204 edyears
+rename v205 edcat
+recode edcat (1/3=1) (4=2) (5=3) (6=4) (7=5), gen(degree)
+label define edlabels 1 "Primary/less" 2 "Some Secondary" 3 "Secondary" 4 "Some Higher Ed" 5 "University or higher"
+label values degree edlabels
+
+recode degree (1/2=1) (nonmiss=0), gen(lesshs)
+recode degree (3/4=1) (nonmiss=0), gen(hs)
+recode degree (5=1) (nonmiss=0), gen(univ)
+
+rename v208 isco
+rename v209 occ2
+rename v215 hourswrk
+
+recode v206 (2/10=0), gen(ftemp)
+recode v206 (2/4=1) (nonmiss=0), gen(ptemp)
+recode v206 (5=1) (nonmiss=0), gen(unemp)
+recode v206 (6/10=1) (nonmiss=0), gen(nolabor)
+
+gen selfemp=v213==1
+replace selfemp=. if v206==.
+gen pubemp=(v212==1 | v212==2)
+replace pubemp=. if v206==.
+gen pvtemp=(selfemp==0 & pubemp==0)
+replace pvtemp=. if v206==.
+
+rename v218 faminc
+
+gen inczscore=.
+levelsof v3a, local(cntries)
+foreach cntryval of local cntries {
+	zscore faminc if v3a==`cntryval', listwise
+	replace inczscore=z_faminc if v3a==`cntryval'
+	drop z_faminc
+}
+
+recode v222 (2=0), gen(union)
+rename v223 party
+recode v220 (1/2=1) (nonmiss=0), gen(highrel)
+recode v220 (3/5=1) (nonmiss=0), gen(lowrel)
+recode v220 (6=1) (nonmiss=0), gen(norel)
+rename v220 religion
+
+gen year=1996
+gen yr2006=0
+rename v3a cntry
+rename v325 wghts
+
+save "ISSP96recode.dta", replace
+
+use "ZA4700.dta", clear
+
+
+sum V17 V18 V19 V20 V21 V22 V23 V24
+foreach var of varlist V17 V18 V19 V20 V21 V22 V23 V24{
+ recode `var' (1=5) (2=4) (3=3) (4=2) (5=1), gen(`var'b)
+ recode `var'b (1/3=0) (4/5=1), gen(`var'c)
+}
+rename (V17b V18b V19b V20b V21b V22b V23b V24b) (spendenv spendhealth spendlaw spendedu spenddef spendret spendunemp spendart)
+rename (V17c V18c V19c V20c V21c V22c V23c V24c) (dspendenv dspendhealth dspendlaw dspendedu dspenddef dspendret dspendunemp dspendart)
+
+foreach var of varlist V35 V36 V37 V38 V39 V40{
+ recode  `var' (1=5) (2=4) (3=3) (4=2) (5=1), gen(`var'b)
+ recode  `var' (1/2=1) (3/5=0), gen(`var'c) //I have inverted the order proably data has changed 
+} 
+rename (V35b V36b V37b V38b V39b V40b) (suchcare sucret sucdef suclaw sucunemp sucenv)
+rename (V35c V36c V37c V38c V39c V40c) (dsuchcare dsucret dsucdef dsuclaw dsucunemp dsucenv) 
+
+foreach var of varlist V25 V26 V27 V28 V29 V30 V31 V32 V33 V34{
+ recode `var' (1=4) (2=3) (3=2) (4=1), gen(`var'b)
+ recode `var' (1/2=1) (3/4=0), gen(`var'c) //I have inverted the order probably data has changed 
+}
+rename (V25b V26b V27b V28b V29b V30b V31b V32b V33b V34b) (govjobs govprices govhcare govretire indgrow govunemp govincdiff govstudents govhousing lawsenv) 
+rename (V25c V26c V27c V28c V29c V30c V31c V32c V33c V34c) (dgovjobs dgovprices dhcare dgovretire dindgrow dgovunemp dgovincdiff dgovstud dgovhous dlawsenv) 
+
+sum  V11 V12 V13 V14 V15 V16
+foreach var of varlist V11 V12 V13 V14 V15 V16{
+ recode `var' (1=5) (2=4) (3=3) (4=2) (5=1), gen(`var'b)
+ recode `var' (1/2=1) (3/5=0), gen(`var'c) // I have inverted the order probably data has changed
+}
+rename (V11b V12b V13b V14b V15b V16b) (cutspend projjobs regbus indnewprod decindjobs workwk)
+rename (V11c V12c V13c V14c V15c V16c) (dcutspend dprojjobs dregbus dindnewprod ddecindjobs dworkwk)
+sum cutspend projjobs regbus indnewprod decindjobs workwk
+sum dcutspend dprojjobs dregbus dindnewprod ddecindjobs dworkwk
+
+foreach var of varlist V41 V42 V43{
+recode `var' (1/2=1) (3/4=0), gen(`var'b)
+}
+rename (V41 V42 V43) (govdetain govtapphone govsearch)
+rename (V41b V42b V43b) (dgovdetain dgovtap dgovsearch)
+
+rename V54 trustfew
+recode trustfew (1/2 = 0) (3/5 = 1), gen(dtrust)
+rename V55 takeadv
+recode takeadv (1/2 = 0) (3/5 = 1), gen(dtakeadv)
+
+gen agesq=age*age
+recode sex(1=0) (2=1), gen(female)
+
+rename marital marst
+recode marst (5=1) (nonmiss=0), gen(nevermar)
+recode marst (2/5=0), gen(married)
+recode marst (3/4=1) (nonmiss=0), gen(divorced)
+recode marst (2=1) (nonmiss=0), gen(widow)
+recode cohab (2=0), gen(partner)
+rename hompop hhsize
+
+recode hhcycle (2/4=1) (6/8=1) (nonmiss=0), gen(kidshh)
+local i = 10
+while `i' < 29 {
+	replace kidshh=1 if hhcycle==`i'
+	local i = `i' + 2
+}
+
+recode urbrural (1/3=0) (4/5=1), gen(rural)
+recode urbrural (2/3=1) (nonmiss=0), gen(suburb)
+
+rename educyrs edyears
+rename degree edcat
+recode edcat (0=1), gen(degree)
+label define edlabels 1 "Primary/less" 2 "Some Secondary" 3 "Secondary" 4 "Some Higher Ed" 5 "University or higher"
+label values degree edlabels
+
+recode degree (1/2=1) (nonmiss=0), gen(lesshs)
+recode degree (3/4=1) (nonmiss=0), gen(hs)
+recode degree (5=1) (nonmiss=0), gen(univ)
+
+rename wrkst empstat
+rename ISCO88 isco // see pg 137 in codebook
+rename wrkhrs hourswrk
+
+recode empstat (2/10=0), gen(ftemp)
+recode empstat (2/4=1) (nonmiss=0), gen(ptemp)
+recode empstat (5=1) (nonmiss=0), gen(unemp)
+recode empstat (6/10=1) (nonmiss=0), gen(nolabor)
+
+gen selfemp=wrktype==4
+replace selfemp=. if empstat==.
+gen pubemp=(wrktype==1 | wrktype==2)
+replace pubemp=. if empstat==.
+gen pvtemp=(selfemp==0 & pubemp==0)
+replace pvtemp=. if empstat==.
+
+gen inczscore=.
+local incvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
+foreach incvar of local incvars {
+	zscore `incvar', listwise
+	replace inczscore=z_`incvar' if z_`incvar'!=.
+	drop z_`incvar'
+}
+
+rename union unionb
+recode unionb (2/3=0), gen(union)
+
+rename PARTY_LR party
+recode attend (1/3=1) (nonmiss=0), gen(highrel)
+recode attend (4/7=1) (nonmiss=0), gen(lowrel)
+recode attend (8=1) (nonmiss=0), gen(norel)
+rename attend religion
+
+rename V3a cntry
+rename weight wghts
+
+gen year=2006
+gen yr2006=1
+
+gen mail=mode==34
+
+save "ISSP06recode.dta", replace
+
+use "ISSP06recode.dta", clear
+
+append using "ISSP96recode.dta"
+
+sort cntry year
+merge m:1 cntry year using "$data\BradyFinnigan2014CountryData.dta"
+recode cntry (36=1) (124=1) (208=1) (246=1) (250=1) (276=1) (372=1) (392=1) (528=1) (554=1) (578=1) (620=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig17)
+recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) (578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(orig13)
+
+save "ISSP9606.dta", replace
+
+global regtable "excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) ctitle(`depvar') eform bdec(3) sdec(2) stats(coef tstat) onecol append"
+
+use "ISSP9606.dta", clear 
+
+keep if year==2006
+keep if orig17 
+
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "age agesq female nevermar divorced widow hhsize kidshh rural suburb lesshs univ ptemp unemp nolabor selfemp pubemp inczscore highrel lowrel"
+global cntryvars "foreignpct netmigpct cforborn socx socdem liberal emprate"
+
+sum $depvars $controls $cntryvars
+
+egen allcontrols = rowmiss($controls)
+recode allcontrols (0=1) (nonmiss=0)
+keep if allcontrols
+
+preserve
+keep if allcontrols
+keep $depvars $cntryvars $controls
+outreg2 using "$output\desc2006.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
+restore
+
+preserve
+keep if allcontrols
+collapse $depvars, by(cntry)
+outsheet cntry $depvars using $desktop\depvars2006", comma replace
+restore
+
+preserve
+keep if allcontrols
+keep cntry $depvars
+bysort cntry: outreg2 using $desktop\depvars2006.xls", append noaster excel sideway bdec(2) sdec(2) sum(detail) eqkeep(mean sd)
+restore
+
+
+*OKAY, NOW WE MANAGE TO REPLICATE THE GRAPH BY CORRECTING THE DATA (in 2006 the order of the variable changed since the autors did the analysis)
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct $controls, i(cntry) quad(30)
+	outreg2 using "$output\forborn2006.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct socx $controls, i(cntry) quad(30)
+	outreg2 using "$output\forborn2006socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using "$output\forborn2006regime.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct emprate $controls, i(cntry) quad(30)
+	outreg2 using "$output\forborn2006emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a foreignpct mcp $controls, i(cntry) quad(30)
+	outreg2 using "$output\forborn2006mcp.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct socx $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006regime.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct emprate $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct mcp $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006mcp.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' netmigpct foreignpct $controls, i(cntry) quad(30)
+	outreg2 using "$output\netmig2006forborn.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn socx $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn socdem liberal $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006regime.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn emprate $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn mcp $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006mcp.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	rename `depvar' a
+	xtlogit a cforborn foreignpct $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006forborn.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append ctitle(`depvar')
+	rename a `depvar'
+}
+
+foreach depvar in $depvars {
+	xtlogit `depvar' cforborn netmigpct $controls, i(cntry) quad(30)
+	outreg2 using "$output\cforborn2006netmig.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+use "ISSP9606.dta", clear 
+
+keep if orig13
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006"
+global cntryvars "foreignpct netmigpct socx emprate"
+
+sum $depvars $controls $cntryvars
+
+egen allcontrols = rowmiss($controls)
+recode allcontrols (0=1) (nonmiss=0)
+
+quietly tab cntry, gen(cntryfe)
+
+preserve
+keep if allcontrols & year==1996 & dgovincdiff<.
+keep $depvars $cntryvars $controls
+outreg2 using $desktop\desc1996.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
+restore
+
+preserve
+keep if allcontrols & year==1996
+collapse $depvars, by(cntry)
+outsheet cntry $depvars using $desktop\depvars1996", comma replace
+restore
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct $controls cntryfe*
+	outreg2 using "$table4\forborn9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct socx $controls cntryfe*
+	outreg2 using "$table4\forborn9606socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct emprate $controls cntryfe*
+	outreg2 using "$table4\forborn9606emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct $controls cntryfe*
+	outreg2 using "$table5\netmig9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct socx $controls cntryfe*
+	outreg2 using "$table5\netmig9606socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct emprate $controls cntryfe*
+	outreg2 using "$table5\netmig9606emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct foreignpct $controls cntryfe*
+	outreg2 using "$table5\netmig9606forborn.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' $controls cntryfe*
+	outreg2 using "$table5\controls9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}

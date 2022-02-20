@@ -1,0 +1,320 @@
+Team: 44
+Software: Stata
+Version: ORIGINAL
+
+clear all
+
+version 13.0
+set more off
+label define YN 1 "yes" 0 "no"
+
+
+cd \
+use ZA2900.dta, clear	
+replace v2 = v2 + 900000
+gen year = 1996
+
+append using ZA4700.dta	
+recode year (. = 2006)
+egen IDnr = rowmax(v2 V2)
+
+recode v3 (1/6 10/13 19 20 24 25 27 30 =1) (else=0), gen(incl)	
+recode v3	///	
+	(1		= 	36		"Australia")	///
+	(2 3		=	276		"Germany")	///
+	(4		=	826		"UK")		///
+	(6		=	840		"USA")		///
+	(10		=	372		"Ireland")	///
+	(12		=	578		"Norway")	///
+	(13		=	752		"Sweden")	///
+	(19		=	554		"New Zealand")	///
+	(20		=	124		"Canada")	///
+	(24		=	392		"Japan")	///
+	(25		=	724		"Spain")	///
+	(27		=	250		"France")	///
+	(30		=	756		"Switzerland")	///
+	, gen(cntry)
+tab v3 incl, missing
+tab v3 cntry, missing
+
+recode V3 (36 124 250 276.1 276.2 372 392 554 578 724 752 756 826.1 840 =1) (else=0), gen(incl06)
+tab V3a incl06, missing
+
+replace cntry = V3a if cntry == .
+keep if incl == 1 | incl06 == 1
+
+
+recode v36 (1 2 = 1) (3 4 = 0) (.=.), gen(JOBS)	
+recode V25 (1 2 = 1) (3 4 = 0) (.=.), gen(JOBS06)
+replace JOBS = JOBS06 if JOBS == .
+label values JOBS YN
+label variable JOBS "Gvmnt should provide jobs"
+
+recode v41 (1 2 = 1) (3 4 = 0) (.=.), gen(UNEM)	
+recode V30 (1 2 = 1) (3 4 = 0) (.=.), gen(UNEM06)	
+replace UNEM = UNEM06 if UNEM == .
+label values UNEM YN
+label variable UNEM "Gvmnt should provide for unemployed"
+
+recode v42 (1 2 = 1) (3 4 = 0) (.=.), gen(RDIS)	
+recode V31 (1 2 = 1) (3 4 = 0) (.=.), gen(RDIS06)
+replace RDIS = RDIS06 if RDIS == .
+label values RDIS YN
+label variable RDIS "Gvmnt should reduce income differences"
+
+recode v39 (1 2 = 1) (3 4 = 0) (.=.), gen(ECAR)	
+recode V28 (1 2 = 1) (3 4 = 0) (.=.), gen(ECAR06)
+replace ECAR = ECAR06 if ECAR == .
+label values ECAR YN
+label variable ECAR "Gvmnt should provide for the elderly"
+
+recode v44 (1 2 = 1) (3 4 = 0) (.=.), gen(HOUS)	
+recode V33 (1 2 = 1) (3 4 = 0) (.=.), gen(HOUS06)
+replace HOUS = HOUS06 if HOUS == .
+label values HOUS YN
+label variable HOUS "Gvmnt should provide decent housing"
+
+recode v38 (1 2 = 1) (3 4 = 0) (.=.), gen(HLTH)	
+recode V27 (1 2 = 1) (3 4 = 0) (.=.), gen(HLTH06)
+replace HLTH = HLTH06 if HLTH == .
+label values HLTH YN
+label variable HLTH "Gvmnt should provide healthcare"
+
+gen AGE = max(v201, age) 
+label variable AGE "Age (yrs)"
+gen AGE2 = AGE * AGE
+
+egen WOM = rowmax(sex v200)	
+replace WOM = WOM - 1	
+label variable WOM "Woman"
+label values WOM YN
+
+egen MARR = rowmax(v202 marital)
+recode MARR ///
+	(1		=	1	"Married")		///
+	(5		=	2	"Never married")	///
+	(3 4 		=	3	"Divorced/separated")	///
+	(2		=	4	"Widowed")		///
+	, gen(MSTAT)
+
+tab MSTAT, gen(MST)
+label variable MST1 "Marital status: Married"
+label variable MST2 "Marital status: Never married"
+label variable MST3 "Marital status: Divorced"
+label variable MST4 "Marital status: Widowed"
+label values MST? YN
+drop MARR
+
+egen HHSZ = rowmax(hompop v273)	
+label variable HHSZ "Household size (persons)"
+
+egen CIH = rowmax(hhcycle v274)
+recode CIH (1 5 9 11 13 15 17 19 21 23 27 =0) (. 95=.) (else=1)	
+label variable CIH "Children in household"
+label values CIH YN
+
+** 	NOTE: B&F codes "incomplete university" (6 in 1996; 4 in 2006) as "secondary education"
+**	adjusted to account for this
+recode v205 (5 6 =0) (1/4=1) (7 = 2) (else=.), gen(EDLVL)	
+recode degree (3 4 =0) (0/2=1) (5 = 2) (else=.), gen(EDLVL06)
+replace EDLVL = EDLVL06 if EDLVL == .
+tab EDLVL, gen(EDL)
+label variable EDL1 "Education: secondary"
+label variable EDL2 "Education: primary only"
+label variable EDL3 "Education: university"
+label values EDL? YN
+drop EDLV*
+
+
+recode v206	///	
+	(1		=	0	"Full time")		///
+	(2/4		=	1	"Part time")		///	
+	(5		=	2	"Unemployed")		///
+	(6/10		= 	3	"Not in labor force")	///
+	, gen(LSTATUS)	
+recode wrkst	///	
+	(1		=	0	"Full time")		///
+	(2/4		=	1	"Part time")		///
+	(5		=	2	"Unemployed")		///
+	(6/10		= 	3	"Not in labor force")	///
+	, gen(LSTATUS06)	
+replace LSTATUS = LSTATUS06 if LSTATUS == .
+
+tab LSTATUS, gen(EMP)
+label variable EMP1 "Employment: Full-time"
+label variable EMP2 "Employment: Part-time"
+label variable EMP3 "Employment: Unemployed"
+label variable EMP4 "Employment: Not in force"
+label values EMP? YN
+
+gen SEMP = 1 if v213 == 1 | wrktype == 4 
+recode SEMP (.=0)
+replace SEMP = . if LSTATUS == .
+label variable SEMP "Self-employed"
+label values SEMP YN
+
+drop LSTATUS LSTATUS06
+
+
+egen mean_inc = mean(v218), by(v3)	
+egen sd_inc = sd(v218), by(v3)
+gen ZINC = (v218 - mean_inc) / sd_inc
+drop *_inc
+
+egen inc = rowmax(AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ///
+	ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC ///
+	LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC ///
+	TW_INC US_INC UY_INC VE_INC ZA_INC)
+egen mean_inc = mean(inc), by(V3a)
+egen sd_inc = sd(inc), by(V3a)
+gen ZINC06 = (inc - mean_inc) / sd_inc
+replace ZINC = ZINC06 if ZINC == .
+drop ZINC06
+
+recode v220 (6=0) (5=1) (1/4 = 2) (else=.), gen(REL)	
+recode attend (8=0) (6 7=1) (1/5 = 2) (else=.), gen(REL06)	
+replace REL = REL06 if REL == . 
+tab REL, gen(RATT)
+label variable RATT1 "Religious attendance: none"
+label variable RATT2 "Religious attendance: low"
+label variable RATT3 "Religious attendance: high"
+label values RATT? YN
+drop REL*
+
+egen WT = rowmax(weight v325)	
+
+
+merge m:1 cntry year using country.dta, keep(matched)
+drop _merge
+
+label variable foreignpct "Percent foreign born"
+label variable netmig "Net migration"
+label variable cforborn "Change in percentage foreign born"
+label variable socx	"Welfare spendings"
+label variable socdem "Welfare regime: Social dem"
+label variable liberal "Welfare regime: Liberal"
+label variable emprate "Employment rate"
+label variable mcp  "Multicult. Policy Index"
+
+
+
+global z AGE AGE2 WOM EDL2 EDL3 ZINC EMP2 EMP3 EMP4 SEMP i.cntry i.year
+global x1 foreignpct
+global x2 foreignpct socx
+global x3 foreignpct emprate
+
+qui logit JOBS $x1 $z , or
+est store A1
+qui logit JOBS $x2 $z , or
+est store A2
+qui logit JOBS $x3 $z , or
+est store A3
+
+qui logit UNEM $x1 $z, or
+est store B1
+qui logit UNEM $x2 $z, or
+est store B2
+qui logit UNEM $x3 $z, or
+est store B3
+
+qui logit RDIS $x1 $z, or
+est store C1
+qui logit RDIS $x2 $z, or
+est store C2
+qui logit RDIS $x3 $z, or
+est store C3
+
+qui logit ECAR $x1 $z , or
+est store D1
+qui logit ECAR $x2 $z , or
+est store D2
+qui logit ECAR $x3 $z , or
+est store D3
+
+qui logit HOUS $x1 $z, or
+est store E1
+qui logit HOUS $x2 $z, or
+est store E2
+qui logit HOUS $x3 $z, or
+est store E3
+
+qui logit HLTH $x1 $z, or
+est store F1
+qui logit HLTH $x2 $z, or
+est store F2
+qui logit HLTH $x3 $z, or
+est store F3
+
+esttab A1 A2 A3, keep(foreignpct socx emprate) eform z(3) label
+esttab B1 B2 B3, keep(foreignpct socx emprate) eform z(3) label
+esttab C1 C2 C3, keep(foreignpct socx emprate) eform z(3) label
+esttab D1 D2 D3, keep(foreignpct socx emprate) eform z(3) label
+esttab E1 E2 E3, keep(foreignpct socx emprate) eform z(3) label
+esttab F1 F2 F3, keep(foreignpct socx emprate) eform z(3) label
+
+
+global x1 netmigpct
+global x2 netmigpct socx
+global x3 netmigpct emprate
+global x4 netmigpct foreignpct
+
+qui logit JOBS $x1 $z , or
+est store A1
+qui logit JOBS $x2 $z , or
+est store A2
+qui logit JOBS $x3 $z , or
+est store A3
+qui logit JOBS $x4 $z , or
+est store A4
+
+qui logit UNEM $x1 $z, or
+est store B1
+qui logit UNEM $x2 $z, or
+est store B2
+qui logit UNEM $x3 $z, or
+est store B3
+qui logit UNEM $x4 $z, or
+est store B4
+
+qui logit RDIS $x1 $z, or
+est store C1
+qui logit RDIS $x2 $z, or
+est store C2
+qui logit RDIS $x3 $z, or
+est store C3
+qui logit RDIS $x4 $z, or
+est store C4
+
+qui logit ECAR $x1 $z , or
+est store D1
+qui logit ECAR $x2 $z , or
+est store D2
+qui logit ECAR $x3 $z , or
+est store D3
+qui logit ECAR $x4 $z , or
+est store D4
+
+qui logit HOUS $x1 $z, or
+est store E1
+qui logit HOUS $x2 $z, or
+est store E2
+qui logit HOUS $x3 $z, or
+est store E3
+qui logit HOUS $x4 $z, or
+est store E4
+
+qui logit HLTH $x1 $z, or
+est store F1
+qui logit HLTH $x2 $z, or
+est store F2
+qui logit HLTH $x3 $z, or
+est store F3
+qui logit HLTH $x4 $z, or
+est store F4
+
+esttab A1 A2 A3 A4, keep(netmigpct socx emprate foreignpct) eform z(3) label
+esttab B1 B2 B3 B4, keep(netmigpct socx emprate foreignpct) eform z(3) label
+esttab C1 C2 C3 C4, keep(netmigpct socx emprate foreignpct) eform z(3) label
+esttab D1 D2 D3 D4, keep(netmigpct socx emprate foreignpct) eform z(3) label
+esttab E1 E2 E3 E4, keep(netmigpct socx emprate foreignpct) eform z(3) label
+esttab F1 F2 F3 F4, keep(netmigpct socx emprate foreignpct) eform z(3) label

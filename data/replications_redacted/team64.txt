@@ -1,0 +1,82 @@
+Team: 64
+Software: Stata
+Version: ORIGINAL
+
+*NOTE: this team re-ran the original study's code to generate the data used in this analysis
+
+ use "ISSP9606.dta", clear
+ drop if orig13==0
+ 
+
+
+drop if age==.
+drop if agesq==.
+drop if female==.
+drop if lesshs==.
+drop if univ==.
+drop if ptemp==.
+drop if unemp==.
+drop if nolabor==.
+drop if selfemp==.
+drop if inczscore==.
+
+encode country, gen (ncountry)
+
+
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006 i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct  i.year i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct socx  i.year i.ncountry, vce(cluster ncountry)
+
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate  i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate  i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore foreignpct emprate i.year i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct i.year i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct socx i.year i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry) 
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct emprate i.year i.ncountry, vce(cluster ncountry)
+
+logistic dgovjobs age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry) 
+logistic dgovunemp age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovincdiff age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovretire age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry)
+logistic dgovhous age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry)
+logistic dhcare age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore netmigpct foreignpct i.year i.ncountry, vce(cluster ncountry)

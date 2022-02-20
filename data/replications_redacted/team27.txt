@@ -1,0 +1,273 @@
+Team: 27
+Software: SPSS
+Version: ORIGINAL
+
+recode V3 (1=1) (2=15) (3=15) (6=51) (8=17) (10=19) (11=29) (12=33) (13=45) (14=7) (16=35) (18=39) (19=31) (20=3) (22=21) (23=21) (24=23) (25=43) (26=27) (27=13) (30=47) (36=2) (124=4) (191=6) (203=8) (208=10) (246=12) (250=14) (276=16) (348=18) 
+(372=20) (376=22) (392=24) (410=26) (428=28) (528=30) (554=32) (578=34) (616=36) (620=38) (643=40) (705=42) (724=44) (752=46) (756=48) (826=50) (840=52) into nr.
+
+recode V39 (1=1) (2=1) (3=0) (4=0) into OldAgeCare.
+recode V41 (1=1) (2=1) (3=0) (4=0) into Unemployed.
+recode V42 (1=1) (2=1) (3=0) (4=0) into ReduceIncomeDifferences.
+recode V36 (1=1) (2=1) (3=0) (4=0) into Jobs.
+
+recode Female (1=0) (2=1).
+compute AgeSquared = Age*Age.
+recode Education (0=1) (1=1) (2=1) (3=1) (4=3) (5=3) (6=2) (7=2).
+recode Employment (1=4) (2=1) (3=1) (4=3) (5=2) (6=3) (7=2) (8=3) (9=2) (10=2).
+
+recode year (1996=0) (2006=1).
+recode Australia (1=0) (0=1).
+recode Canada (1=0) (0=1).
+recode France (1=0) (0=1).
+recode Hungary (1=0) (0=1).
+recode Ireland (1=0) (0=1).
+recode Japan (1=0) (0=1).
+recode NewZealand (1=0) (0=1).
+recode Norway (1=0) (0=1).
+recode Poland (1=0) (0=1).
+recode Spain (1=0) (0=1).
+recode Sweden (1=0) (0=1).
+recode Switzerland (1=0) (0=1).
+recode UnitedStates (1=0) (0=1).
+
+
+(1).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(2).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(3).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH ImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(4).
+NOMREG Jobs (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(5).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock SocialWelfareExpenditures Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(6).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock SocialWelfareExpenditures Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(7).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH ImmigrantStock SocialWelfareExpenditures Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(8).
+NOMREG Jobs (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock SocialWelfareExpenditures Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(9).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock EmploymentRate Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(10).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock EmploymentRate Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(11).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH ImmigrantStock EmploymentRate Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(12).
+NOMREG Jobs (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ImmigrantStock EmploymentRate Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(13).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(14).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(15).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(16).
+NOMREG Jobs (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(17).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    SocialWelfareExpenditures ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(18).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    SocialWelfareExpenditures ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(19).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH SocialWelfareExpenditures ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(20).
+NOMREG Jobs (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    SocialWelfareExpenditures ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(21).
+NOMREG OldAgeCare (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    EmploymentRate ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(22).
+NOMREG Unemployed (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year Australia Canada 
+    France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    EmploymentRate ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(23).
+NOMREG ReduceIncomeDifferences (BASE=FIRST ORDER=ASCENDING) BY Female Education Employment year 
+    Australia Canada France Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland 
+    UnitedStates WITH EmploymentRate ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.
+(24).
+NOMREG Jobs (BASE=LAST ORDER=ASCENDING) BY Female Education Employment year Australia Canada France 
+    Hungary Ireland Japan NewZealand Norway Poland Spain Sweden Switzerland UnitedStates WITH 
+    EmploymentRate ChangeinImmigrantStock Age AgeSquared
+  /CRITERIA CIN(95) DELTA(0) MXITER(100) MXSTEP(5) CHKSEP(20) LCONVERGE(0) PCONVERGE(0.000001) 
+    SINGULAR(0.00000001) 
+  /MODEL
+  /STEPWISE=PIN(.05) POUT(0.1) MINEFFECT(0) RULE(SINGLE) ENTRYMETHOD(LR) REMOVALMETHOD(LR)
+  /INTERCEPT=INCLUDE
+  /PRINT=PARAMETER SUMMARY LRT CPS STEP MFI.

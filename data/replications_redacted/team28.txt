@@ -1,0 +1,216 @@
+Team: 28
+Software: Stata
+Version: ORIGINAL
+
+version 14.0
+
+use "ZA2900.dta" , clear
+gen jobs=v36
+recode jobs 1=1 2=1 3=0 4=0
+gen elderly=v39
+recode elderly 1=1 2=1 3=0 4=0
+gen unemployed=v41
+recode unemployed 1=1 2=1 3=0 4=0
+gen income=v42
+recode income 1=1 2=1 3=0 4=0
+
+gen female=v200
+recode female 1=0 2=1
+ren v201 age
+mcenter age
+gen C_age2= C_age*C_age
+
+gen educ=v205
+recode educ 1=1 2=1 3=1 4=1 5=0 6=0 7=2 						
+
+gen empstat=v206
+recode empstat 1=0 2=1 3=1 4=1 6=2 7=2 8=2 9=2 10=2 5=3
+lab def empstat 0 "full time" 1 "part time" 2 "not ctive" 3 "unemployed"
+lab var empstat empstat
+
+gen cntry=.
+replace cntry=36 if v3==1
+replace cntry=2761 if v3==2
+replace cntry=2762 if v3==3
+replace cntry=8261 if v3==4
+replace cntry=840 if v3==6
+replace cntry=348 if v3==8
+replace cntry=372 if v3==10
+replace cntry=578 if v3==12
+replace cntry=752 if v3==13
+replace cntry=203 if v3==14
+replace cntry=705 if v3==15
+replace cntry=616 if v3==16
+replace cntry=643 if v3==18
+replace cntry=554 if v3==19
+replace cntry=124 if v3==20
+replace cntry=608 if v3==21
+replace cntry=3761 if v3==22
+replace cntry=3762 if v3==23
+replace cntry=392 if v3==24
+replace cntry=724 if v3==25
+replace cntry=428 if v3==26
+replace cntry=250 if v3==27
+replace cntry=756 if v3==30
+
+drop if v3==8
+drop if v3==9
+drop if v3==14
+drop if v3==15
+drop if v3==16
+drop if v3==17
+drop if v3==18
+drop if v3==21
+drop if v3==24
+drop if v3==26
+drop if v3==28
+
+label define cntrylabel 36 "AU-Australia" 2761 "DE-W" 2762 "DE-E" 8261 "GB" 840 "US-United States" 348 "HU-Hungary" 372 "IE-Ireland" 578 "NO-Norway" 752 "SE-Sweden" 203 "CZ-Czech Republic" ///
+705 "SI-Slovenia" 616 "PL-Poland" 643 "RU-Russia" 554 "NZ-New Zealand" 124 "CA-Canada" 3761 "IL-J" 3762 "IL-A" 392 "JP-Japan" 724 "ES-Spain" 428 "LV-Latvia" 250 "FR-France" 756 "CH-Switzerland" ///
+608 "Phillipines" 
+lab val cntry cntrylabel
+
+ren v1 V1
+ren v2 V2
+ 
+drop v206 v205 v200 v42 v41 v39 v36 v3
+
+gen year=1996
+save "ZA1996_selected_f.dta" , replace
+
+use "ZA4700.dta" , clear
+
+gen jobs=V25
+recode jobs 1=1 2=1 3=0 4=0
+gen elderly=V28
+recode elderly 1=1 2=1 3=0 4=0
+gen unemployed=V30
+recode unemployed 1=1 2=1 3=0 4=0
+gen income=V31
+recode income 1=1 2=1 3=0 4=0
+
+gen female=sex
+recode female 1=0 2=1
+mcenter age
+gen C_age2= C_age*C_age
+gen educ=degree
+recode educ 0=1 1=1 2=1 3=0 4=0 5=2 						// note: incomplete secondary is with secondary. semi higher incpl. uni. is with uni. this is not clear from the text
+lab def educ 1 "primary or less" 0 "secondary" 2 "university"
+lab var educ educ
+
+gen empstat=wrkst
+recode empstat 1=0 2=1 3=1 4=1 6=2 7=2 8=2 9=2 10=2 5=3
+lab def empstat 0 "full time" 1 "part time" 2 "not ctive" 3 "unemployed"
+lab var empstat empstat
+
+gen cntry=V3
+replace cntry=2761 if V3==276.1
+replace cntry=2762 if V3==276.2
+replace cntry=8261 if V3==826.1
+replace cntry=3761 if V3==376.1
+replace cntry=3762 if V3==376.2
+
+drop if V3==152
+drop if V3==158
+drop if V3==191
+drop if V3==203
+drop if V3==208
+drop if V3==214
+drop if V3==246
+drop if V3==348
+drop if V3==392
+drop if V3==410
+drop if V3==428
+drop if V3==528
+drop if V3==608
+drop if V3==616
+drop if V3==620
+drop if V3==643
+drop if V3==705
+drop if V3==710
+drop if V3==858
+drop if V3==862
+
+drop wrkst degree sex V31 V30 V28 V25 version V3a
+gen year=2006
+save "DZA2006_selected_f.dta", replace
+ 
+append using "ZA1996_selected_f.dta"
+
+recode cntry "2761"="276" "2762"="276"
+recode cntry "3761"="376" "3762"="376"
+recode cntry "8261"="826" 
+
+
+save "ZA19962006.dta", replace
+
+use "ZA19962006.dta" , clear
+sort cntry year
+save "ZA19962006.dta", replace
+
+use "L2data.dta", clear
+mcenter emprate
+mcenter foreignpct
+mcenter socx
+mcenter netmigpct
+
+drop if cntry==152
+drop if cntry==158
+drop if cntry==191
+drop if cntry==203
+drop if cntry==208
+drop if cntry==214
+drop if cntry==246
+drop if cntry==348
+drop if cntry==392
+drop if cntry==410
+drop if cntry==428
+drop if cntry==528
+drop if cntry==608
+drop if cntry==616
+drop if cntry==620
+drop if cntry==643
+drop if cntry==705
+drop if cntry==710
+drop if cntry==858
+drop if cntry==862
+
+sort cntry year
+save "L2data.dta", replace
+use "ZA19962006.dta" , clear
+merge m:1 cntry year using "L2data.dta"
+tab _merge
+drop _merge
+save "workingdata.dta", replace
+
+version 14.0
+
+
+logistic  elderly      c.C_foreignpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  unemployed   c.C_foreignpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  income       c.C_foreignpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  jobs         c.C_foreignpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+
+logistic  elderly      c.C_foreignpct1 c.C_socx1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+logistic  unemployed   c.C_foreignpct1 c.C_socx1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+logistic  income       c.C_foreignpct1 c.C_socx1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	logistic  jobs         c.C_foreignpct1 c.C_socx1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)
+
+logistic  elderly      c.C_foreignpct1 c.C_emprate1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)					
+logistic  unemployed   c.C_foreignpct1 c.C_emprate1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)					
+logistic  income       c.C_foreignpct1 c.C_emprate1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)					
+logistic  jobs         c.C_foreignpct1 c.C_emprate1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+
+logistic  elderly      c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  unemployed   c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  income       c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)			
+logistic  jobs         c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+								
+logistic  elderly      c.C_socx1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)		
+logistic  unemployed   c.C_socx1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)		
+logistic  income       c.C_socx1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)		
+logistic  jobs         c.C_socx1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+
+logistic  elderly      c.C_emprate1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+logistic  unemployed   c.C_emprate1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+logistic  income       c.C_emprate1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	
+logistic  jobs         c.C_emprate1 c.C_netmigpct1 i.female c.C_age c.C_age2 i.educ i.empstat i.year i.cntry, vce (robust)	

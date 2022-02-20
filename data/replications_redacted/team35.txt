@@ -1,0 +1,406 @@
+﻿Team: 35
+Software: SPSS
+Version: ORIGINAL
+
+if (V3 = 1 or V3 = 36 ) country = 1. 
+if (V3 = 20 or V3 = 124 ) country = 2. 
+if (V3 = 30 or V3 = 756 ) country = 3. 
+if (V3 = 2 or V3 = 276 ) country = 4. 
+if (V3 = 25 or V3 = 724 ) country = 5. 
+if (V3 = 27 or V3 = 250) country = 6. 
+if (V3 = 4 or V3 =  826) country = 7. 
+if (V3 = 10 or V3 = 372) country = 8. 
+if (V3 = 24 or V3 = 392) country = 9. 
+if (V3 = 12 or V3 = 578) country = 10. 
+if (V3 = 19 or V3 = 554) country = 11. 
+if (V3 = 13 or V3 = 752) country = 12. 
+if (V3 = 6 or V3 = 840) country = 13. 
+
+RECODE V1 (4700=1) (2900=0) INTO V1_n.
+VARIABLE LABELS  V1_n 'survey wave'.
+EXECUTE.
+
+COMPUTE V25_n=SUM(V25, v36).
+EXECUTE.
+
+COMPUTE V28_n=SUM(V28, v39).
+EXECUTE.
+
+COMPUTE V30_n=SUM(V30, v41).
+EXECUTE.
+
+COMPUTE V31_n=SUM(V31, v42).
+EXECUTE.
+
+COMPUTE sex_n=SUM(sex, v200).
+EXECUTE.
+
+COMPUTE age_n=SUM(age, v201).
+EXECUTE.
+
+COMPUTE wrkst=SUM(wrkst, v206).
+EXECUTE.
+
+RECODE V25_n (1=1) (2=1) (3=0) (4=0) INTO V25_n_dummy.
+EXECUTE.
+
+RECODE V28_n (1=1) (2=1) (3=0) (4=0) INTO V28_n_dummy.
+EXECUTE.
+
+RECODE V30_n (1=1) (2=1) (3=0) (4=0) INTO V30_n_dummy.
+EXECUTE.
+
+RECODE V31_n (1=1) (2=1) (3=0) (4=0) INTO V31_n_dummy.
+EXECUTE.
+
+COMPUTE age_n_square=age_n ** 2.
+EXECUTE.
+
+RECODE v205 (1=1) (2=1) (3=1) (4=0) (5=0) (6=0) (7=0) INTO degree_primary_less.
+EXECUTE.
+
+RECODE v205 (1=0) (2=0) (3=0) (4=1) (5=1) (6=0) (7=0) INTO degree_secondary.
+EXECUTE.
+
+RECODE v205 (1=0) (2=0) (3=0) (4=0) (5=0) (6=1) (7=1) INTO degree_university.
+EXECUTE.
+
+RECODE degree (0=1) (1=1) (2=0) (3=0) (4=0) (5=0) INTO degree_primary_less.
+EXECUTE.
+
+RECODE degree (0=0) (1=0) (2=1) (3=1) (4=0) (5=0) INTO degree_secondary.
+EXECUTE.
+
+RECODE degree (0=0) (1=0) (2=0) (3=0) (4=1) (5=1) INTO degree_university.
+EXECUTE.
+
+RECODE wrkst (1=1) (2=0) (3=0) (4=0) (5=0) (6=0) (7=0) (8=0) (9=0) (10=0) INTO 
+    wrkst_full_time.
+EXECUTE.
+
+RECODE wrkst (1=0) (2=1) (3=1) (4=0) (5=0) (6=0) (7=0) (8=0) (9=0) (10=0) INTO 
+    wrkst_part_time.
+EXECUTE.
+
+RECODE wrkst (1=0) (2=0) (3=0) (4=1) (5=0) (6=1) (7=0) (8=1) (9=0) (10=0) INTO 
+    wrkst_active_unemployed.
+EXECUTE.
+
+RECODE wrkst (1=0) (2=0) (3=0) (4=0) (5=1) (6=0) (7=1) (8=0) (9=1) (10=1) INTO 
+    wrkst_not_active.
+EXECUTE.
+
+if (country = 1 AND V1_n = 0) foreignpct = 21.3. 
+if (country = 1 AND V1_n = 1) foreignpct = 21.3.
+
+if (country = 2 AND V1_n = 0) foreignpct = 17.20000076. 
+if (country = 2 AND V1_n = 1) foreignpct = 19.50000000.
+
+if (country = 3 AND V1_n = 0) foreignpct = 20.89999962. 
+if (country = 3 AND V1_n = 1) foreignpct = 22.29999924.
+
+if (country = 4 AND V1_n = 0) foreignpct = 11.00000000. 
+if (country = 4 AND V1_n = 1) foreignpct = 12.89999962.
+
+
+if (country = 5 AND V1_n = 0) foreignpct = 2.59999990. 
+if (country = 5 AND V1_n = 1) foreignpct = 10.60000038.
+
+if (country = 6 AND V1_n = 0) foreignpct = 10.500000006. 
+if (country = 6 AND V1_n = 1) foreignpct = 10.60000038.
+
+if (country = 7 AND V1_n = 0) foreignpct = 7.19999981. 
+if (country = 7 AND V1_n = 1) foreignpct = 9.69999981.
+
+if (country = 8 AND V1_n = 0) foreignpct = 7.30000019. 
+if (country = 8 AND V1_n = 1) foreignpct = 14.80000019.
+
+if (country = 9 AND V1_n = 0) foreignpct = 1.08599997. 
+if (country = 9 AND V1_n = 1) foreignpct = 1.56400001.
+
+if (country = 10 AND V1_n = 0) foreignpct = 5.40000010. 
+if (country = 10 AND V1_n = 1) foreignpct = 8.00000000.
+
+if (country = 11 AND V1_n = 0) foreignpct = 16.20000076. 
+if (country = 11 AND V1_n = 1) foreignpct = 20.70000076.
+
+if (country = 12 AND V1_n = 0) foreignpct = 10.30000019. 
+if (country = 12 AND V1_n = 1) foreignpct = 12.30000019.
+
+if (country = 13 AND V1_n = 0) foreignpct = 10.69999981. 
+if (country = 13 AND V1_n = 1) foreignpct = 13.30000019.
+
+
+
+
+if (country = 1 AND V1_n = 0) emprate =  68.38. 
+if (country = 1 AND V1_n = 1) emprate =  72.97.
+
+if (country = 2 AND V1_n = 0) emprate = 66.95. 
+if (country = 2 AND V1_n = 1) emprate = 72.70.
+
+if (country = 3 AND V1_n = 0) emprate = 82.60. 
+if (country = 3 AND V1_n = 1) emprate = 84.54.
+
+if (country = 4 AND V1_n = 0) emprate = 64.15. 
+if (country = 4 AND V1_n = 1) emprate = 67.41.
+
+if (country = 5 AND V1_n = 0) emprate = 47.58. 
+if (country = 5 AND V1_n = 1) emprate = 64.85.
+
+if (country = 6 AND V1_n = 0) emprate = 58.17. 
+if (country = 6 AND V1_n = 1) emprate = 61.85.
+
+if (country = 7 AND V1_n = 0) emprate = 68.32. 
+if (country = 7 AND V1_n = 1) emprate = 70.22.
+
+if (country = 8 AND V1_n = 0) emprate = 56.06. 
+if (country = 8 AND V1_n = 1) emprate = 69.34.
+
+if (country = 9 AND V1_n = 0) emprate = 74.41. 
+if (country = 9 AND V1_n = 1) emprate = 76.22.
+
+if (country = 10 AND V1_n = 0) emprate = 74.37. 
+if (country = 10 AND V1_n = 1) emprate = 76.38.
+
+if (country = 11 AND V1_n = 0) emprate = 71.76. 
+if (country = 11 AND V1_n = 1) emprate = 76.01.
+
+if (country = 12 AND V1_n = 0) emprate =70.34. 
+if (country = 12 AND V1_n = 1) emprate = 72.93.
+
+if (country = 13 AND V1_n = 0) emprate = 71.77. 
+if (country = 13 AND V1_n = 1) emprate = 71.93.
+
+
+
+if (country = 1 AND V1_n = 0) socx = 16.6. 
+if (country = 1 AND V1_n = 1) socx = 17.1.
+
+if (country = 2 AND V1_n = 0) socx = 18. 
+if (country = 2 AND V1_n = 1) socx = 16.4.
+
+if (country = 3 AND V1_n = 0) socx = 18. 
+if (country = 3 AND V1_n = 1) socx = 20.2.
+
+if (country = 4 AND V1_n = 0) socx = 27. 
+if (country = 4 AND V1_n = 1) socx = 26.7.
+
+if (country = 5 AND V1_n = 0) socx = 21.3. 
+if (country = 5 AND V1_n = 1) socx = 21.2.
+
+if (country = 6 AND V1_n = 0) socx = 28.8. 
+if (country = 6 AND V1_n = 1) socx = 29.1.
+
+if (country = 7 AND V1_n = 0) socx = 19.9. 
+if (country = 7 AND V1_n = 1) socx = 21.2.
+
+if (country = 8 AND V1_n = 0) socx = 14.7. 
+if (country = 8 AND V1_n = 1) socx = 16.7.
+
+if (country = 9 AND V1_n = 0) socx = 14.5. 
+if (country = 9 AND V1_n = 1) socx = 18.5.
+
+if (country = 10 AND V1_n = 0) socx = 22.5. 
+if (country = 10 AND V1_n = 1) socx = 21.6.
+
+if (country = 11 AND V1_n = 0) socx = 18.9. 
+if (country = 11 AND V1_n = 1) socx = 18.5.
+
+if (country = 12 AND V1_n = 0) socx = 31.6. 
+if (country = 12 AND V1_n = 1) socx = 29.4.
+
+if (country = 13 AND V1_n = 0) socx = 15.1. 
+if (country = 13 AND V1_n = 1) socx = 15.9.
+
+if (country = 1 AND V1_n = 0) netmigpct = 1.29490924. 
+if (country = 1 AND V1_n = 1) netmigpct = 3.14409065.
+
+if (country = 2 AND V1_n = 0) netmigpct = 2.18959260. 
+if (country = 2 AND V1_n = 1) netmigpct = 3.33456159.
+
+if (country = 3 AND V1_n = 0) netmigpct = 3.22248268. 
+if (country = 3 AND V1_n = 1) netmigpct = 2.69005394.
+
+if (country = 4 AND V1_n = 0) netmigpct = 3.24450660. 
+if (country = 4 AND V1_n = 1) netmigpct = 1.12776864.
+
+if (country = 5 AND V1_n = 0) netmigpct = 0.82168734. 
+if (country = 5 AND V1_n = 1) netmigpct = 5.76934290.
+
+if (country = 6 AND V1_n = 0) netmigpct = 0.41396859. 
+if (country = 6 AND V1_n = 1) netmigpct = 1.24947679.
+
+if (country = 7 AND V1_n = 0) netmigpct = 0.28843811. 
+if (country = 7 AND V1_n = 1) netmigpct = 1.57342863.
+
+if (country = 8 AND V1_n = 0) netmigpct = -0.03458165. 
+if (country = 8 AND V1_n = 1) netmigpct = 5.52292585.
+
+if (country = 9 AND V1_n = 0) netmigpct = 0.37720755. 
+if (country = 9 AND V1_n = 1) netmigpct = 0.06418485.
+
+if (country = 10 AND V1_n = 0) netmigpct = 0.97341746. 
+if (country = 10 AND V1_n = 1) netmigpct = 1.825211416.
+
+if (country = 11 AND V1_n = 0) netmigpct = 3.883377796. 
+if (country = 11 AND V1_n = 1) netmigpct = 2.48007941.
+
+if (country = 12 AND V1_n = 0) netmigpct = 1.70722461. 
+if (country = 12 AND V1_n = 1) netmigpct = 2.06375408.
+
+if (country = 13 AND V1_n = 0) netmigpct = 2.46555519. 
+if (country = 13 AND V1_n = 1) netmigpct = 1.91910112.
+
+
+
+DATASET ACTIVATE DataSet1.
+SPSSINC CREATE DUMMIES VARIABLE=country 
+ROOTNAME1=country 
+/OPTIONS ORDER=A USEVALUELABELS=YES USEML=YES OMITFIRST=NO.
+
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER foreignpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER foreignpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER foreignpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER foreignpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13  V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER foreignpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER foreignpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER foreignpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER foreignpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER foreignpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER foreignpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER foreignpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER foreignpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER netmigpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER netmigpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER netmigpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER netmigpct sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER netmigpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER netmigpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER netmigpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER netmigpct socx sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V28_n_dummy
+  /METHOD=ENTER netmigpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V30_n_dummy
+  /METHOD=ENTER netmigpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V31_n_dummy
+  /METHOD=ENTER netmigpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).
+
+LOGISTIC REGRESSION VARIABLES V25_n_dummy
+  /METHOD=ENTER netmigpct emprate sex_n age_n age_n_square degree_primary_less degree_university 
+    wrkst_part_time wrkst_active_unemployed wrkst_not_active country_2 country_3 country_4 country_5 
+    country_6 country_7 country_8 country_9 country_10 country_11 country_12 country_13 V1_n 
+  /CRITERIA=PIN(.05) POUT(.10) ITERATE(20) CUT(.5).

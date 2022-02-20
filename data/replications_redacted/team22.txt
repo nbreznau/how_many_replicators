@@ -1,0 +1,160 @@
+Team: 22
+Software: Stata
+Version: ORIGINAL
+
+use ZA2900.dta
+gen year=1996
+gen country="Australia" if v3==1
+replace country="Germany" if v3==2
+replace country="Germany" if v3==3
+replace country="United Kingdom" if v3==4
+replace country="United States" if v3==6
+replace country="Hungary" if v3==8
+replace country="Italy" if v3==9
+replace country="Ireland" if v3==10
+replace country="Norway" if v3==12
+replace country="Sweden" if v3==13
+replace country="Czech Republic" if v3==14
+replace country="Slovenia" if v3==15
+replace country="Poland" if v3==16
+replace country="Bulgaria" if v3==17
+replace country="Russia" if v3==18
+replace country="New Zealand" if v3==19
+replace country="Canada" if v3==20
+replace country="Israel" if v3==22
+replace country="Israel" if v3==23
+replace country="Japan" if v3==24
+replace country="Spain" if v3==25
+replace country="Latvia" if v3==26
+replace country="France" if v3==27
+replace country="Cyprus" if v3==28
+replace country="Switzerland" if v3==30
+
+gen d_oldagecare=1 if v39==1 | v39==2
+replace d_oldagecare=0 if v39==3 | v39==4
+gen d_unemployed=1 if v41==1 | v41==2
+replace d_unemployed=0 if v41==3 | v41==4
+gen d_incomediff=1 if v42==1 | v42==2
+replace d_incomediff=0 if v42==3 | v42==4
+gen d_jobs=1 if v36==1 | v36==2
+replace d_jobs=0 if v36==3 | v36==4
+
+gen female=.
+replace female=1 if v200==2
+replace female=0 if v200==1
+gen age = v201 if v201<=97
+gen age2=age*age
+
+gen edu=2 if v205==2 | v205==2 | v205==3 | v205==4
+replace edu=1 if v205==5 | v205==6
+replace edu=3 if v205==7 
+gen edu2=2 if v205==1 | v205==2 | v205==3 
+replace edu2=1 if v205==4 | v205==5 | v205==6
+replace edu2=3 if v205==7 
+
+gen empl=1 if v206==1 //full-time
+replace empl=2 if v206==2 //part-time
+replace empl=3 if v206==6 | v206==7 | v206==8 |v206==9 |v206==10 
+replace empl=4 if v206==5 //unemployed
+
+gen empl2=1 if v206==1 //full-time
+replace empl2=2 if v206==2 //part-time
+replace empl2=3 if v206==6 | v206==7 | v206==8 |v206==9 |v206==10 
+replace empl2=4 if v206==5 //unemployed
+replace empl2=2 if v206==3 | v206==4 //part-time
+
+gen weight=v325
+gen edu_orig1996=v205
+gen empl_orig1996=v206
+
+keep year-empl_orig1996
+
+save issp1996.dta, replace
+
+use ZA4700.dta, clear
+gen year=2006
+
+gen country="Australia" if V3a==36
+replace country="Germany" if V3a==276
+replace country="United Kingdom" if V3a==826
+replace country="United States" if V3a==840
+replace country="Hungary" if V3a==348 //n
+replace country="Ireland" if V3a==372
+replace country="Norway" if V3a==578
+replace country="Sweden" if V3a==752
+replace country="Czech Republic" if V3a==203 //n
+replace country="Slovenia" if V3a==705 //n
+replace country="Poland" if V3a==616 //n
+replace country="Russia" if V3a==643 //n
+replace country="New Zealand" if V3a==554
+replace country="Canada" if V3a==124
+replace country="Israel" if V3a==376 //n
+replace country="Japan" if V3a==392
+replace country="Spain" if V3a==724
+replace country="Latvia" if V3a==428 //n
+replace country="France" if V3a==250
+replace country="Switzerland" if V3a==756
+
+gen d_oldagecare=1 if V28==1 | V28==2
+replace d_oldagecare=0 if V28==3 | V28==4
+gen d_unemployed=1 if V30==1 | V30==2
+replace d_unemployed=0 if V30==3 | V30==4
+gen d_incomediff=1 if V31==1 | V31==2
+replace d_incomediff=0 if V31==3 | V31==4
+gen d_jobs=1 if V25==1 | V25==2
+replace d_jobs=0 if V25==3 | V25==4
+
+gen female=.
+replace female=1 if sex==2
+replace female=0 if sex==1
+tab female
+gen age2=age*age
+
+gen edu=2 if degree==0 | degree==1 
+replace edu=1 if degree==2 | degree==3 | degree==4
+replace edu=3 if degree==5
+
+gen edu2=2 if degree==0 | degree==1 | degree==2
+replace edu2=1 if degree==3 | degree==4
+replace edu2=3 if degree==5
+
+gen edu_orig2006=degree
+
+gen empl=1 if wrkst==1 //full-time
+replace empl=2 if wrkst==2 //part-time
+replace empl=3 if wrkst==6 | wrkst==7 | wrkst==8 |wrkst==9 |wrkst==10 
+replace empl=4 if wrkst==5 //unemployed
+
+gen empl2=1 if wrkst==1 //full-time
+replace empl2=2 if wrkst==2 //part-time
+replace empl2=3 if wrkst==6 | wrkst==7 | wrkst==8 |wrkst==9 |wrkst==10 
+replace empl2=4 if wrkst==5 //unemployed
+replace empl2=2 if wrkst==3 | wrkst==4 //part-time
+gen empl_orig2006=wrkst
+
+keep age weight year-empl_orig2006
+
+save issp2006.dta, replace
+append using issp1996.dta 
+save issp1996_2006.dta, replace
+
+keep if country=="Australia" | country=="Canada" | country=="France"  | country=="Germany" | country=="Ireland" | country=="Japan" | country=="New Zealand" | country=="Norway" | country=="Spain" | country=="Sweden" | country=="Switzerland" | country=="United Kingdom" | country=="United States"
+encode country, generate(country_num)
+save issp1996_2006_13c.dta, replace
+
+merge m:1 country year using L2data.dta, generate(match)
+keep if country=="Australia" | country=="Canada" | country=="France"  | country=="Germany" | country=="Ireland" | country=="Japan" | country=="New Zealand" | country=="Norway" | country=="Spain" | country=="Sweden" | country=="Switzerland" | country=="United Kingdom" | country=="United States"
+save issp1996_2006_13cL2.dta, replace
+
+logit d_jobs       female age age2 i.edu i.empl i.country_num i.year foreignpct, or
+logit d_unemployed female age age2 i.edu i.empl i.country_num i.year foreignpct, or
+logit d_incomediff female age age2 i.edu i.empl i.country_num i.year foreignpct, or
+logit d_oldagecare female age age2 i.edu i.empl i.country_num i.year foreignpct, or
+
+logit d_jobs       female age age2 i.edu i.empl i.country_num i.year netmigpct, or
+logit d_unemployed female age age2 i.edu i.empl i.country_num i.year netmigpct, or
+logit d_incomediff female age age2 i.edu i.empl i.country_num i.year netmigpct, or
+logit d_oldagecare female age age2 i.edu i.empl i.country_num i.year netmigpct, or
+
+
+

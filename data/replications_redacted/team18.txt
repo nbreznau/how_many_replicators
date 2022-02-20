@@ -1,0 +1,308 @@
+Team: 18
+Software: Stata
+Version: ORIGINAL
+
+clear all
+set more off
+version 15
+
+use "ZA2900.dta", clear
+
+gen id = _n 
+
+	recode v3									///
+		(1       = 36  "AU-Australia")    		///             
+		(2 3     = 276 "DE-Germany")      		/// 
+		(4       = 826 "GB-Great Britain")   	///  	
+		(6       = 840 "US-United States")	 	///
+		(8       = 348 "HU-Hungary")   	 		///
+		(10      = 372 "IE-Ireland")	 		///
+		(12      = 578 "NO-Norway")    	 		///
+		(13      = 752 "SE-Sweden")    	 		///
+		(14      = 203 "CZ-Czech Republic")  	/// 
+		(15      = 705 "SI-Slovenia") 	 		///
+		(16      = 616 "PL-Poland")      	 	///
+		(18      = 643 "RU-Russia")   	 		///
+		(19      = 554 "NZ-New Zealand")  		///
+		(20      = 124 "CA-Canada") 	 		///
+		(21      = 608 "PH-Philippines")	 	///
+		(22 23   = 376 "IL-Israel")         	/// 
+		(24      = 392 "JP-Japan")          	/// 
+		(25      = 724 "ES-Spain")   	 		///
+		(26      = 428 "LV-Latvia")  	 		///
+		(27      = 250 "FR-France")   	 		///
+		(30      = 756 "CH-Switzerland")  	 	///
+		(else 	 = .) 							///
+		, gen(cntry)
+
+
+	gen year = 1996
+	
+	recode v200 			///
+		(2 = 1 "Female")	///
+		(1 = 0 "Male")		///
+		, gen(female)
+	lab var female "Female"                    
+
+	rename v201 age 
+	gen age_sq = age*age
+	lab var age_sq "Age-squared"
+
+	recode v205								///
+		(1		= . )						/// drop those still in education
+		(2 3 4  = 1 "Primary or less")		///
+		(5 6 	= 2 "Secondary")			///
+		(7		= 3 "University or more")	///
+		, gen(edu)
+	
+	lab var edu "Education"
+
+	recode v206								///
+		(1 = 1 "Full-time")					///
+		(2 3 = 2 "Part-time")				///
+		(4 6 7 8 9 10 = 3 "Not active")		///
+		(5 = 4 "Active unemployed")			///
+		,gen(emplstat)
+	lab var emplstat "Employment Status"
+
+	recode v39				///
+		(1 2 = 1 "yes")		///
+		(3 4 = 0 "no")		///
+		, gen(old)
+	lab var old "Old Age Care"
+	
+	recode v41				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(unempl)	
+	lab var unempl "Unemployed"
+
+	recode v42 				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(incdiff)	
+	lab var incdiff "Reduce Income Differences"
+
+	recode v36				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(jobs)
+	lab var jobs "Jobs"
+
+keep id cntry year female age age_sq edu emplstat old unempl incdiff jobs 
+
+save "ISSP1996_prepared.dta", replace
+
+clear all
+set more off
+version 15
+
+use "ZA4700.dta", clear
+
+	rename V3a cntry
+
+	keep if      	   /// 
+		cntry == 36  | ///                 
+		cntry == 276 | ///   
+		cntry == 826 | ///     
+		cntry == 840 | ///   
+		cntry == 348 | ///   
+		cntry == 372 | ///   
+		cntry == 578 | ///   
+		cntry == 752 | ///   
+		cntry == 203 | ///    
+		cntry == 705 | ///   
+		cntry == 616 | ///   
+		cntry == 643 | ///   
+		cntry == 554 | ///   
+		cntry == 124 | ///   
+		cntry == 608 | ///   
+		cntry == 376 | ///                 
+		cntry == 392 | ///   
+		cntry == 724 | ///   
+		cntry == 428 | ///   
+		cntry == 250 | ///   
+		cntry == 756 
+gen year = 2006
+
+	recode sex 				///
+		(2 = 1 "Female")	///
+		(1 = 0 "Male")		///
+		, gen(female)
+
+	lab var female "Female"
+	gen age_sq = age*age
+	lab var age_sq "Age-squared"
+
+	recode degree							///
+		(0 1 	= 1 "Primary or less")		///
+		(2 3 4 	= 2 "Secondary")			///
+		(5		= 3 "University or more")	///
+		, gen(edu)
+	
+	lab var edu "Education"
+
+	recode wrkst							///
+		(1 = 1 "Full-time")					///
+		(2 3 = 2 "Part-time")				///
+		(4 6 7 8 9 10 = 3 "Not active")		///
+		(5 = 4 "Active unemployed")			///
+		,gen(emplstat)
+				
+	lab var emplstat "Employment Status"
+
+	recode V28				///
+		(1 2 = 1 "yes")		///
+		(3 4 = 0 "no")		///
+		, gen(old)
+	
+	lab var old "Old Age Care"
+
+	recode V30				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(unempl)
+	lab var unempl "Unemployed"
+
+	recode V31 				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(incdiff)	
+	lab var incdiff "Reduce Income Differences"
+
+	recode V25				///
+		(1 2 = 1 "Yes")		///
+		(3 4 = 0 "No")		///
+		, gen(jobs)	
+	lab var jobs "Jobs"
+	
+
+keep id cntry year female age age_sq edu emplstat old unempl incdiff jobs
+
+save "ISSP2006_prepared.dta", replace
+
+clear all
+set more off
+version 15
+
+use "L2data.dta", clear
+
+lab var foreignpct "Immigrant Stock"
+lab var netmigpct "Change in Immigrant Stock"
+lab var socx "Social Welfare Expenditures"
+lab var emprate "Employment rate"
+
+save "level2.dta", replace
+
+clear all
+set more off
+version 15
+
+use "ISSP1996_prepared.dta", clear
+
+append using "ISSP2006_prepared.dta"
+
+merge m:1 cntry year using "level2.dta" ///
+	, keep(match) nogen
+
+keep if ///
+	  cntry == 36  	/// "AU-Australia" 
+	| cntry == 276	/// "DE-Germany"      	
+	| cntry == 826	/// "GB-Great Britain"  
+	| cntry == 840	/// "US-United States"		
+	| cntry == 372	/// "IE-Ireland"	
+	| cntry == 578	/// "NO-Norway"    	
+	| cntry == 752	/// "SE-Sweden"
+	| cntry == 554	/// "NZ-New Zealand" 
+	| cntry == 124	/// "CA-Canada" 	
+	| cntry == 392	/// "JP-Japan" 
+	| cntry == 724	/// "ES-Spain" 
+	| cntry == 250	/// "FR-France"	
+	| cntry == 756	//  "CH-Switzerland"	
+
+save "analysis_sample.dta", replace
+
+clear all
+set more off
+version 15
+
+use "analysis_sample.dta", clear
+
+global controls i.female age age_sq ib2.edu ib1.emplstat i.cntry i.year
+
+
+	quietly logit old foreignpct $controls, or 
+	eststo m1
+
+	quietly logit unempl foreignpct $controls, or 
+	eststo m2
+
+	quietly logit incdiff foreignpct $controls, or 
+	eststo m3
+
+	quietly logit jobs foreignpct $controls, or 
+	eststo m4
+
+	quietly logit old foreignpct socx $controls, or 
+	eststo m5
+
+	quietly logit unempl foreignpct socx $controls, or 
+	eststo m6
+
+	quietly logit incdiff foreignpct socx $controls, or 
+	eststo m7
+
+	quietly logit jobs foreignpct socx $controls, or 
+	eststo m8
+
+	quietly logit old foreignpct emprate $controls, or 
+	eststo m9
+
+	quietly logit unempl foreignpct emprate $controls, or 
+	eststo m10
+
+	quietly logit incdiff foreignpct emprate $controls, or 
+	eststo m11
+
+	quietly logit jobs foreignpct emprate $controls, or 
+	eststo m12
+
+	quietly logit old netmigpct $controls, or 
+	eststo m13
+
+	quietly logit unempl netmigpct $controls, or 
+	eststo m14
+
+	quietly logit incdiff netmigpct $controls, or 
+	eststo m15
+
+	quietly logit jobs netmigpct $controls, or 
+	eststo m16
+
+	quietly logit old netmigpct socx $controls, or 
+	eststo m17
+	 
+	quietly logit unempl netmigpct socx $controls, or 
+	eststo m18
+
+	quietly logit incdiff netmigpct socx $controls, or 
+	eststo m19
+
+	quietly logit jobs netmigpct socx $controls, or 
+	eststo m20
+
+	quietly logit old netmigpct emprate $controls, or 
+	eststo m21
+
+	quietly logit unempl netmigpct emprate $controls, or 
+	eststo m22
+
+	quietly logit incdiff netmigpct emprate $controls, or 
+	eststo m23
+
+	quietly logit jobs netmigpct emprate $controls, or 
+	eststo m24
+
+esttab m* using "results_table.csv", keep(foreignpct socx emprate netmigpct _cons) eform constant pr2 replace
+
+

@@ -1,0 +1,342 @@
+Team: 6
+Software: SPSS
+Version: ORIGINAL
+
+DATASET ACTIVATE DataSet1.
+VARIABLE LABELS v1 "ZA Study Number".
+VALUE LABELS v1 2900"ISSO 1996".
+FREQUENCIES v1.
+FREQUENCIES v3.
+RECODE v3 (1=36) (2=276) (3=276) (4=826) (6=840) 
+(8=348) (9=380) (10=372) (12=578) (13=752) (14=203) (15=705)
+(16=616) (17=100) (18=643) (19=554) (20=124) (21=608) 
+(22=376) (23=376) (24=392) (25=724) 
+(26=428) (27=250) (28=196) (30=756)  into iso.
+VARIABLE LABELS iso "ISO-Code".
+
+RENAME VARIABLES v36=jobs.
+RENAME VARIABLES v39=OldAgeCare.
+RENAME VARIABLES v41=unemployed.
+RENAME VARIABLES v42=redincdiff.
+RENAME VARIABLES v200=sex.
+RENAME VARIABLES v201=age.
+RENAME VARIABLES v205=edu.
+RENAME VARIABLES v206=wrkst.
+FREQUENCIES edu.
+
+RECODE edu (1=0) (2=0) (3=1) (4=2) (5=3) (6=4) (7=5).
+VALUE LABELS edu 
+0"No formal qualification, incomplete primary"
+1"Lowest formal qualification"
+2"Above lowest qualification"
+3"Higher secondary completed"
+4"Above higher secondary level,other qualification"
+5"University degree completed, graduate studies".
+EXECUTE.
+DELETE VARIABLES 
+v4 v5 v6 v7 v8 v9 v10 v11 v12
+v13 v14 v15 v16 v17 v18 v19 v20
+v21 v22 v23 v24 v25 v26 v27 v28
+v29 v30 v31 v32 v33 v34 v35 v37
+v38 v40 v43 v44 v45 v46 v47 v48
+v49 v50 v51 v52 v53 v54 v55 v56
+v57 v58 v59 v60 v61 v62 v63 v64
+v65 v66 v67 v68 v202 v203 v204 v207
+v208 v209 v210 v211 v212 v213 v214 v215
+v216 v217 v218 v219 v220 v221 v222 v223
+v224 v225 v226 v227 v228 v229 v230 v231
+v232 v233 v234 v235 v236 v237 v238 v239
+v240 v241 v242 v243 v244 v245 v246 v247
+v248 v249 v250 v251 v252 v253 v254 v255
+v256 v257 v258 v259 v260 v261 v262 v263
+v264 v265 v266 v267 v268 v269 v270 v271
+v272 v273 v274 v275 v276 v277 v278 v279
+v280 v281 v282 v283 v284 v285 v286 v287
+v288 v289 v290 v291 v292 v293 v294 v295
+v296 v297 v298 v299 v300 v301 v302 v303
+v304 v305 v306 v307 v308 v309 v310 v311
+v312 v313 v314 v315 v316 v317 v318 v319
+v320 v321 v322 v323 v324 v325.
+
+*____ISSP 2006______.
+DATASET ACTIVATE DataSet2.
+VALUE LABELS v1 4700"ISSO 2006".
+COMPUTE iso=V3a.
+VARIABLE LABELS iso "ISO-Code".
+RENAME VARIABLES v25=jobs.
+RENAME VARIABLES v28=OldAgeCare.
+RENAME VARIABLES v30=unemployed.
+RENAME VARIABLES v31=redincdiff.
+RENAME VARIABLES degree=edu.
+FREQUENCIES edu.
+EXECUTE.
+DELETE VARIABLES attend AU_DEGR AU_INC AU_PRTY AU_REG AU_RINC AU_SIZE CA_DEGR CA_INC CA_PRTY CA_REG 
+    CA_RINC CA_SIZE CH_DEGR CH_INC CH_PRTY CH_REG CH_RINC CH_SIZE CL_DEGR CL_INC CL_PRTY CL_REG CL_RINC 
+    CL_SIZE cohab CZ_DEGR CZ_INC CZ_PRTY CZ_REG CZ_RINC CZ_SIZE DE_DEGR DE_INC DE_PRTY DE_REG DE_RINC 
+    DE_SIZE DK_DEGR DK_INC DK_PRTY DK_REG DK_RINC DK_SIZE DO_DEGR DO_INC DO_PRTY DO_REG DO_RINC DO_SIZE 
+    educyrs ES_DEGR ES_INC ES_PRTY ES_REG ES_RINC ES_SIZE ethnic FI_DEGR FI_INC FI_PRTY FI_REG FI_RINC 
+    FI_SIZE FR_DEGR FR_INC FR_PRTY FR_REG FR_RINC FR_SIZE GB_DEGR GB_INC GB_PRTY GB_REG GB_RINC GB_SIZE 
+    hhcycle hompop HR_DEGR HR_INC HR_PRTY HR_REG HR_RINC HR_SIZE HU_DEGR HU_INC HU_PRTY HU_REG HU_RINC 
+    HU_SIZE IE_DEGR IE_INC IE_PRTY IE_REG IE_RINC IE_SIZE IL_DEGR IL_INC IL_PRTY IL_REG IL_RINC IL_SIZE 
+    ISCO88 JP_DEGR JP_INC JP_PRTY JP_REG JP_RINC JP_SIZE KR_DEGR KR_INC KR_PRTY KR_REG KR_RINC KR_SIZE 
+    LV_DEGR LV_INC LV_PRTY LV_REG LV_RINC LV_SIZE marital mode nemploy NL_DEGR NL_INC NL_PRTY NL_REG 
+    NL_RINC NL_SIZE NO_DEGR NO_INC NO_PRTY NO_REG NO_RINC NO_SIZE NZ_DEGR NZ_INC NZ_PRTY NZ_REG NZ_RINC 
+    NZ_SIZE PARTY_LR PH_DEGR PH_INC PH_PRTY PH_REG PH_RINC PH_SIZE PL_DEGR PL_INC PL_PRTY PL_REG 
+    PL_RINC PL_SIZE PT_DEGR PT_INC PT_PRTY PT_REG PT_RINC PT_SIZE relig religgrp RU_DEGR RU_INC RU_PRTY 
+    RU_REG RU_RINC RU_SIZE SE_DEGR SE_INC SE_PRTY SE_REG SE_RINC SE_SIZE SI_DEGR SI_INC SI_PRTY SI_REG 
+    SI_RINC SI_SIZE SPISCO88 spwrkst spwrktyp topbot TW_DEGR TW_INC TW_PRTY TW_REG TW_RINC TW_SIZE 
+    union urbrural US_DEGR US_INC US_PRTY US_REG US_RINC US_SIZE UY_DEGR UY_INC UY_PRTY UY_REG UY_RINC 
+    UY_SIZE V10 V11 V12 V13 V14 V15 V16 V17 V18 V19 V20 V21 V22 V23 V24 V26 V27 V29 V32 V33 V34 V35 V36 
+    V37 V38 V39 V3a V4 V40 V41 V42 V43 V44 V45 V46 V47 V48 V49 V5 V50 V51 V52 V53 V54 V55 V56 V57 V58 
+    V59 V6 V60 V61 V62 V63 V7 V8 V9 VE_DEGR VE_INC VE_PRTY VE_REG VE_RINC VE_SIZE version VOTE_LE 
+    weight wrkhrs wrksup wrktype ZA_DEGR ZA_INC ZA_PRTY ZA_REG ZA_RINC ZA_SIZE.
+
+DATASET ACTIVATE DataSet2.
+ADD FILES /FILE=*
+  /FILE='DataSet1'.
+EXECUTE.
+
+CROSSTABS iso by v1.
+VALUE LABELS v1 2900"ISSO 1996" 4700"ISSO 2006".
+VALUE LABELS iso
+36 "Australia" 100 "Bulgaria" 124 "Canada" 152 "Chile"
+158 "Taiwan" 191 "Croatia" 196 "Zypern" 203"Czech_Republic"
+208 "Denmark" 214 "Dom_Rep" 246 "Finland" 250 "France"
+276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Israel"
+380 "Italy" 392 "Japan" 410 "South_Korea" 428 "Latvia"
+528 "Netherlands" 554 "New_Zealand" 578 "Norway" 608 "Philippines"
+616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia"
+710 "South_Africa" 724 "Spain" 752 "Sweden" 756 "Switzerland"
+826 "Great Britain" 840 "United States" 858 "Uruguay" 862 "Venezuela".
+CROSSTABS iso by v1.
+
+FREQUENCIES all.
+RECODE sex (1=0) (2=1) into female.
+VALUE LABELS female 0"male" 1"female".
+FREQUENCIES female.
+COMPUTE agesq =age*age.
+FREQUENCIES agesq.
+FREQUENCIES edu.
+
+RECODE edu (0=0) (1=0) (2=1) (3=1) (4=1) (5=2) into educat.
+VALUE LABELS educat 
+0"Primary or less" 
+1"Secondary; more than primary, less than completed university degree"
+2"University degree or more". 
+FREQUENCIES educat.
+FREQUENCIES wrkst.
+
+RECODE wrkst (1=3) (2=0) (3=0) (4 6 7 8 9 10=1) (5=2) into wrkstcat.
+VALUE LABELS wrkstcat
+0"part time" 1"not active" 2"active unemployed" 3"full-time".
+
+FREQUENCIES jobs oldagecare unemployed redincdiff.
+RECODE jobs (1 2=1) (3 4=0) into jobsd.
+RECODE oldagecare (1 2=1) (3 4=0) into oldagecared.
+RECODE unemployed (1 2=1) (3 4=0) into unemployedd.
+RECODE redincdiff (1 2=1) (3 4=0) into redincdiffd.
+VALUE LABELS jobsd 1"yes, gov. responsibility".
+VALUE LABELS oldagecared 1"yes, gov. responsibility".
+VALUE LABELS unemployedd 1"yes, gov. responsibility".
+VALUE LABELS redincdiffd 1"yes, gov. responsibility".
+FREQUENCIES jobsd oldagecared unemployedd redincdiffd.
+
+FREQUENCIES v1.
+RECODE v1 (2900=1996) (4700=2006) into year.
+FREQUENCIES year.
+FREQUENCIES iso year.
+CROSSTABS iso by year.
+COMPUTE ref =iso*year.
+FREQUENCIES ref.
+CROSSTABS ref by year.
+FREQUENCIES year educat wrkstcat.
+RECODE year (1996=1) (ELSE=0) into d1996.
+RECODE educat (0=1) (1 2 =0) into edulow.
+RECODE educat (2=1) (1 0 =0) into eduhigh.
+RECODE wrkstcat (0=1) (1 2 3 =0) into wrkpart.
+RECODE wrkstcat (1=1) (0 2 3 =0) into wrknotact.
+RECODE wrkstcat (2=1) (0 1 3=0) into wrkactunemp.
+FREQUENCIES wrkpart wrknotact wrkactunemp.
+FREQUENCIES edulow eduhigh.
+FREQUENCIES wrkstcat.
+
+CROSSTABS iso by v1.
+
+
+DATASET ACTIVATE DataSet3.
+RENAME VARIABLES cntry=iso.
+COMPUTE ref=iso*year.
+
+DATASET ACTIVATE DataSet2.
+SORT CASES BY ref.
+DATASET ACTIVATE DataSet3.
+SORT CASES BY ref.
+DATASET ACTIVATE DataSet2.
+MATCH FILES /FILE=*
+  /TABLE='DataSet3'
+  /RENAME (iso year = d0 d1) 
+  /BY ref
+  /DROP= d0 d1.
+EXECUTE.
+VALUE LABELS iso
+36 "Australia" 100 "Bulgaria" 124 "Canada" 152 "Chile"
+158 "Taiwan" 191 "Croatia" 196 "Zypern" 203"Czech_Republic"
+208 "Denmark" 214 "Dom_Rep" 246 "Finland" 250 "France"
+276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Israel"
+380 "Italy" 392 "Japan" 410 "South_Korea" 428 "Latvia"
+528 "Netherlands" 554 "New_Zealand" 578 "Norway" 608 "Philippines"
+616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia"
+710 "South_Africa" 724 "Spain" 752 "Sweden" 756 "Switzerland"
+826 "Great Britain" 840 "United States" 858 "Uruguay" 862 "Venezuela".
+
+RECODE 
+V1 V2 V3 iso jobs
+OldAgeCare unemployed redincdiff sex
+age edu wrkst female agesq educat wrkstcat jobsd
+edulow eduhigh wrkpart wrknotact wrkactunemp
+oldagecared unemployedd redincdiffd year
+ref emprate foreignpct socx netmigpct
+(SYSMIS=-99) (ELSE=COPY).
+
+MISSING VALUES V1 V2 V3 iso jobs
+OldAgeCare unemployed redincdiff sex
+age edu wrkst female agesq educat wrkstcat jobsd
+edulow eduhigh wrkpart wrknotact wrkactunemp
+oldagecared unemployedd redincdiffd year
+ref emprate foreignpct socx netmigpct (-99).
+
+SELECT IF 
+iso EQ 36 OR iso EQ 124 OR iso EQ 250 OR
+iso EQ 276 OR iso EQ 372 OR iso EQ 392 OR 
+iso EQ 554 OR iso EQ 578 OR iso EQ 724 OR
+ iso EQ 752 OR iso EQ 756 OR iso EQ 826 OR
+iso EQ 840.
+EXECUTE.
+FREQUENCIES iso.
+
+AUTORECODE var =iso /INTO isor.
+DO REPEAT #newvar = isod1 to isod13 / #isoval = 1 to 13.
+RECODE isor (#isoval= 1)(else = 0) into #newvar.
+END REPEAT print.
+EXECUTE.
+
+LOGISTIC REGRESSION oldagecared with
+	foreignpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd with 
+	foreignpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	foreignpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	foreignpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION oldagecared  with 
+	foreignpct socx 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd  with
+	foreignpct socx 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	foreignpct socx 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	foreignpct socx 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION oldagecared  with
+	foreignpct emprate 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd  with
+	foreignpct emprate 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	foreignpct emprate 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	foreignpct emprate 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION oldagecared  with
+	netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd  with
+	netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION oldagecared with 
+	socx netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd  with
+	socx netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	socx netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	socx netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION oldagecared with 
+	emprate netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION unemployedd  with
+	emprate netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION redincdiffd  with
+	emprate netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+
+LOGISTIC REGRESSION jobsd  with
+	emprate netmigpct 
+	female age agesq edulow eduhigh wrkpart wrknotact wrkactunemp 
+	isod2 isod3 isod4 isod5 isod6 isod7 isod8 isod9 isod10 isod11 isod12 isod13 d1996.
+

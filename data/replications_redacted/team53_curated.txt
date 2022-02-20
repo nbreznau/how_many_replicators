@@ -1,0 +1,388 @@
+Team: 53
+Software: R
+Version: CURATED
+
+library(tidyverse)
+library(haven)
+library(foreign)
+library(MASS)
+library(openxlsx)
+library(knitr)
+library(broom)
+library(stargazer)
+library(texreg)
+
+
+ISSP96 <- read.dta("ZA2900.dta")
+ISSP06 <- read_dta("ZA4700.dta") 
+
+country <- read_dta("bradyfinnigan2014countrydata.dta")
+
+ISSP96 <- ISSP96[ISSP96[["v3"]] == "aus" |
+                   ISSP96[["v3"]] == "cdn" |
+                   ISSP96[["v3"]] == "f" |
+                   ISSP96[["v3"]] == "D-W" |
+                   ISSP96[["v3"]] == "D-E" |
+                   ISSP96[["v3"]] == "irl" |
+                   ISSP96[["v3"]] == "j" |
+                   ISSP96[["v3"]] == "nz" |
+                   ISSP96[["v3"]] == "n" |
+                   ISSP96[["v3"]] == "e" |
+                   ISSP96[["v3"]] == "s" |
+                   ISSP96[["v3"]] == "ch" |
+                   ISSP96[["v3"]] == "gb" |
+                   ISSP96[["v3"]] == "usa", ]
+
+country <- country[country[["country"]] == "Australia" |
+                     country[["country"]] == "Canada" |
+                     country[["country"]] == "France" |
+                     country[["country"]] == "Germany" |
+                     country[["country"]] == "Ireland" |
+                     country[["country"]] == "Japan" |
+                     country[["country"]] == "New Zealand" |
+                     country[["country"]] == "Norway" |
+                     country[["country"]] == "Spain" |
+                     country[["country"]] == "Sweden" |
+                     country[["country"]] == "Switzerland" |
+                     country[["country"]] == "United Kingdom" |
+                     country[["country"]] == "United States", ]
+
+
+ISSP06$V3a <- as_factor(ISSP06$V3a) 
+ISSP06 <- ISSP06[ISSP06[["V3a"]] == "AU-Australia" |
+                   ISSP06[["V3a"]] == "CA-Canada" |
+                   ISSP06[["V3a"]] == "FR-France" |
+                   ISSP06[["V3a"]] == "DE-Germany" |         
+                   ISSP06[["V3a"]] == "IE-Ireland" |         
+                   ISSP06[["V3a"]] == "JP-Japan" |         
+                   ISSP06[["V3a"]] == "NZ-New Zealand" |         
+                   ISSP06[["V3a"]] == "NO-Norway" |         
+                   ISSP06[["V3a"]] == "ES-Spain" |         
+                   ISSP06[["V3a"]] == "SE-Sweden" |         
+                   ISSP06[["V3a"]] == "CH-Switzerland" |          
+                   ISSP06[["V3a"]] == "GB-Great Britain" |
+                   ISSP06[["V3a"]] == "US-United States", ]
+
+
+
+ISSP96$age <- ISSP96$v201 
+ISSP96$ageSqu <- (ISSP96$age)^2 
+ISSP96$female <- ISSP96$v200
+levels(ISSP96$female) <- c(0, 1, NA) 
+ISSP96$lessHS <- as.numeric(ISSP96$v205 == "None;still at school,uni" |  
+                              ISSP96$v205 == "Incpl primary" |
+                              ISSP96$v205 == "Primary compl" |
+                              ISSP96$v205 == "Incpl secondary")
+ISSP96$univ <- as.numeric(ISSP96$v205 == "University compl") 
+ISSP96$ptemp <- as.numeric(ISSP96$v206 == "P-t empl,main job" | 
+                             ISSP96$v206 == "Less part-time" |      
+                             ISSP96$v206 == "Help family member")   
+ISSP96$unempy <- as.numeric(ISSP96$v206 == "Unemployed") 
+ISSP96$nolabor <- as.numeric(ISSP96$v206 == "Studt,school,educ" | 
+                               ISSP96$v206 == "Retired" |      
+                               ISSP96$v206 == "Housewife <man>" |
+                               ISSP96$v206 == "Permanent disabled" |
+                               ISSP96$v206 == "Oth,n i lab force" |
+                               ISSP96$v206 == "na")
+ISSP96$selfEmpy <- as.numeric(ISSP96$v213 == "Self-employed RP:informell") 
+ISSP96[is.na(ISSP96$v206),"selfEmpy"] = NA
+
+
+ISSP96$pubEmpy <- as.numeric(ISSP96$v212 == "Government" | ISSP96$v212 == "Public owned firm") 
+ISSP96$pubEmpy[is.na(ISSP96$v206)] <- NA 
+
+ISSP96$highRel <- as.numeric(ISSP96$v220 == "Once a week or more" | ISSP96$v220 == "2-3 times a month") 
+ISSP96$lowRel <- as.numeric(ISSP96$v220 == "Once a month" | ISSP96$v220 == "Sev times a year" | 
+                              ISSP96$v220 == "Less frequently a year")
+ISSP96$noRel <- as.numeric(ISSP96$v220 == "Never")
+
+ISSP96$incZScore <- vector(mode="numeric", length=length(ISSP96$v3)) 
+ISSP96$incZScore[!is.na(ISSP96$incZScore)] <- NA
+for(i in levels(ISSP96[["v3"]])) {                                     
+  obs <- which(ISSP96[["v3"]] == i)                                    
+  ISSP96$incZScore[obs] <- scale(ISSP96[obs, "v218"])                 
+}
+
+
+ISSP96$neverMar <- as.numeric(ISSP96$v202 == "not married")
+ISSP96$married <- as.numeric(ISSP96$v202 == "marr,liv as mar" | 
+                               ISSP96$v206 == "widowed" |      
+                               ISSP96$v206 == "divorced" |
+                               ISSP96$v206 == "separated") 
+ISSP96$div <- as.numeric(ISSP96$v202 == "divorced")
+ISSP96$widow <- as.numeric(ISSP96$v202 == "widowed")
+
+ISSP96$hhsize <- ISSP96$v273 
+
+
+
+ISSP96$kidsHH <- as.numeric(ISSP96$v274 == "1 adult,1 child" |  
+                              ISSP96$v274 == "1 adult,2 child" |
+                              ISSP96$v274 == "1 adult,3 or > ch" |
+                              ISSP96$v274 == "2 adults,1 child" |
+                              ISSP96$v274 == "2 adults,2 child" |  
+                              ISSP96$v274 == "2 adults,3 or > ch" |  
+                              ISSP96$v274 == "3 adults+children" | 
+                              ISSP96$v274 == "4 adults+ children" |
+                              ISSP96$v274 == "5 adults+children" |
+                              ISSP96$v274 == "6 adults+children" |
+                              ISSP96$v274 == "7 adults+children" |
+                              ISSP96$v274 == "8 adults+children")
+
+
+ISSP96$rural <- as.numeric(ISSP96$v275 == "Rural")
+ISSP96$suburb <- as.numeric(ISSP96$v275 == "Suburb,city,town,county seat")
+ISSP96$urban <- as.numeric(ISSP96$v275 == "Urban")
+
+
+ISSP96 <- ISSP96[-which(is.na(ISSP96$v218)), ]
+
+
+
+ISSP06$ageSqu <- (ISSP06$age)^2 
+ISSP06$female <- as.numeric(ISSP06$sex == 2) 
+ISSP06$lessHS <- as.numeric(ISSP06$degree == 0 | 
+                              ISSP06$degree == 1 | 
+                              ISSP06$degree == 2)
+ISSP06$univ <- as.numeric(ISSP06$degree == 5) 
+ISSP06$ptemp <- as.numeric(ISSP06$wrkst == 2 | 
+                             ISSP06$wrkst == 3 | 
+                             ISSP06$wrkst == 4)
+ISSP06$unempy <- as.numeric(ISSP06$wrkst == 5) 
+ISSP06$nolabor <- as.numeric(ISSP06$wrkst == 6 | 
+                               ISSP06$wrkst == 7 | 
+                               ISSP06$wrkst == 8 |
+                               ISSP06$wrkst == 9 |
+                               ISSP06$wrkst == 10 )
+ISSP06$selfEmpy <- as.numeric(ISSP06$wrktype == 4) 
+replace <- is.na(ISSP06$wrkst)
+ISSP06[replace, "selfEmpy"] <- NA
+
+ISSP06$pubEmpy <- as.numeric(ISSP06$wrktype == 1 | ISSP06$wrktype == 2) 
+replace <- is.na(ISSP06$wrkst)
+ISSP06[replace, "pubEmpy"] <- NA
+
+
+ISSP06$highRel <- as.numeric(ISSP06$attend == 1 | 
+                               ISSP06$attend == 2 | 
+                               ISSP06$attend == 3)
+ISSP06$lowRel <- as.numeric(ISSP06$attend == 4 | 
+                              ISSP06$attend == 5 | 
+                              ISSP06$attend == 6 |
+                              ISSP06$attend == 7)
+ISSP06$noRel <- as.numeric(ISSP06$attend == 8)    
+
+
+ISSP06$neverMar <- as.numeric(ISSP06$marital == 5) 
+ISSP06$married <- as.numeric(ISSP06$marital == 2 | 
+                               ISSP06$marital == 3 |
+                               ISSP06$marital == 4 |
+                               ISSP06$marital == 5) 
+ISSP06$div <- as.numeric(ISSP06$marital == 3 | 
+                           ISSP06$marital == 4)
+ISSP06$widow <- as.numeric(ISSP06$marital == 2) 
+
+ISSP06$hhsize <- ISSP06$hompop 
+
+ISSP06$kidsHH <- as.numeric(ISSP06$hhcycle == 2 | 
+                              ISSP06$hhcycle == 3 |
+                              ISSP06$hhcycle == 4 |
+                              ISSP06$hhcycle == 6 |
+                              ISSP06$hhcycle == 7 |
+                              ISSP06$hhcycle == 8 |
+                              ISSP06$hhcycle == 10 |
+                              ISSP06$hhcycle == 12 |
+                              ISSP06$hhcycle == 14 |
+                              ISSP06$hhcycle == 16 |
+                              ISSP06$hhcycle == 18 |
+                              ISSP06$hhcycle == 20)
+
+
+ISSP06$rural <- as.numeric(ISSP06$urbrural == 4 | 
+                             ISSP06$urbrural == 5) 
+ISSP06$suburb <- as.numeric(ISSP06$marital == 2 | 
+                              ISSP06$marital == 3)
+
+ISSP06$incZScore <- vector(mode="numeric", length=length(ISSP06$V3a)) 
+ISSP06$countryIncome <- vector(mode = "character", length = length(ISSP06$V3a)) 
+ISSP06$incZScore[!is.na(ISSP06$incZScore)] <- NA
+ISSP06$countryIncome[!is.na(ISSP06$countryIncome)] <- NA
+for(i in names(dplyr::select(ISSP06, ends_with("_INC")))) {  
+  ISSP06[!is.na(ISSP06[ , i]), "countryIncome"] <- i
+}
+for(i in names(dplyr::select(ISSP06, ends_with("_INC")))){ 
+  obs <- which(ISSP06[["countryIncome"]] == i)                                   
+  ISSP06$incZScore[obs] <- scale(ISSP06[obs, i])                  
+}  
+ISSP06 <- subset(ISSP06, select = -countryIncome)
+
+
+ISSP06 <- ISSP06[-which(is.na(ISSP06$incZScore)), ]
+
+
+
+ISSP96$d.jobs <- numeric(length = length(ISSP96$v36))
+ISSP96$d.jobs <- as.numeric(ISSP96$v36 == "Definitely should" | ISSP96$v36 == "Probably should")
+ISSP96[is.na(ISSP96$v36), "d.jobs"] <- NA 
+
+ISSP96$d.unempy <- numeric(length = length(ISSP96$v41))
+ISSP96$d.unempy <- as.numeric(ISSP96$v41 == "Definitely should" | ISSP96$v41 == "Probably should")
+ISSP96[is.na(ISSP96$v41), "d.unempy"] <- NA 
+
+ISSP96$d.income <- numeric(length = length(ISSP96$v42))
+ISSP96$d.income <- as.numeric(ISSP96$v42 == "Definitely should" | ISSP96$v42 == "Probably should")
+ISSP96[is.na(ISSP96$v42), "d.income"] <- NA 
+
+ISSP96$d.retire <- numeric(length = length(ISSP96$v39))
+ISSP96$d.retire <- as.numeric(ISSP96$v39 == "Definitely should" | ISSP96$v39 == "Probably should")
+ISSP96[is.na(ISSP96$v39), "d.retire"] <- NA 
+
+ISSP96$d.housing <- numeric(length = length(ISSP96$v44))
+ISSP96$d.housing <- as.numeric(ISSP96$v44 == "Definitely should" | ISSP96$v44 == "Probably should")
+ISSP96[is.na(ISSP96$v44), "d.housing"] <- NA 
+
+ISSP96$d.health <- numeric(length = length(ISSP96$v38))
+ISSP96$d.health <- as.numeric(ISSP96$v38 == "Definitely should" | ISSP96$v38 == "Probably should")
+ISSP96[is.na(ISSP96$v38), "d.health"] <- NA 
+
+ISSP06$d.jobs <- numeric(length = length(ISSP06$V25))
+ISSP06$d.jobs <- as.numeric(ISSP06$V25 == 1 | ISSP06$V25 == 2)
+ISSP06[is.na(ISSP06$V25), "d.jobs"] <- NA 
+
+ISSP06$d.unempy <- numeric(length = length(ISSP06$V30))
+ISSP06$d.unempy <- as.numeric(ISSP06$V30 == 1 | ISSP06$V30 == 2)
+ISSP06[is.na(ISSP06$V30), "d.unempy"] <- NA 
+
+ISSP06$d.income <- numeric(length = length(ISSP06$V31))
+ISSP06$d.income <- as.numeric(ISSP06$V31 == 1 | ISSP06$V31 == 2)
+ISSP06[is.na(ISSP06$V31), "d.income"] <- NA 
+
+ISSP06$d.retire <- numeric(length = length(ISSP06$V28))
+ISSP06$d.retire <- as.numeric(ISSP06$V28 == 1 | ISSP06$V28 == 2)
+ISSP06[is.na(ISSP06$V28), "d.retire"] <- NA 
+
+ISSP06$d.housing <- numeric(length = length(ISSP06$V33))
+ISSP06$d.housing <- as.numeric(ISSP06$V33 == 1 | ISSP06$V33 == 2)
+ISSP06[is.na(ISSP06$V33), "d.housing"] <- NA 
+
+ISSP06$d.health <- numeric(length = length(ISSP06$V27))
+ISSP06$d.health <- as.numeric(ISSP06$V27 == 1 | ISSP06$V27 == 2)
+ISSP06[is.na(ISSP06$V27), "d.health"] <- NA 
+
+
+country2 <- dplyr::select(country, country, year, foreignpct, socx, emprate, netmigpct)
+
+ISSP96$year <- 1996
+ISSP06$year <- 2006
+
+ISSP96$country <- vector(mode = "character", length = length(ISSP96$v1))
+ISSP96[ISSP96$v3 == "aus", "country"] <- "Australia" 
+ISSP96[ISSP96$v3 == "cdn", "country"] <- "Canada"
+ISSP96[ISSP96$v3 == "f", "country"] <- "France"
+ISSP96[ISSP96$v3 == "D-W", "country"] <- "Germany"
+ISSP96[ISSP96$v3 == "D-E", "country"] <- "Germany"
+ISSP96[ISSP96$v3 == "irl", "country"] <- "Ireland"
+ISSP96[ISSP96$v3 == "j", "country"] <- "Japan"
+ISSP96[ISSP96$v3 == "nz", "country"] <- "New Zealand"
+ISSP96[ISSP96$v3 == "n", "country"] <- "Norway"
+ISSP96[ISSP96$v3 == "e", "country"] <- "Spain"
+ISSP96[ISSP96$v3 == "s", "country"] <- "Sweden"
+ISSP96[ISSP96$v3 == "ch", "country"] <- "Switzerland"
+ISSP96[ISSP96$v3 == "gb", "country"] <- "United Kingdom"
+ISSP96[ISSP96$v3 == "usa", "country"] <- "United States"
+
+ISSP06$country <- vector(mode = "character", length = length(ISSP06$V1))
+ISSP06[ISSP06$V3a == "AU-Australia", "country"] <- "Australia"
+ISSP06[ISSP06$V3a == "CA-Canada", "country"] <- "Canada"
+ISSP06[ISSP06$V3a == "FR-France", "country"] <- "France"
+ISSP06[ISSP06$V3a == "DE-Germany", "country"] <- "Germany"
+ISSP06[ISSP06$V3a == "IE-Ireland", "country"] <- "Ireland"
+ISSP06[ISSP06$V3a == "JP-Japan", "country"] <- "Japan"
+ISSP06[ISSP06$V3a == "NZ-New Zealand", "country"] <- "New Zealand"
+ISSP06[ISSP06$V3a == "NO-Norway", "country"] <- "Norway"
+ISSP06[ISSP06$V3a == "ES-Spain", "country"] <- "Spain"
+ISSP06[ISSP06$V3a == "SE-Sweden", "country"] <- "Sweden"
+ISSP06[ISSP06$V3a == "CH-Switzerland", "country"] <- "Switzerland"
+ISSP06[ISSP06$V3a == "GB-Great Britain", "country"] <- "United Kingdom"
+ISSP06[ISSP06$V3a == "US-United States", "country"] <- "United States"
+
+
+ISSP96 <- dplyr::select(ISSP96, age, ageSqu, female, neverMar, div, widow, hhsize, kidsHH, rural, suburb, lessHS, univ, ptemp, unempy, nolabor, selfEmpy, pubEmpy, incZScore, highRel, lowRel, d.jobs, d.unempy, d.income, d.retire, d.housing, d.health, year, country)
+ISSP06 <- dplyr::select(ISSP06, age, ageSqu, female, neverMar, div, widow, hhsize, kidsHH, rural, suburb, lessHS, univ, ptemp, unempy, nolabor, selfEmpy, pubEmpy, incZScore, highRel, lowRel, d.jobs, d.unempy, d.income, d.retire, d.housing, d.health, year, country)
+
+merged <- rbind(ISSP96, ISSP06)
+merged <- merge(merged,country2,by=c("country","year"))
+
+merged$selfEmpy[is.na(merged$selfEmpy) & !is.na(merged$nolabor)] <- 0
+
+Table4_1.1 <- glm(d.jobs ~ foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_1.2 <- glm(d.unempy ~ foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_1.3 <- glm(d.income ~ foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore +  factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_1.4 <- glm(d.retire ~ foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_1.5 <- glm(d.housing ~ foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_1.6 <- glm(d.health ~ foreignpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+Table4_2.1 <- glm(d.jobs ~ foreignpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_2.2 <- glm(d.unempy ~ foreignpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_2.3 <- glm(d.income ~ foreignpct + socx + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_2.4 <- glm(d.retire ~ foreignpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_2.5 <- glm(d.housing ~ foreignpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_2.6 <- glm(d.health ~ foreignpct + socx + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+Table4_3.1 <- glm(d.jobs ~ foreignpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_3.2 <- glm(d.unempy ~ foreignpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_3.3 <- glm(d.income ~ foreignpct + emprate + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_3.4 <- glm(d.retire ~ foreignpct + emprate + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_3.5 <- glm(d.housing ~ foreignpct + emprate + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table4_3.6 <- glm(d.health ~ foreignpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+models <- list(Table4_1.1, Table4_1.2, Table4_1.3, Table4_1.4, Table4_1.5, Table4_1.6, Table4_2.1, Table4_2.2, Table4_2.3, Table4_2.4, Table4_2.5, Table4_2.6, Table4_3.1, Table4_3.2, Table4_3.3, Table4_3.4, Table4_3.5, Table4_3.6)
+
+htmlreg(models,
+        override.coef = lapply(models, function(x) exp(coef(x))),
+        override.se = lapply(models, function(x) coef(x)/sqrt(diag(vcov(x)))),
+        caption.above = TRUE, omit.coef = "(factor)|(edu)|(female)|(age)",
+        single.row = FALSE, stars = c(0.001,  0.01, 0.05),
+        digits = 3,
+        file = "table4.doc")
+
+Table5_1.1 <- glm(d.jobs ~ netmigpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_1.2 <- glm(d.unempy ~ netmigpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_1.3 <- glm(d.income ~ netmigpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_1.4 <- glm(d.retire ~ netmigpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_1.5 <- glm(d.housing ~ netmigpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_1.6 <- glm(d.health ~ netmigpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+Table5_2.1 <- glm(d.jobs ~ netmigpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_2.2 <- glm(d.unempy ~ netmigpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_2.3 <- glm(d.income ~ netmigpct + socx + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_2.4 <- glm(d.retire ~ netmigpct + socx + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_2.5 <- glm(d.housing ~ netmigpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_2.6 <- glm(d.health ~ netmigpct + socx + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+Table5_3.1 <- glm(d.jobs ~ netmigpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_3.2 <- glm(d.unempy ~ netmigpct + emprate + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_3.3 <- glm(d.income ~ netmigpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_3.4 <- glm(d.retire ~ netmigpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_3.5 <- glm(d.housing ~ netmigpct + emprate + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_3.6 <- glm(d.health ~ netmigpct + emprate + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+Table5_4.1 <- glm(d.jobs ~ netmigpct + foreignpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_4.2 <- glm(d.unempy ~ netmigpct + foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_4.3 <- glm(d.income ~ netmigpct + foreignpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_4.4 <- glm(d.retire ~ netmigpct + foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_4.5 <- glm(d.housing ~ netmigpct + foreignpct + age + ageSqu + female +  lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+Table5_4.6 <- glm(d.health ~ netmigpct + foreignpct + age + ageSqu + female + lessHS + univ + ptemp + unempy + nolabor + selfEmpy +   incZScore + factor(year) + factor(country), data = merged, family = "binomial"(link="logit"))
+
+models <- list(Table5_1.1, Table5_1.2, Table5_1.3, Table5_1.4, Table5_1.5, Table5_1.6, Table5_2.1, Table5_2.2, Table5_2.3, Table5_2.4, Table5_2.5, Table5_2.6, Table5_3.1, Table5_3.2, Table5_3.3, Table5_3.4, Table5_3.5, Table5_3.6, Table5_4.1, Table5_4.2, Table5_4.3, Table5_4.4, Table5_4.5, Table5_4.6)
+
+htmlreg(models,
+        override.coef = lapply(models, function(x) exp(coef(x))),
+        override.se = lapply(models, function(x) coef(x)/sqrt(diag(vcov(x)))),
+        caption.above = TRUE, omit.coef = "(factor)|(edu)|(female)|(age)",
+        single.row = FALSE, stars = c(0.001,  0.01, 0.05),
+        digits = 3,
+        file = "table5.doc")
+
+
+

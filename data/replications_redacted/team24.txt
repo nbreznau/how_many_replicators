@@ -1,0 +1,202 @@
+Team: 24
+Software: MLWin (Stata)
+Version: ORIGINAL
+
+use "ZA2900.dta", clear
+
+desc, s
+keep v1 v2 v3 v36 v39 v41 v42 v200 v201 v205 v206 v325
+
+numlabel _all, add force
+
+	recode v36 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(jobs)
+	recode v39 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(old_age)
+	recode v41 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(unemp)
+	recode v42 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(redist)
+	recode v200 (1=0 "0. Male") (2=1 "1. Female"), gen(gender)
+
+	rename v201 age
+	gen age2=age^2
+	
+	recode v205 (1 2 3 4=1 "1. Primary or less") (5 6=2 "2. Secondary") ///
+		(7=3 "3. University or more"), gen(edu)
+	recode v206 (1=1 "1. Full-time emp.") (2=2 "2. Part-time emp.") ///
+		(5=3 "3. Unemployed") (3 4 6 7 8 9 10=4 "4. Not active"), gen(emp)
+
+gen country=""	// 2 digit (ISO 3166-2)
+	replace country	=	"AU"	if	v3==1
+	replace country	=	"DE"	if	v3==2 | v3==3
+	replace country =	"GB"	if	v3==4
+	replace country =	"NIRL"	if	v3==5	// has no 2 digit ISO code
+	replace country =	"US"	if	v3==6
+	replace country =	"AT"	if	v3==7
+	replace country =	"HU"	if	v3==8
+	replace country =	"IT"	if	v3==9
+	replace country =	"IE"	if	v3==10
+	replace country =	"NL"	if	v3==11
+	replace country =	"NO"	if	v3==12
+	replace country =	"SE"	if	v3==13
+	replace country =	"CZ"	if	v3==14
+	replace country =	"SI"	if	v3==15
+	replace country =	"PL"	if	v3==16
+	replace country =	"BG"	if	v3==17
+	replace country =	"RU"	if	v3==18
+	replace country =	"NZ"	if	v3==19
+	replace country =	"CA"	if	v3==20
+	replace country =	"PH"	if	v3==21
+	replace country =	"IL"	if	v3==22
+	replace country =	"PS"	if	v3==23
+	replace country =	"JP"	if	v3==24
+	replace country =	"ES"	if	v3==25
+	replace country =	"LV"	if	v3==26
+	replace country =	"FR"	if	v3==27
+	replace country =	"CY"	if	v3==28
+	replace country =	"CH"	if	v3==30	
+	
+rename v325 weight
+recast float weight, force		// too precise for mlwin
+gen year=1996
+
+save "issp.wave1.dta", replace
+
+use "ZA4700.dta", clear
+desc, s
+keep V1 version V2 V3 V25 V28 V30 V31 sex age degree wrkst weight
+rename V1 V2 V3 V25 V28 V30 V31, lower
+
+numlabel _all, add force
+
+	recode v25 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(jobs)
+	recode v28 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(old_age)
+	recode v30 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(unemp)
+	recode v31 (1 2=1 "1. Yes") (3 4=0 "0. No"), gen(redist)
+
+	recode sex (1=0 "0. Male") (2=1 "1. Female"), gen(gender)
+	gen age2=age^2
+	recode degree (0 1 2=1 "1. Primary or less") (3 4=2 "2. Secondary") ///
+		(5=3 "3. University or more"), gen(edu)
+	recode wrkst (1=1 "1. Full-time emp.") (2=2 "2. Part-time emp.") ///
+		(5=3 "3. Unemployed") (3 4 6 7 8 9 10=4 "4. Not active"), gen(emp)
+
+kountry v3, from(iso3n) to(iso2c)
+replace _ISO2C_		=	"DE"	if (v3==276.1000000000000227 | v3==276.1999999999999886) & ///
+	_ISO2C_==""
+replace _ISO2C_		=	"IL"	if (v3==376.1000000000000227) & _ISO2C_==""
+replace _ISO2C_		=	"PS"	if (v3==376.1999999999999886) & _ISO2C_==""
+replace _ISO2C_		=	"GB"	if (v3==826.1000000000000227) & _ISO2C_==""
+replace _ISO2C_		=	"RU"	if (v3==643) & _ISO2C_==""
+rename _ISO2C_ country
+
+tab v3 country, mis
+
+recast float weight, force		// too precise for mlwin
+
+gen year=2006
+	
+save "issp.wave2.dta", replace
+use "issp.wave2.dta", clear
+
+append using "issp.wave1.dta"
+
+keep v1 v2 v3 age age2 country degree edu emp gender ///
+	 jobs old_age redist sex unemp weight wrkst year
+
+save "issp.wave1-2.dta", replace
+use "issp.wave1-2.dta", clear
+
+use "L2data.dta", clear
+
+kountry cntry, from(iso3n) to(iso2c)
+rename country country_tmp
+rename _ISO2C_ country
+
+tab country country_tmp, mis
+drop country_tmp cntry
+
+foreach var of varlist netmigpct socx emprate foreignpct {
+	rename `var' c_`var'
+	recast float c_`var', force
+	}
+
+merge 1:m country year using "issp.wave1-2.dta", 
+tab country if _merge==1, mis
+tab country if _merge==2, mis
+
+tab v3 if _merge==1, mis
+tab v3 if _merge==2, mis
+
+encode country, gen(cntry)
+lab var cntry "Country codes, value labels: ISO 3166 alpha-2 codes"
+numlabel cntry, add
+fre cntry
+
+aorder
+order v1 v2 v3 cntry country  
+
+save "issp.merged.dta", replace
+ 
+global dv1	old_age
+global dv2	unemp
+global dv3	redist
+global dv4	jobs
+
+global ind	age age2 b0.gender b2.edu b1.emp	
+global wave	b1996.year
+global cnt	b1.cntry
+
+global c1	c.c_foreignpct
+global c2	c.c_foreignpct c.c_socx
+global c3	c.c_foreignpct c.c_emprate
+global c4	c.c_netmigpct
+global c5	c.c_netmigpct  c.c_socx
+global c6	c.c_netmigpct c.c_emprate
+
+capture drop sample
+mark sample
+markout sample $dv1 $dv2 $dv3 $dv4 $ind $year c_emprate c_foreignpct c_netmigpct c_socx
+replace sample=0 if !inlist(cntry,1,3,4,8,11,13,14,17,20,24,25,31,34)  
+table cntry year if sample, c(count sample)
+
+gen cons=1
+
+foreach var of varlist $dv1 $dv2 $dv3 $dv4 {
+	eststo logit_m1`var': logit `var' $c1 $wave $cnt $ind if sample, or 
+	eststo logit_m2`var': logit `var' $c2 $wave $cnt $ind if sample, or
+	eststo logit_m3`var': logit `var' $c3 $wave $cnt $ind if sample, or
+	eststo logit_m4`var': logit `var' $c4 $wave $cnt $ind if sample, or
+	eststo logit_m5`var': logit `var' $c5 $wave $cnt $ind if sample, or
+	eststo logit_m6`var': logit `var' $c6 $wave $cnt $ind if sample, or
+	}
+	
+esttab logit_m1old_age logit_m1unemp logit_m1redist logit_m1jobs 							///
+	   logit_m2old_age logit_m2unemp logit_m2redist logit_m2jobs 							///
+	   logit_m3old_age logit_m3unemp logit_m3redist logit_m3jobs 							///
+	   logit_m4old_age logit_m4unemp logit_m4redist logit_m4jobs 							///
+	   logit_m5old_age logit_m5unemp logit_m5redist logit_m5jobs 							///
+	   logit_m6old_age logit_m6unemp logit_m6redist logit_m6jobs 							///
+	   using "${results}logit.table_$S_DATE.txt", eform 									///
+		stats(N, fmt(%18.0g) label("N persons" ))													/// 
+		c(b(fmt(3) star label(OR)) z(fmt(3))) stardetach											///
+		order(c_foreignpct c_socx c_emprate c_netmigpct)											///
+		coeflabels(c_foreignpct "Immigrant Stock (%)" 												///
+				   c_socx "Social Welfare Expenditures (% of GDP)"									///
+				   c_emprate "Employment Rate (% in LF)"											///
+				   c_netmigpct "Change in Immigrant Stock (1-year, in %)"							///
+				   age "Age" age2 "Age squared" 1.gender "Gender (1=female)"						///
+				   1.edu "Primary or less" 3.edu "University or more" 								///
+				   2.emp "Part-time emp." 3.emp "Unemployed" 4.emp "Not active"						///
+				   _cons "Constant")																///
+		drop(0.* 2.edu 1.emp *cntry *year)															///
+		refcat(c_foreignpct "COUNTRY-LEVEL VARIABLES" age "INDIVIDUAL-LEVEL VARIABLES"				///
+			  3.edu "Secondary (Ref.)" 2.emp "Full-time emp. (Ref.)", label(" "))					///
+		mtitles("Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone"		///
+				"Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone"		///
+				"Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone"		///
+				"Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone"		///
+				"Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone"		///
+				"Old age care" "Unemployment" "Reduce income differences" "Jobs for everyone") ///
+		varwidth(30) modelwidth(10)																	///
+		addnote("Source: ISSP 1996, 2006. Country and year fixed effects included." "Z-statistics below the odds ratios. * p<0.05, ** p<0.01, *** p<0.001.")	///
+		tit(Table 1. Single level logit models predicting support for governmental policies (unweighted)) 	///
+	 tab replace
+

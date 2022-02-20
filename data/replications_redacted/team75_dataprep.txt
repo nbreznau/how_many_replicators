@@ -1,0 +1,283 @@
+Team: 75
+Software: SPSS
+Version: ORIGINAL 
+
+DATASET CLOSE ALL.
+get stata file="ZA4700.dta".
+
+RENAME VARIABLES v3a = cntry.
+
+RECODE sex (1 = 0) (2 = 1) (SYSMIS = -99).
+
+COMPUTE age2 = age*age.
+RECODE age2 (sysmis = -99).
+
+RECODE age (SYSMIS = -99).
+
+CROSSTABS age BY age2.
+
+COMPUTE edup = 0.
+IF (degree = 0 OR degree = 1) edup = 1.
+IF (degree = 8 OR degree = 9) edup = -99.
+IF sysmis(degree) edup = -99.
+FREQUENCIES edup.
+COMPUTE edus = 0.
+IF (degree = 2 OR degree = 3) edus = 1.
+IF (degree = 8 OR degree = 9) edus = -99.
+IF sysmis(degree) edus = -99.
+COMPUTE eduh = 0.
+IF (degree = 4 OR degree = 5) eduh = 1.
+IF (degree = 8 OR degree = 9) eduh = -99.
+IF sysmis(degree) eduh = -99.
+
+COMPUTE emppt = 0.
+IF (spwrkst = 2 OR spwrkst = 3) emppt = 1.
+IF sysmis(spwrkst) emppt = -99.
+COMPUTE empna = 0.
+IF (spwrkst = 4 OR spwrkst = 6 OR spwrkst = 7 OR spwrkst = 8 OR spwrkst = 9 OR spwrkst = 10) empna = 1.
+IF sysmis(spwrkst) empna = -99.
+COMPUTE empau = 0.
+IF (spwrkst = 5) empau = 1.
+IF sysmis(spwrkst) empau = -99.
+COMPUTE empft = 0.
+IF (spwrkst = 1) empft = 1.
+IF sysmis(spwrkst) empft = -99.
+
+COMPUTE old = 0.
+IF (v28=1 OR v28 = 2) old = 1.
+IF sysmis(v28) old = -99.
+
+COMPUTE une = 0.
+IF (v30=1 OR v30 = 2) une = 1.
+IF sysmis(v30) une = -99.
+
+COMPUTE dif = 0.
+IF (v31=1 OR v31 = 2) dif = 1.
+IF sysmis(v31) dif = -99.
+
+COMPUTE job = 0.
+IF (v25=1 OR v25 = 2) job = 1.
+IF sysmis(v25) job = -99.
+
+MISSING VALUES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job (-99).
+
+SORT CASES by cntry.
+FORMATS cntry(f3.0).
+
+SAVE OUTFILE 'ZA4700_NTA.sav'
+    /KEEP v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
+
+DATASET CLOSE ALL.
+get stata file="ZA2900.dta".
+
+RECODE v3 (1  = 36)   (2   = 276) (3  = 276)  (4  = 826)  (6  = 840)  (8  = 348)  (9  = -99 ) (10 = 372) (12 = 578) (13 = 752) (14 = 203)
+                  (15 = 705) (16 = 616) (17 =  -99) (18 = 643) (19 = 554) (20 =  124) (21 = -99) (22 = 376) (23 = 376) (24 = 392)
+                  (25 = 724) (26 = 428) (27 = 250) (28 = -99)  (30 = 756) (ELSE = -99)  INTO cntry.
+
+RECODE v200 (1 = 0) (2 = 1) (SYSMIS = -99) INTO sex.
+
+COMPUTE age2 = v201*v201.
+RECODE age2 (sysmis = -99).
+
+RECODE v201 (SYSMIS = -99) (ELSE = COPY) into age.
+
+COMPUTE edup = 0.
+IF (v205 = 1 OR v205 = 2 OR v205 = 3) edup = 1.
+IF (v205 = 99) edup = -99.
+IF sysmis(v205) edup = -99.
+COMPUTE edus = 0.
+IF (v205 = 4 OR v205 =5) edus = 1.
+IF (v205 = 99) edus = -99.
+IF sysmis(v205) edus = -99.
+COMPUTE eduh = 0.
+IF (v205 = 6 OR v205 = 7) eduh = 1.
+IF (v205 = 99) eduh = -99.
+IF sysmis(v205) eduh = -99.
+
+COMPUTE emppt = 0.
+IF (v206 = 2 OR v206 = 3) emppt = 1.
+IF sysmis(v206) emppt = -99.
+COMPUTE empna = 0.
+IF (v206 = 4 OR v206 = 6 OR v206 = 7 OR v206 = 8 OR v206 = 9 OR v206 = 10) empna = 1.
+IF sysmis(v206) empna = -99.
+COMPUTE empau = 0.
+IF (v206 = 5) empau = 1.
+IF sysmis(v206) empau = -99.
+COMPUTE empft = 0.
+IF (v206 = 1) empft = 1.
+IF sysmis(v206) empft = -99.
+
+COMPUTE old = 0.
+IF (v39=1 OR v39 = 2) old = 1.
+IF sysmis(v39) old = -99.
+
+COMPUTE une = 0.
+IF (v41=1 OR v41 = 2) une = 1.
+IF sysmis(v41) une = -99.
+
+COMPUTE dif = 0.
+IF (v42=1 OR v42 = 2) dif = 1.
+IF sysmis(v42) dif = -99.
+
+COMPUTE job = 0.
+IF (v36=1 OR v36 = 2) job = 1.
+IF sysmis(v36) job = -99.
+
+MISSING VALUES v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job  (-99).
+
+SORT CASES by cntry.
+FORMATS cntry(f3.0).
+
+SAVE OUTFILE 'ZA2900_NTA.sav'
+    /KEEP v1 v2 cntry sex age age2 edup edus eduh emppt empna empau empft old une dif job .
+
+
+DATASET CLOSE ALL.
+GET DATA
+  /TYPE=XLS
+  /FILE='L2data.xls'
+  /SHEET=name 'Sheet1'
+  /CELLRANGE=FULL
+  /READNAMES=ON
+  /DATATYPEMIN PERCENTAGE=95.0.
+EXECUTE.
+DATASET NAME DataSet1 WINDOW=FRONT.
+
+SELECT IF year = 1996.
+FREQUENCIES year cntry.
+
+SORT CASES BY cntry.
+FORMATS cntry(f3.0).
+
+SAVE OUTFILE 'L2data1996_NTA.sav'.
+
+DATASET CLOSE ALL.
+GET DATA
+  /TYPE=XLS
+  /FILE='L2data.xls'
+  /SHEET=name 'Sheet1'
+  /CELLRANGE=FULL
+  /READNAMES=ON
+  /DATATYPEMIN PERCENTAGE=95.0.
+EXECUTE.
+DATASET NAME DataSet1 WINDOW=FRONT.
+
+SELECT IF year = 2006.
+SORT CASES BY cntry.
+FORMATS cntry(f3.0).
+
+SAVE OUTFILE 'L2data2006_NTA.sav'.
+
+
+DATASET CLOSE ALL. 
+CD 'Replication project'.
+GET FILE 'ZA2900_NTA.sav'.
+
+MATCH FILES 
+     /FILE='ZA2900_NTA.sav'
+    /TABLE 'L2data1996_NTA.sav'
+   /BY cntry.
+EXECUTE.
+
+SAVE OUTFILE 'ZA2900-L2data1996.sav'.
+
+
+DATASET CLOSE ALL. 
+CD '\'.
+GET FILE 'ZA4700_NTA.sav'.
+
+MATCH FILES 
+     /FILE='ZA4700_NTA.sav'
+    /TABLE 'L2data2006_NTA.sav'
+   /BY cntry.
+EXECUTE.
+
+SAVE OUTFILE 'ZA4700-L2data2006.sav'.
+
+
+DATASET CLOSE ALL. 
+CD '\'.
+GET FILE 'ZA2900-L2data1996.sav'.
+
+ADD FILES file='ZA2900-L2data1996.sav'
+      /in=ZA2900
+      /file = 'ZA4700-L2data2006.sav'
+      /in=ZA4700.
+
+SORT CASES BY cntry.
+
+IF (v1 = 2900) year = 1996.
+IF (v1 = 4700) year = 2006.
+
+SAVE OUTFILE 'ZA2900-ZA4700_pooled.sav'.
+
+DATASET CLOSE ALL.
+GET FILE 'ZA2900-ZA4700_pooled.sav'.
+
+SORT CASES  BY year.
+SPLIT FILE SEPARATE BY year.
+CROSSTABS country BY socx.
+
+SPLIT FILE OFF.
+SELECT IF cntry = 36 OR cntry = 124 OR cntry = 250 OR cntry = 276 OR cntry = 372 OR cntry = 392 OR cntry = 554 OR cntry = 578 OR cntry = 724 OR cntry = 752 OR cntry = 756 OR cntry = 826 OR cntry = 840.
+CROSSTABS cntry BY country.
+
+SAVE OUTFILE 'ZA2900-ZA4700_pooled-13countries.sav'.
+
+DATASET CLOSE ALL.
+CD '\'.
+GET FILE 'ZA2900-ZA4700_pooled-13countries.sav'.
+
+RENAME VARIABLES foreignpct = istock.
+RENAME VARIABLES netmigpct = chistock.
+
+FORMATS emprate(f6.3).
+FORMATS istock(f6.3).
+FORMATS socx(f6.3).
+FORMATS chistock(f6.3).
+
+IF (year = 1996) yrdm = 0.
+IF (year = 2006) yrdm = 1.
+CROSSTABS year BY yrdm.
+
+IF (cntry = 36) aust = 1.
+IF (cntry NE 36) aust = 0.
+IF (cntry = 124) can = 1.
+IF (cntry NE 124) can = 0.
+IF (cntry = 250) fr = 1.
+IF (cntry NE 250) fr = 0.
+IF (cntry = 276) de = 1.
+IF (cntry NE 276) de = 0.
+IF (cntry = 372) ir = 1.
+IF (cntry NE 372) ir = 0.
+IF (cntry = 392) jp = 1.
+IF (cntry NE 392) jp = 0.
+IF (cntry = 554) nz = 1.
+IF (cntry NE 554) nz = 0.
+IF (cntry = 578) nw = 1.
+IF (cntry NE 578) nw = 0.
+IF (cntry = 724) sp = 1.
+IF (cntry NE 724) sp = 0.
+IF (cntry = 752) sw = 1.
+IF (cntry NE 752) sw = 0.
+IF (cntry = 756) ch = 1.
+IF (cntry NE 756) ch = 0.
+IF (cntry = 826) uk = 1.
+IF (cntry NE 826) uk = 0.
+IF (cntry = 840) us = 1.
+IF (cntry NE 840) us = 0.
+
+COMPUTE aged = (age/100).
+COMPUTE age2d = (age2/100).
+DESCRIPTIVES aged age2d.
+FREQUENCIES aged age2d.
+RECODE aged age2d (SYSMIS = -99).
+MISSING VALUES aged age2d (-99).
+
+SET LOCALE = 'en_us'.
+
+SAVE TRANSLATE
+   /TYPE = CSV
+   /KEEP = cntry sex age age2 aged age2d edup edus eduh emppt empna empau empft old une dif job emprate socx istock chistock 
+                 year yrdm aust can fr de ir jp nz nw sp sw ch uk us
+   /OUTFILE = 'CRI-Mplus.dat'.

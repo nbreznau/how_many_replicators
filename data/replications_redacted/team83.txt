@@ -1,0 +1,324 @@
+Team: 83
+Software: R
+Version: ORIGINAL
+
+p_needed <- c("devtools", "plyr", "tidyverse", "foreign", "readxl", "lubridate","broom")
+packages <- rownames(installed.packages())
+p_to_install <- p_needed[!(p_needed %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+
+
+lapply(p_needed, require, character.only = TRUE)
+
+
+rm(list = ls()) 
+if (Sys.getenv("USERNAME") == "") {
+  setwd("/")
+} else if (Sys.getenv("USER") == "") {
+  setwd("/")
+} else setwd("C/")
+
+
+country_sample <- c(36,124,250,276,372,392,554,578,724,752,756,826,840)
+
+issp1996_df <- read.csv(file="ZA2900.csv", head = TRUE, sep = ",")
+issp2006_df <- read.csv(file="ZA4700.csv", head = TRUE, sep = ",")
+context_df  <- read.csv(file="L2data.csv", head = TRUE, sep = ",") %>%
+  subset(cntry %in% country_sample)
+
+df_1996 <- select(issp1996_df,v3,v39,v41,v42,v36,v200,v201,v206,v205) %>%
+  rename(country = v3,
+         att_old_age = v39, 
+         att_unemployed = v41 , 
+         att_income_diff = v42,
+         att_jobs = v36,
+         female = v200,
+         age = v201,
+         employment = v206,
+         education = v205) %>% 
+  mutate_at(vars(matches("att")), funs(recode(.,"Definitely should" = 1, "Probably should" = 1, "Probably not" = 0, "Definitely not" = 0))) %>%
+  mutate(female = recode(female, "Female" = 1, "Male" = 0)) %>%
+  mutate(age = as.numeric(age)) %>%
+  mutate(employment = recode(employment, "Unemployed" = 1, "Studt,school,educ" = 0, "Retired" = 0, "Permanent disabled" = 0, "P-t empl,main job" = 2, "Oth,n i lab force" = 0, "Less part-time" = 0, "Housewife <man>" = 0, "Help family member" = 0, "F-time empl,main job" = 3)) %>%
+  mutate(education = recode(education, "Incpl primary" = 1, "Incpl secondary" = 1, "Primary compl" = 1, "None;still at school,uni" = 1, "Secondary compl" = 2, "University compl" = 3, "Semi-higher,Incpl uni." = 3)) %>%
+  mutate(cntry = recode(country, aus = 36, cdn = 124, f = 250, "D-W" = 276,
+                       "D-E" = 276, gb = 826, irl = 372, j = 392,
+                       nz = 554, n = 578, e = 724, s = 752,
+                       ch = 756, usa = 840)) %>%
+  subset(cntry %in% country_sample) %>% select(., -country) %>%
+  mutate(year = 1996)
+
+
+df_2006 <- select(issp2006_df,V3,V28,V30,V31,V25,sex,age,wrkst,degree) %>%
+  rename(country = V3,
+         att_old_age = V28, 
+         att_unemployed = V30, 
+         att_income_diff = V31,
+         att_jobs = V25,
+         female = sex,
+         employment = wrkst,
+         education = degree) %>%   
+  mutate_at(vars(matches("att")), funs(recode(.,"Definitely should be" = 1, "Probably should be" = 1, "Probably should not be" = 0, "Definitely should not be" = 0))) %>%
+  mutate(female = recode(female, "Female" = 1, "Male" = 0)) %>%
+  mutate(age = as.numeric(age)) %>%
+  mutate(employment = recode(employment, "Unemployed" = 1, "Student,school,vocational training" = 0, "Retired" = 0, "Permanently disabled" = 0, "Employed, part-time,main job" = 2, "Other,not in labour force" = 0, "Employed, less than part-time" = 0, "Housewife,-man,home duties" = 0, "Helping family member" = 0, "Employed, full-time,main job" = 3)) %>%
+  mutate(education = recode(education, "No formal qualification, incomplete primary" = 1, "Lowest formal qualification" = 1, "Above lowest qualification" = 1, "Higher secondary completed" = 2, "Above higher secondary level,other qualification" = 3, "University degree completed, graduate studies" = 3)) %>%
+  mutate(cntry = recode(country, "AU-Australia" = 36, "CA-Canada" = 124, "FR-France" = 250, "276.1" = 276, 
+                        "276.2" = 276, "826.1" = 826, "IE-Ireland" = 372, "JP-Japan" = 392,
+                        "NZ-New Zealand" = 554, "NO-Norway" = 578, "ES-Spain" = 724, "SE-Sweden" = 752,
+                        "CH-Switzerland" = 756, "US-United States" = 840)) %>%
+  subset(cntry %in% country_sample) %>% select(., -country) %>%
+  mutate(year = 2006) 
+
+
+
+df <- rbind(df_1996, df_2006)
+df <- inner_join(df, context_df)
+df <- mutate(df, age_sq = age*age)
+
+
+ls(df)
+summary(df$att_income_diff)
+summary(df$att_jobs)
+summary(df$att_old_age)
+summary(df$att_unemployed)
+
+
+
+df$year <- factor(df$year)  
+
+
+model1 <- glm(att_old_age~foreignpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model1)
+#exp(coef(model1))
+
+model2 <- glm(att_unemployed~foreignpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model2)
+#exp(coef(model2))
+
+model3 <- glm(att_income_diff~foreignpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model3)
+#exp(coef(model3))
+
+model4 <- glm(att_jobs~foreignpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model4)
+#exp(coef(model4))
+
+
+
+model5 <- glm(att_old_age~foreignpct + socx 
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model5)
+#exp(coef(model5))
+
+model6 <- glm(att_unemployed~foreignpct + socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model6)
+#exp(coef(model6))
+
+model7 <- glm(att_income_diff~foreignpct+socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model7)
+#exp(coef(model7))
+
+model8 <- glm(att_jobs~foreignpct + socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model8)
+#exp(coef(model8))
+
+
+model9 <- glm(att_old_age~foreignpct + emprate 
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model9)
+#exp(coef(model9))
+
+model10 <- glm(att_unemployed~foreignpct + emprate 
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model10)
+#exp(coef(model10))
+
+model11 <- glm(att_income_diff~foreignpct + emprate 
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model11)
+#exp(coef(model11))
+
+model12 <- glm(att_jobs~foreignpct + emprate 
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model12)
+#exp(coef(model12))
+
+  
+model13 <- glm(att_old_age~netmigpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model13)
+#exp(coef(model13))
+
+model14 <- glm(att_unemployed~netmigpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model14)
+#exp(coef(model14))
+
+model15 <- glm(att_income_diff~netmigpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model15)
+#exp(coef(model5))
+
+model16 <- glm(att_jobs~netmigpct
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model16)
+#exp(coef(model16))
+
+model17 <- glm(att_old_age~netmigpct+socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model17)
+#exp(coef(model17))
+
+model18 <- glm(att_unemployed~netmigpct+socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model18)
+#exp(coef(model18))
+
+model19 <- glm(att_income_diff~netmigpct+socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model19)
+#exp(coef(model19))
+
+model20 <- glm(att_jobs~netmigpct+socx
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model20)
+#exp(coef(model20))
+
+
+model21 <- glm(att_old_age~netmigpct+emprate
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model21)
+#exp(coef(model21))
+
+model22 <- glm(att_unemployed~netmigpct+emprate
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model22)
+#exp(coef(model22))
+
+model23 <- glm(att_income_diff~netmigpct+emprate
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model23)
+#exp(coef(model23))
+
+model24 <- glm(att_jobs~netmigpct+emprate
+              +female+age+age_sq+education+employment
+              +country+year,
+              data=df,
+              family=binomial(link='logit'))
+#summary(model24)
+#exp(coef(model24))
+
+
+models <- mget(paste0("model", 1:24))
+all_coefs <- plyr::ldply(models, tidy, .id = "model")
+head(all_coefs)
+
+
+coeffs <- all_coefs %>% select(model,term,estimate) %>%
+  spread(term,estimate)
+
+
+zvalues <- all_coefs %>% select(model,term,statistic) %>%
+  spread(term,statistic)
+
+write.table(coeffs, file = "coefficients.csv", sep = ";", 
+            na = "NA", dec = ",", row.names = F,
+            col.names = T) 
+
+write.table(zvalues, file = "zvalues.csv", sep = ";", 
+            na = "NA", dec = ",", row.names = F,
+            col.names = T) 
+
+
+out <- rbind(as.character(coeffs$model),exp(coeffs$foreignpct),zvalues$foreignpct,
+           exp(coeffs$socx), zvalues$socx, 
+           exp(coeffs$emprate), zvalues$emprate,
+           exp(coeffs$netmigpct), zvalues$netmigpct,
+           coeffs$`(Intercept)`)
+
+
+terms <- c(" ","Immigrant Stock","z","Social welfare Expenditures","z","Employment Rate","z","Change in Immigrant Stock","z","Intercept")
+
+out <- data.frame(terms,out)
+
+write.table(out, file = "out.csv",sep=";",
+            na = "NA", row.names = F, col.names=F) 

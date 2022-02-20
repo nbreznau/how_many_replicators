@@ -1,0 +1,26 @@
+	(1)	(2)
+VARIABLES	mean	sd
+		
+age	45.515	15.852
+dgovjobs	0.639	0.480
+dhcare	0.946	0.227
+dgovretire	0.944	0.230
+dgovunemp	0.772	0.420
+dgovincdiff	0.654	0.476
+dgovhous	0.777	0.416
+agesq	2,322.846	1,549.548
+female	0.496	0.500
+lesshs	0.433	0.495
+univ	0.145	0.353
+ptemp	0.122	0.328
+unemp	0.052	0.223
+nolabor	0.333	0.471
+selfemp	0.105	0.307
+inczscore	0.018	1.004
+yr2006	0.000	0.000
+emprate	67.061	9.621
+foreignpct	11.738	6.388
+socx	21.123	5.178
+netmigpct	1.842	1.238
+		
+Number of cntry	17	17

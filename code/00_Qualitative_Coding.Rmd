@@ -1,0 +1,86 @@
+---
+title: "00 Qualitative Codes"
+output: html_document
+---
+In this workflow, the file 'dataout_print.xlsx' is the template used for qualitative coding and notes. This routine extracts categories by team for this file. The categories are saved in the file 'qual_out.csv' for use with later quantitative analyses.
+
+```{r setup}
+
+pacman::p_load("tidyverse",
+               "readtext",
+               "readxl")
+```
+
+## Data Coding Report
+
+```{r data, warning = F, message = F}
+teamcodes <- read_xlsx(here::here("results", "dataout_print.xlsx"),
+                      skip = 2)
+teamcodes <- teamcodes[,1:14]
+colnames(teamcodes) <- c("ID","Team","Verif_O","Exact_O","Error_O","Verif_C","Exact_C","Error_C","gap","Sources_of_Variability","Category",	"Additional_Info",	"Counterfactual",	"Group")
+
+# fix string-based NA
+teamcodes <- teamcodes %>%
+  mutate(Category = ifelse(is.na(Category), "NaN", Category),
+         Additional_Info = ifelse(is.na(Additional_Info), "NaN", Additional_Info),
+         Counterfactual = ifelse(is.na(Counterfactual), "NaN", Counterfactual))
+```
+
+## Count Codes
+
+```{r counts}
+#num = number of codes, teams = number of teams
+mistakes_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Mistake"]))
+mistakes_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Mistake"]))
+procedural_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Procedural"]))
+procedural_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Procedural"]))
+interpret_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Interpretational"]))
+interpret_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Interpretational"]))
+mist_proc_num <- length(unique(teamcodes$ID[teamcodes[,"Category"] == "Mistake-Procedural"]))
+mist_proc_teams <- length(unique(teamcodes$Team[teamcodes[,"Category"] == "Mistake-Procedural"]))
+
+# count all by team
+teamcodes_teamwise <- teamcodes %>%
+  rowwise() %>%
+  mutate(Mistake = ifelse(Category == "Mistake", 1, 0),
+         Procedural = ifelse(Category == "Procedural", 1, 0),
+         Interpretational = ifelse(Category == "Interpretational", 1, 0),
+         Mistake_Procedural = ifelse(Category == "Mistake-Procedural", 1, 0),
+         Missing_Parts = ifelse(grepl("^Missing parts", Additional_Info), 1, 0),
+         Questionable_Skills = ifelse(grepl("competencies", Additional_Info), 1, 0),
+         Counterfactual_Curation = ifelse(Counterfactual == "Yes", 1, 0)) %>%
+  ungroup() %>%
+  select(Team, Mistake, Procedural, Interpretational, Mistake_Procedural, Missing_Parts, Questionable_Skills, Counterfactual_Curation) %>%
+  group_by(Team) %>%
+  summarise_all(sum, na.rm = T)
+
+# extract reference to missing parts of the workflow and questionable competencies as they are located in the Additional_Info column
+
+teamcodes <- teamcodes %>%
+  mutate(missing_parts = ifelse(grepl("^Missing parts", Additional_Info), TRUE, FALSE),
+         questionable = ifelse(grepl("competencies", Additional_Info), TRUE, FALSE))
+
+missingparts_num <- length(unique(teamcodes$ID[teamcodes[,"missing_parts"] == TRUE]))
+missingparts_teams <- length(unique(teamcodes$Team[teamcodes[,"missing_parts"] == TRUE]))
+
+competence_num <- length(unique(teamcodes$ID[teamcodes[,"questionable"] == TRUE]))
+
+# extract counterfactuals (where we were able to fix mistakes)
+counterfact_num <- length(unique(teamcodes$ID[teamcodes[,"Counterfactual"] == "Yes"]))
+counterfact_teams <- length(unique(teamcodes$Team[teamcodes[,"Counterfactual"] == "Yes"]))
+```
+
+## Outfile
+
+```{r makedf}
+
+write.csv(teamcodes_teamwise, here::here("results", "qual_out.csv"), row.names = F)
+
+```
+
+## Colophon
+
+```{r colophon}
+sessionInfo()
+```
+

@@ -1,0 +1,192 @@
+Team: 49
+Software: Stata
+Version: ORIGINAL
+
+use "L2data.dta"
+
+rename country cntrname
+rename cntry country
+destring country, replace
+
+save "L2data_.dta", replace
+
+
+use "ZA2900.dta" 
+
+gen year = 1996
+rename v2 respid
+tostring respid, replace
+replace respid = "1996" + respid
+rename v3 country
+replace country = 31 if country == 2 | country == 3
+
+
+tab1 v36 v39 v41 v42, mis
+recode v36 (1 2 = 1) (3 4 = 0), gen(Jobs)
+recode v39 (1 2 = 1) (3 4 = 0), gen(Old_Age_Care)
+recode v41 (1 2 = 1) (3 4 = 0), gen(Unemployed)
+recode v42 (1 2 = 1) (3 4 = 0), gen(Reduce_Income_Differences)
+
+recode v200 (1 = 0) (2 = 1), gen(Female)
+rename v201 Age
+gen Age_squared = Age^2
+
+tab v205, mis
+tab v205, nolab mis
+gen education = 0
+replace education = 1 if v205 <= 4
+replace education = 2 if v205 == 5 | v205 == 6 
+replace education = 3 if v205 == 7 
+replace education=. if v205==.
+
+label variable education "education"
+label define education 1 "primary" , add
+label define education 2 "secondary" , add
+label define education 3 "university" , add
+label values education education
+tab education
+
+
+tab v206, mis
+tab v206, nolab mis
+
+gen employment = 0
+replace employment = 1 if v206 == 1 //reference
+replace employment = 2 if v206 == 2 | v206 == 3
+replace employment = 3 if v206 == 4 | v206==5  // helping f member or unemployed
+replace employment=4 if v206>=6 // all others, including students, retired, housewifes, disabled, etc.
+replace employment=. if v206==.
+
+label variable employment "employment"
+label define employment 1 "full time" , add
+label define employment 2 "part time" , add
+label define employment 3 "active unemployed" , add
+label define employment 4 "not active", add
+label values employment employment 
+tab employment
+
+
+append using "ZA4700.dta"
+
+tab year, mis
+replace year = 2006 if year != 1996
+
+tostring V2, replace
+tostring V3a, gen(countryid)
+replace respid = "2006" + V2 + countryid if year == 2006
+
+recode country (1 = 36) (20 = 124) (27 = 250) (31 = 276) (24 = 392) (19 = 554) (12 = 578) (13 = 752) (30 = 756) (4 = 826) (6 = 840) (25 = 724) (10 = 372) (32 = 376)
+replace country = V3a if year == 2006
+
+
+replace Jobs = 1 if V25 == 1 | V25 == 2
+replace Jobs = 0 if V25 == 3 | V25 == 4
+replace Old_Age_Care = 1 if V28 == 1 | V28 == 2
+replace Old_Age_Care = 0 if V28 == 3 | V28 == 4
+replace Unemployed = 1 if V30 == 1 | V30 == 2
+replace Unemployed = 0 if V30 == 3 | V30 == 4
+replace Reduce_Income_Differences = 1 if V31 == 1 | V31 == 2
+replace Reduce_Income_Differences = 0 if V31 == 3 | V31 == 4
+
+replace Female = 1 if sex == 2
+replace Female = 0 if sex == 1
+replace Age = age if year == 2006
+replace Age_squared = age^2 if year == 2006
+
+tab degree, mis
+tab degree, nolab mis
+replace education = 1 if degree <= 2 & year == 2006 
+replace education = 2 if (degree == 3 | degree == 4) & year == 2006
+replace education = 3 if (degree ==5) & year == 2006
+replace education=. if degree==. & year == 2006
+
+tab wrkst, mis
+tab wrkst, nolab mis
+replace employment = 1 if wrkst == 1 & year == 2006
+replace employment = 2 if (wrkst ==  2 | wrkst ==  3 ) & year == 2006
+replace employment = 3 if (wrkst == 4 | wrkst==5) & year == 2006
+replace employment = 4 if wrkst >=6 & year == 2006
+replace employment=. if wrkst==. & year==2006
+tab employment, mis
+
+keep year respid country Old_Age_Care Jobs Unemployed Reduce_Income_Differences Female Age Age_squared education employment
+
+keep if country == 36 | country == 124 | country == 250 | country == 276 | country == 372 | country == 392 | country == 554 | country == 578 | country == 724| country == 752 | country == 756 | country == 826 | country == 840  
+
+label values country country
+label define country 36 "Australia", modify
+label define country 124 "Canada", modify
+label define country 250 "France", modify
+label define country 276 "Germany", modify
+label define country 372 "Ireland", modify
+label define country 392 "Japan", modify
+label define country 554 "New Zealand", modify
+label define country 578 "Norway", modify
+label define country 724 "Spain", modify
+label define country 752 "Sweden", modify
+label define country 756 "Switzerland", modify
+label define country 826 "Great Britain", modify
+label define country 840 "USA", modify
+
+merge m:n country year using "L2data_.dta"
+drop if _merge != 3
+drop _merge
+
+tab year, mis
+tab year, gen(yrdum)
+tab country, gen(countrydum)
+
+sort respid year country
+
+
+save "ISSP1996_2006.dta", replace
+
+
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment foreignpct yrdum2 i.country,  or 
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment foreignpct yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment foreignpct yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment foreignpct yrdum2 i.country,  or
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment foreignpct socx yrdum2 i.country,  or
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment foreignpct socx yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment foreignpct socx yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment foreignpct socx yrdum2 i.country,  or
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment foreignpct emprate yrdum2 i.country,  or
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment foreignpct emprate yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment foreignpct emprate yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment foreignpct emprate yrdum2 i.country,  or
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment netmigpct yrdum2 i.country,  or
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment netmigpct yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment netmigpct yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment netmigpct yrdum2 i.country,  or
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment socx netmigpct yrdum2 i.country,  or
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment socx netmigpct yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment socx netmigpct yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment socx netmigpct yrdum2 i.country,  or
+
+logit Old_Age_Care Female Age Age_squared ib2.education ib1.employment emprate netmigpct yrdum2 i.country,  or
+
+logit Unemployed Female Age Age_squared ib2.education ib1.employment emprate netmigpct  yrdum2 i.country,  or
+
+logit Reduce_Income_Differences Female Age Age_squared ib2.education ib1.employment emprate netmigpct yrdum2 i.country,  or
+
+logit Jobs Female Age Age_squared ib2.education ib1.employment emprate netmigpct yrdum2 i.country,  or

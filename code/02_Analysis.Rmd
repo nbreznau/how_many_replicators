@@ -1,0 +1,256 @@
+---
+title: "02 Data Analysis"
+output: html_document
+---
+
+This file uses the cleaned data for the following variables to provide statistical output.
+
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
+|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
+
+```{r setup, warning = F, message = F}
+rm(list = ls())
+library(pacman)
+
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr")
+
+```
+
+## Load Data
+
+```{r setup2, warning = F, message = F}
+# load data from 01_Data_Prep
+load(file = here::here("data","data.Rdata"))
+
+
+# disable scientific notation
+options(scipen = 999)
+```
+
+
+## Team-Level Data Prep
+
+Our observations take place only at the team level, therefore it is only necessary to run a regression on the team averages ('level-2') of the three outcome variables *verif*, *exact* and *deviance_abs*.
+
+Aggregate data to team-level
+
+```{r aggregate_team}
+
+# curated
+cri_team <- cri_cur_long %>%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
+  group_by(u_teamid) %>%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T),
+            routine = mean(routine, na.rm = T))
+
+cri_team_orig <- cri_long %>%
+  group_by(u_teamid) %>%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T))
+
+cri_team$degree <- factor(cri_team$degree, labels = c("Sociology", "Political Science", "Other"))
+cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Political Science", "Other"))
+cri_team_orig <- cri_team_orig %>%
+  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
+
+cri_team <- cri_team %>%
+  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
+
+# trim outlier
+cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
+cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
+
+# make an easy file for descriptives for 03_Figures workflow
+write_rds(cri_team_orig, here::here("data","cri_team.RDS"))
+
+# merge qualitative features
+qual_out <- qual_out %>%
+  rename(u_teamid = u_teamid2)
+
+cri_team <- cri_team %>%
+  left_join(qual_out, by = "u_teamid")
+
+cri_team_orig <- cri_team_orig %>%
+  left_join(qual_out, by = "u_teamid")
+
+
+```
+
+## Statistics and Predictive Models
+
+### Correlations by Group
+
+```{r corr, warning = F, message = F}
+cri_team_c<- cri_team %>%
+  select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
+
+cri_team_orig_c <- cri_team_orig %>%
+  select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
+
+cri_team_c_T <- cri_team_c %>%
+  subset(exp == 1) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_c_T[upper.tri(cri_team_c_T)] <- ""
+
+cri_team_c_O <- cri_team_c %>%
+  subset(exp == 0) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_c_O[upper.tri(cri_team_c_O)] <- ""
+
+cri_team_orig_c_T <- cri_team_orig_c %>%
+  subset(exp == 1) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_orig_c_T[upper.tri(cri_team_orig_c_T)] <- ""
+
+cri_team_orig_c_O <- cri_team_orig_c %>%
+  subset(exp == 0) %>%
+  select(-exp) %>%
+  cor(., use = "pairwise.complete") %>%
+  round(., 3) %>%
+  as.data.frame()
+
+cri_team_orig_c_O[upper.tri(cri_team_orig_c_O)] <- ""
+
+write.csv(cri_team_c_T, here::here("results","Tbl9_1.csv"), row.names = F)
+write.csv(cri_team_c_O, here::here("results","Tbl9_2.csv"), row.names = F)
+write.csv(cri_team_orig_c_T, here::here("results","Tbl9_3.csv"), row.names = F)
+write.csv(cri_team_orig_c_O, here::here("results","Tbl9_4.csv"), row.names = F)
+
+   
+```
+
+### Regressions Predicting Reproducibility
+
+
+```{r regs}
+# original - pooled
+O_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
+O_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
+O_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_orig)
+
+# original - by group
+O_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+O_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+O_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 1))
+
+O_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+O_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+O_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
+
+# curated - pooled
+M_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+
+# curated - by group
+M_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+
+M_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+
+orig_results <- mget(ls(pattern = "O_"))
+cur_results <- mget(ls(pattern = "M_"))
+```
+
+### Results
+
+Saved in Word for paper
+```{r results}
+tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Orig.doc"))
+
+tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Cur.doc"))
+```
+
+Printed here in workflow
+
+#### Original
+```{r results2}
+tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
+```
+
+
+#### Curated
+```{r results3}
+tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
+```
+
+### Regressions Predicting Error Sources
+
+We investigate the multivariate associations of team-level variables and whether they made mistakes and/or had procedural variations. To do this we subset our team sample first to include only those teams that had at least one instance of the category Mistake or Mistake-Procedural (=1) and all other teams except those with instances of Procedural (=0). If a team has a Mistake and Procedural code they are coded as = 1. Next we do a similar subset where cases are kept with at least one instance of Procedural and Mistake-Procedural (=1) with those having any Mistake dropped.
+
+```{r reg_error}
+# set up data
+cri_team_mistake <- cri_team %>%
+  mutate(Mistake_DV = ifelse(Mistake == 1 | Mistake_Procedural == 1, 1, 0),
+         drop = ifelse(Mistake_DV != 1 & Procedural == 1, 0, 1)) %>%
+  subset(drop == 1)
+
+cri_team_proc <- cri_team %>%
+  mutate(Procedural_DV = ifelse(Procedural == 1 | Mistake_Procedural == 1, 1, 0),
+         drop = ifelse(Procedural_DV !=1 & Mistake == 1, 0, 1)) %>%
+  subset(drop == 1)
+
+MIS_1 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake)
+PRO_1 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc)
+MIS_2 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 1))
+PRO_2 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 1))
+MIS_3 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 0))
+PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 0))
+```
+
+### Results
+
+```{r results4, warning = F, message = F}
+tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
+
+tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
+```
+
+## Colophon
+
+```{r sessioninfo}
+sessionInfo()
+```
+
+
+

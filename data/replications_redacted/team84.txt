@@ -1,0 +1,410 @@
+Team: 84
+Software: R
+Version: ORIGINAL
+
+L2data <- read.csv("L2data.csv")
+
+require(dplyr)
+
+L2data %>%
+   group_by(year) %>%
+   summarise_each(funs(mean(., na.rm = TRUE)), foreignpct, emprate, socx, netmigpct) -> year.diff
+
+year.diff[3,] <- year.diff[2,] - year.diff[1,] 
+
+knitr::kable(year.diff, digits = 3, padding = 2, align='c', 
+      caption = "Mean of variables of interest across countries (row differences in 3rd row)")
+
+require(dplyr)
+
+L2data %>%
+  group_by(country) %>%
+  summarise_each(funs(mean(., na.rm = TRUE)), foreignpct, emprate, socx, netmigpct) -> country.diff
+
+knitr::kable(country.diff, digits = 3, padding = 2, align='c', 
+      caption = "Mean of variables of interest across years")
+
+ZA2900 <- read.csv("ZA2900.csv") 
+ZA4700 <- read.csv("ZA4700.csv") 
+
+ZA2900$v200 <- car::recode(ZA2900$v200, "c('')=NA")
+ZA4700$sex <- car::recode(ZA4700$sex, "c('')=NA")
+
+
+ZA2900 %>%
+  count(v200) %>%
+  mutate(prop = prop.table(n))
+
+ZA4700 %>%
+  count(sex) %>%
+  mutate(prop = prop.table(n))
+
+ZA2900$v201 <- car::recode(ZA2900$v201, "c('')=NA")
+ZA2900$v201 <- car::recode(ZA2900$v201, "c('15 years')=15")
+ZA2900$v201 <- car::recode(ZA2900$v201, "c('97 years')=97")
+ZA2900$v201 <- as.numeric(levels(ZA2900$v201))[ZA2900$v201]
+
+ZA2900 %>%
+  summarise_each(
+    funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE), min(., na.rm = TRUE), max(., na.rm = TRUE)),
+                 v201)
+ZA2900 %>%
+  summarise_each(
+    funs(mean(., na.rm = TRUE), sd(., na.rm = TRUE), min(., na.rm = TRUE), max(., na.rm = TRUE)),
+                 v201)
+
+ZA2900$v205.modified <- as.numeric(ZA2900$v205)
+ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(2,3,4)='Primary or less'")
+ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(5,6,7,8)='Secondary and University or more'")
+ZA2900$v205.modified <- car::recode(ZA2900$v205.modified, "c(1)=NA")
+
+ZA4700$degree.modified <- as.numeric(ZA4700$degree)
+ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(3,5,6)='Primary or less'")
+ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(2,4,7)='Secondary and University or more'")
+ZA4700$degree.modified <- car::recode(ZA4700$degree.modified, "c(1)=NA")
+
+ZA2900$v206.modified <- as.numeric(ZA2900$v206)
+ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(2)='Full-time'")
+ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(7)='Part-time'")
+ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(11, 3,4,5)='Active unemployed'")
+ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(8,9,10)='Not active'")
+ZA2900$v206.modified <- car::recode(ZA2900$v206.modified, "c(1,6)=NA")
+
+ZA4700$wrkst.modified <- as.numeric(ZA4700$wrkst)
+ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(2)='Full-time'")
+ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(4)='Part-time'")
+ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(11,3,5,6)='Active unemployed'")
+ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(8,9,10)='Not active'")
+ZA4700$wrkst.modified <- car::recode(ZA4700$wrkst.modified, "c(1,7)=NA")
+
+ZA2900$v39.modified <- car::recode(ZA2900$v39, "c('')=NA")
+ZA2900$v39.modified <- car::recode(ZA2900$v39.modified, 
+                                   "c('Definitely not', 'Probably not') = 'Negative'")
+ZA2900$v39.modified <- car::recode(ZA2900$v39.modified,
+                                   "c('Definitely should', 'Probably should') = 'Affirmative'")
+
+
+ZA4700$V28.modified <- car::recode(ZA4700$V28, "c('')=NA")
+ZA4700$V28.modified <- car::recode(ZA4700$V28.modified, 
+                                   "c('Definitely should not be', 'Probably should not be') = 'Negative'")
+ZA4700$V28.modified <- car::recode(ZA4700$V28.modified,
+                                   "c('Definitely should be', 'Probably should be') = 'Affirmative'")
+
+ZA2900$v41.modified <- car::recode(ZA2900$v41, "c('')=NA")
+ZA2900$v41.modified <- car::recode(ZA2900$v41.modified, 
+                                   "c('Definitely not', 'Probably not') = 'Negative'")
+ZA2900$v41.modified <- car::recode(ZA2900$v41.modified,
+                                   "c('Definitely should', 'Probably should') = 'Affirmative'")
+
+
+ZA4700$V30.modified <- car::recode(ZA4700$V30, "c('')=NA")
+ZA4700$V30.modified <- car::recode(ZA4700$V30.modified, 
+                                   "c('Definitely should not be', 'Probably should not be') = 'Negative'")
+ZA4700$V30.modified <- car::recode(ZA4700$V30.modified,
+                                   "c('Definitely should be', 'Probably should be') = 'Affirmative'")
+
+ZA2900$v42.modified <- car::recode(ZA2900$v42, "c('')=NA")
+ZA2900$v42.modified <- car::recode(ZA2900$v42.modified, 
+                                   "c('Definitely not', 'Probably not') = 'Negative'")
+ZA2900$v42.modified <- car::recode(ZA2900$v42.modified,
+                                   "c('Definitely should', 'Probably should') = 'Affirmative'")
+
+
+ZA4700$V31.modified <- car::recode(ZA4700$V31, "c('')=NA")
+ZA4700$V31.modified <- car::recode(ZA4700$V31.modified, 
+                                   "c('Definitely should not be', 'Probably should not be') = 'Negative'")
+ZA4700$V31.modified <- car::recode(ZA4700$V31.modified,
+                                   "c('Definitely should be', 'Probably should be') = 'Affirmative'")
+
+ZA2900$v36.modified <- car::recode(ZA2900$v36, "c('')=NA")
+ZA2900$v36.modified <- car::recode(ZA2900$v36.modified, 
+                                   "c('Definitely not', 'Probably not') = 'Negative'")
+ZA2900$v36.modified <- car::recode(ZA2900$v36.modified,
+                                   "c('Definitely should', 'Probably should') = 'Affirmative'")
+
+
+ZA4700$V25.modified <- car::recode(ZA4700$V25, "c('')=NA")
+ZA4700$V25.modified <- car::recode(ZA4700$V25.modified, 
+                                   "c('Definitely should not be', 'Probably should not be') = 'Negative'")
+ZA4700$V25.modified <- car::recode(ZA4700$V25.modified,
+                                   "c('Definitely should be', 'Probably should be') = 'Affirmative'")
+
+
+ZA2900$v3.modified  <- ZA2900$v3
+ZA2900$v3.modified <- plyr::revalue(ZA2900$v3.modified, 
+        c("aus" = "Australia",
+          "cdn" = "Canada",
+          "ch"  = "Switzerland",
+          "cz"  = "Czech Republic",
+          "D-E" = "Germany",
+          "D-W" = "Germany",
+          "e"   = "Spain",
+          "f"   = "France",
+          "gb"  = "United Kingdom",
+          "h"   = "Hungary",
+          "IL-A"= "Israel",
+          "IL-J"= "Israel",
+          "irl" = "Ireland",
+          "j"   = "Japan",
+          "lv"  = "Latvia",
+          "n"   = "Norway",
+          "nz"  = "New Zealand",
+          "pl"  = "Poland",
+          "lv"  = "Latvia",
+          "rus" = "Russia",
+          "s"   = "Sweden",
+          "slo" = "Slovenia",
+          "usa" = "United States"
+          ))
+
+ZA4700$V3a.modified <- ZA4700$V3a
+ZA4700$V3a.modified <- stringr::str_sub(ZA4700$V3a.modified, start = 4)
+ZA4700$V3a.modified[ZA4700$V3a.modified == "Great Britain"] <- "United Kingdom"
+
+
+merge.1996 <- ZA2900[ , c(
+  "v200", "v201", "v205.modified", "v206.modified",
+  "v39.modified", "v41.modified", "v42.modified", "v36.modified",
+  "v3.modified")]
+
+names(merge.1996) <- c("Sex", "Age", "Education", "Employment", 
+                       "PolPref.Old", "PolPref.Unemployed", "PolPref.Income", "PolPref.Jobs",
+                       "Country")
+
+merge.1996$Year <- "1996"
+
+merge.2006 <- ZA4700[ , c(
+  "sex", "age", "degree.modified", "wrkst.modified",
+  "V28.modified", "V30.modified", "V31.modified", "V25.modified",
+  "V3a.modified")]
+
+names(merge.2006) <- c("Sex", "Age", "Education", "Employment", 
+                       "PolPref.Old", "PolPref.Unemployed", "PolPref.Income", "PolPref.Jobs",
+                       "Country")
+
+merge.2006$Year <- "2006"
+
+merge.1996$Country <- as.character(merge.1996$Country)
+
+merged.1996.2006 <- rbind(merge.1996, merge.2006)
+merged.1996.2006 <- merged.1996.2006[merged.1996.2006$Country %in% 
+                                       intersect(merge.1996$Country, merge.2006$Country), ]
+
+Cntry <- L2data[, c(7,2,3:6)]
+names(Cntry)[1:2] <- c("Country", "Year")
+
+Cntry$Country <- as.character(Cntry$Country)
+Cntry[21:22, "Country"] <- "Israel"
+
+data.merged <- merge(merged.1996.2006, Cntry)
+
+data.merged[c(1,2,5,6)] <- lapply(data.merged[c(1,2,5,6)], factor)
+
+data.merged$AgeSq <- (data.merged$Age)^2
+
+data.merged$PolPref.Old.N        <- (2-as.numeric(data.merged$PolPref.Old))
+data.merged$PolPref.Unemployed.N <- (2-as.numeric(data.merged$PolPref.Unemployed))
+data.merged$PolPref.Income.N     <- (2-as.numeric(data.merged$PolPref.Income))
+data.merged$PolPref.Jobs.N       <- (2-as.numeric(data.merged$PolPref.Jobs))
+
+data.merged$Education <- relevel(data.merged$Education, ref = "Secondary and University or more")
+data.merged$Employment <- relevel(data.merged$Employment, ref = "Full-time")
+
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+data.merged.13 <- data.merged[data.merged$Country %!in% 
+                                c("Czech Republic", "Hungary", "Israel",
+                                  "Latvia", "Poland", "Russia", "Slovenia"), ]
+
+knitr::kable(data.merged.13[c(1:3,4930:4932, 4933:4935, 7045:7050), c(1:6,11:14,16)], 
+             digits = 3, padding = 1, align='c', caption = "A few rows & columns of the the merged dataset")
+
+library(epiDisplay)
+library(knitr)
+library(broom)
+
+model.1 <- glm(PolPref.Old.N ~ foreignpct +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.1)
+
+model.2 <- glm(PolPref.Unemployed.N ~ foreignpct +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13) ; summary(model.2)
+
+model.3 <- glm(PolPref.Income.N ~ foreignpct +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.3)
+
+model.4 <- glm(PolPref.Jobs.N ~ foreignpct +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.4)
+
+options(scipen=999)
+logistic.display(model.1)
+logistic.display(model.2)
+logistic.display(model.3)
+logistic.display(model.4)
+options(scipen=0)
+
+
+model.5 <- glm(PolPref.Old.N ~ foreignpct + socx +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.5); 
+
+model.6 <- glm(PolPref.Unemployed.N ~ foreignpct + socx +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.6)
+
+model.7 <- glm(PolPref.Income.N ~ foreignpct + socx +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.7)
+
+model.8 <- glm(PolPref.Jobs.N ~ foreignpct + socx +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.8)
+
+options(scipen=999)
+logistic.display(model.5)
+logistic.display(model.6)
+logistic.display(model.7)
+logistic.display(model.8)
+options(scipen=0)
+
+
+model.9 <- glm(PolPref.Old.N ~ foreignpct + emprate +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.9); 
+
+model.10 <- glm(PolPref.Unemployed.N ~ foreignpct + socx + emprate +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.10)
+model.11 <- glm(PolPref.Income.N ~ foreignpct + socx + emprate +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.11)
+
+model.12 <- glm(PolPref.Jobs.N ~ foreignpct + socx + emprate +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.12)
+
+options(scipen=999)
+logistic.display(model.9)
+logistic.display(model.10)
+logistic.display(model.11)
+logistic.display(model.12)
+options(scipen=0)
+
+model.13 <- glm(PolPref.Old.N ~ netmigpct +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.13);
+
+model.14 <- glm(PolPref.Unemployed.N ~ netmigpct +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.14)
+
+model.15 <- glm(PolPref.Income.N ~ netmigpct +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.15)
+
+model.16 <- glm(PolPref.Jobs.N ~ netmigpct +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.16)
+
+options(scipen=999)
+logistic.display(model.13)
+logistic.display(model.14)
+logistic.display(model.15)
+logistic.display(model.16)
+options(scipen=0)
+
+
+model.17 <- glm(PolPref.Old.N ~ netmigpct + socx +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.17);
+
+model.18 <- glm(PolPref.Unemployed.N ~ netmigpct + socx +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.18)
+
+model.19 <- glm(PolPref.Income.N ~ netmigpct + socx +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.19)
+model.20 <- glm(PolPref.Jobs.N ~ netmigpct + socx +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.20)
+
+options(scipen=999)
+logistic.display(model.17)
+logistic.display(model.18)
+logistic.display(model.19)
+logistic.display(model.20)
+options(scipen=0)
+
+model.21 <- glm(PolPref.Old.N ~ netmigpct + emprate +
+                               Sex + Age + AgeSq + Education + Employment +
+                               factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.21);
+
+model.22 <- glm(PolPref.Unemployed.N ~ netmigpct + emprate +
+                                      Sex + Age + AgeSq + Education + Employment +
+                                      factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.22)
+
+model.23 <- glm(PolPref.Income.N ~ netmigpct + emprate +
+                                  Sex + Age + AgeSq + Education + Employment +
+                                  factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.23)
+
+model.24 <- glm(PolPref.Jobs.N ~ netmigpct + emprate +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.24)
+
+model.24 <- glm(PolPref.Jobs.N ~ netmigpct + emprate +
+                                Sex + Age + AgeSq + Education + Employment +
+                                factor(Country) + factor(Year),
+               family=binomial(link='logit'),
+               data = data.merged.13); summary(model.24)

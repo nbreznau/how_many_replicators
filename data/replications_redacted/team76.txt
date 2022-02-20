@@ -1,0 +1,245 @@
+Team: 76
+Sotware: R 
+Version: ORIGINAL
+
+rm(list=ls())
+
+
+library(Hmisc)
+library(tidyverse)
+library(data.table)
+library(readxl)
+
+ZA2900_1996 <- read_csv(file="ZA2900.csv")
+
+ZA2900_1996$v3 <- ifelse((ZA2900_1996$v3=="D-E" | ZA2900_1996$v3=="D-W"), "de", ZA2900_1996$v3)
+
+s_1996 <- ZA2900_1996 %>% filter(v3 %in% c("aus","cdn","f","irl","j","nz","n","e","s","ch","gb","usa","de"))
+
+s_1996 <- s_1996 %>%
+  mutate_all(as.character)
+
+
+setnames(s_1996, old = c('v36','v41', 'v42', 'v38', 'v39', 'v44'), new = c('govjobs','govunemp', 'govincdiff', 'govhcare', 'govretire', 'govhousing'))
+
+s_1996 <- s_1996 %>% 
+  mutate_at(c('govjobs','govunemp', 'govincdiff', 'govhcare', 'govretire', 'govhousing'), 
+            funs(recode(., "Definitely should"=1, "Probably should"=1, "Definitely not"=0, "Probably not"=0)))
+
+
+s_1996$age <- as.numeric(s_1996$v201)
+s_1996$agesq <- s_1996$age^2
+s_1996$female <- ifelse(s_1996$v200=="Female",1,s_1996$v200)
+s_1996$female <- ifelse(s_1996$v200=="Male",0,s_1996$female)
+s_1996$lesshs <- ifelse(s_1996$v205=="Incpl primary" | s_1996$v205=="Incpl secondary" | s_1996$v205=="None;still at school,uni" | s_1996$v205=="Primary compl",1,0)
+s_1996$univ <- ifelse(s_1996$v205=="University compl",1,0)
+s_1996$ptemp <- ifelse(s_1996$v206=="P-t empl,main job" | s_1996$v206=="Less part-time" | s_1996$v206=="Help family member",1,0)
+s_1996$unemp <- ifelse(s_1996$v206=="Unemployed",1,0)
+s_1996$nolabor <- ifelse(s_1996$v206=="Studt,school,educ" | s_1996$v206=="Retired" | s_1996$v206=="Housewife <man>" |
+                           s_1996$v206=="Permanent disabled" | s_1996$v206=="Oth,n i lab force",1,0)
+s_1996$selfemp <- ifelse(s_1996$v213=="Self-employed RP:informell",1,0)
+s_1996$selfemp <- ifelse(!is.na(s_1996$v206) & is.na(s_1996$v213),0,s_1996$selfemp)
+s_1996$inczscore <- ave(as.numeric(s_1996$v218), s_1996$v3, FUN=scale)
+s_1996$year <- 1996
+
+ZA4700_2006 <- read_csv(file="ZA4700.csv")
+
+ZA4700_2006 <- ZA4700_2006 %>% 
+  mutate_at(c("V3"), funs(recode(., "AU-Australia"="aus", "JP-Japan"="j", "CA-Canada"="cdn", "FR-France"="f", "NZ-New Zealand"="nz", "CH-Switzerland"="ch",
+                                 "ES-Spain"="e", "SE-Sweden"="s", "IE-Ireland"="irl", "NO-Norway"="n", "US-United States"="usa", "826.1"="gb", "276.1"="de",
+                                 "276.2"="de")))
+
+s_2006 <- ZA4700_2006 %>% filter(V3 %in% c("aus","cdn","f","irl","j","nz","n","e","s","ch","gb","usa","de"))
+
+names(s_2006) <- tolower(names(s_2006))
+s_2006 <- s_2006 %>%
+  mutate_all(as.character)
+
+setnames(s_2006, old = c('v25','v30', 'v31', 'v27', 'v28', 'v33'), new = c('govjobs','govunemp', 'govincdiff', 'govhcare', 'govretire', 'govhousing'))
+
+s_2006 <- s_2006 %>% 
+  mutate_at(c('govjobs','govunemp', 'govincdiff', 'govhcare', 'govretire', 'govhousing'), 
+            funs(recode(., "Definitely should be"=1, "Probably should be"=1, "Definitely should not be"=0, "Probably should not be"=0)))
+
+
+s_2006$age <- as.numeric(s_2006$age)
+s_2006$agesq <- s_2006$age^2
+s_2006$female <- ifelse(s_2006$sex=="Female",1,s_2006$sex)
+s_2006$female <- ifelse(s_2006$sex=="Male",0,s_2006$female)
+s_2006$lesshs <- ifelse(s_2006$degree=="No formal qualification, incomplete primary" | 
+                          s_2006$degree=="Above lowest qualification" | s_2006$degree=="Lowest formal qualification",1,0)
+s_2006$univ <- ifelse(s_2006$degree=="University degree completed, graduate studies",1,0)
+s_2006$ptemp <- ifelse(s_2006$wrkst=="Employed, part-time,main job" | s_2006$wrkst=="Employed, less than part-time" | s_2006$wrkst=="Helping family member",1,0)
+s_2006$unemp <- ifelse(s_2006$wrkst=="Unemployed",1,0)
+s_2006$nolabor <- ifelse(s_2006$wrkst=="Student,school,vocational training" | s_2006$wrkst=="Retired" | s_2006$wrkst=="Housewife,-man,home duties" |
+                           s_2006$wrkst=="Permanently disabled" | s_2006$wrkst=="Other,not in labour force" ,1,0)
+s_2006$selfemp <- ifelse(s_2006$wrktype=="Self employed",1,0)
+s_2006$selfemp <- ifelse(!is.na(s_2006$wrkst) & is.na(s_2006$wrktype),0, s_2006$selfemp)
+s_2006$year <- 2006
+
+
+s_2006_extra1 <- read_xlsx("data/ZA4700.xlsx", range = cell_cols("D:E"), col_types = "numeric" )
+s_2006_extra2 <- read_xlsx("data/ZA4700.xlsx", range = cell_cols("ER:FX"), col_types = "numeric" )
+
+s_2006_2 <- cbind(s_2006_extra1,s_2006_extra2)
+
+s_2006_2 <- s_2006_2 %>% 
+  mutate_at(c("V3"), funs(recode(., "36"="aus", "392"="j", "124"="cdn", "250"="f", "554"="nz", "756"="ch",
+                                 "724"="e", "752"="s", "372"="irl", "578"="n", "840"="usa", "826.1"="gb", "276.1"="de",
+                                 "276.2"="de")))
+
+s_2006_2 <- s_2006_2 %>% filter(V3 %in% c("aus","cdn","f","irl","j","nz","n","e","s","ch","gb","usa","de"))
+
+names(s_2006_2) <- tolower(names(s_2006_2))
+
+s_2006_2$income <-  coalesce(s_2006_2$au_inc, s_2006_2$ca_inc, s_2006_2$fr_inc, s_2006_2$de_inc, s_2006_2$ie_inc, s_2006_2$jp_inc, s_2006_2$nz_inc,s_2006_2$no_inc,
+                                           s_2006_2$es_inc, s_2006_2$se_inc, s_2006_2$ch_inc, s_2006_2$gb_inc, s_2006_2$us_inc)
+
+s_2006_2$inczscore <- ave(s_2006_2$income, s_2006_2$v3, FUN=scale)
+
+s_2006_2 <- s_2006_2[,c(36:37)]
+
+s_2006 <- cbind(s_2006, s_2006_2)
+
+s_1996 <- s_1996[,c(3,36,38,39,41,42,44,195:205)]
+s_2006 <- s_2006[,c(4,27,29,30,32,33,35,67,292:300,302)]
+
+pooled_data <- rbind(s_1996, s_2006)
+
+
+country_data <- read_csv("bradyfinnigan2014countrydata.csv")
+
+pooled_data$cntry <- as.character(pooled_data$v3)
+pooled_data <- pooled_data %>% 
+  mutate_at(c("cntry"), funs(recode(., "aus"="36", "j"="392", "cdn"="124", "f"="250", "nz"="554", "ch"="756",
+                                "e"="724", "s"="752", "irl"="372", "n"="578", "usa"="840", "gb"="826", "de"="276")))
+pooled_data$cntry <- as.numeric(pooled_data$cntry)
+
+complete_data <- merge(pooled_data, country_data, by=c("cntry", "year"),all.x=T)
+
+
+model4_1_6 <- NULL
+z4_1_6 <- NULL
+odd4_1_6 <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model4_1_6[[i]] <- glm(get(i) ~ foreignpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+              selfemp + inczscore + as.factor(year) + as.factor(cntry),
+               family = binomial("logit"),  data = complete_data)
+  z4_1_6[[i]]  <- summary(model4_1_6[[i]])$coefficients[,3]
+  odd4_1_6[[i]] <- exp(coef(model4_1_6[[i]]))
+}
+
+
+model4_7_12 <- NULL
+z4_7_12 <- NULL
+odd4_7_12 <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model4_7_12[[i]] <- glm(get(i) ~ foreignpct + socx + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                           selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                         family = binomial("logit"),  data = complete_data)
+  z4_7_12[[i]]  <- summary(model4_7_12[[i]])$coefficients[,3]
+  odd4_7_12[[i]] <- exp(coef(model4_7_12[[i]]))
+}
+
+
+model4_13_18 <- NULL
+z4_13_18 <- NULL
+odd4_13_18  <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model4_13_18[[i]] <- glm(get(i) ~ foreignpct + emprate + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                            selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                          family = binomial("logit"),  data = complete_data)
+  z4_13_18[[i]]  <- summary(model4_13_18[[i]])$coefficients[,3]
+  odd4_13_18[[i]] <- exp(coef(model4_13_18[[i]]))
+}
+
+
+model5_1_6 <- NULL
+z5_1_6 <- NULL
+odd5_1_6 <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model5_1_6[[i]] <- glm(get(i) ~ netmigpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                           selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                         family = binomial("logit"),  data = complete_data)
+  z5_1_6[[i]]  <- summary(model5_1_6[[i]])$coefficients[,3]
+  odd5_1_6[[i]] <- exp(coef(model5_1_6[[i]]))
+}
+
+model5_7_12 <- NULL
+z5_7_12 <- NULL
+odd5_7_12 <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model5_7_12[[i]] <- glm(get(i) ~ netmigpct + socx + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                            selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                          family = binomial("logit"),  data = complete_data)
+  z5_7_12[[i]]  <- summary(model5_7_12[[i]])$coefficients[,3]
+  odd5_7_12[[i]] <- exp(coef(model5_7_12[[i]]))
+}
+
+model5_13_18 <- NULL
+z5_13_18 <- NULL
+odd5_13_18  <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model5_13_18[[i]] <- glm(get(i) ~ netmigpct + emprate + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                             selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                           family = binomial("logit"),  data = complete_data)
+  z5_13_18[[i]]  <- summary(model5_13_18[[i]])$coefficients[,3]
+  odd5_13_18[[i]] <- exp(coef(model5_13_18[[i]]))
+}
+
+
+model5_19_25 <- NULL
+z5_19_25 <- NULL
+odd5_19_25  <- NULL
+
+for (i in c("govjobs","govunemp","govincdiff","govretire","govhousing","govhcare")){
+  model5_19_25[[i]] <- glm(get(i) ~ netmigpct+ foreignpct + age + agesq + female + lesshs + univ + ptemp + unemp + nolabor +
+                             selfemp + inczscore + as.factor(year) + as.factor(cntry),
+                           family = binomial("logit"),  data = complete_data)
+  z5_19_25[[i]]  <- summary(model5_19_25[[i]])$coefficients[,3]
+  odd5_19_25[[i]] <- exp(coef(model5_19_25[[i]]))
+}
+
+
+
+table <- htmlreg(list(model4_1_6[[1]],model4_1_6[[2]],model4_1_6[[3]],model4_1_6[[4]],model4_1_6[[5]],model4_1_6[[6]],
+                     model4_7_12[[1]],model4_7_12[[2]],model4_7_12[[3]],model4_7_12[[4]],model4_7_12[[5]],model4_7_12[[6]],
+                     model4_13_18[[1]],model4_13_18[[2]],model4_13_18[[3]],model4_13_18[[4]],model4_13_18[[5]],model4_13_18[[6]],
+                     model5_1_6[[1]],model5_1_6[[2]],model5_1_6[[3]],model5_1_6[[4]],model5_1_6[[5]],model5_1_6[[6]],
+                     model5_7_12[[1]],model5_7_12[[2]],model5_7_12[[3]],model5_7_12[[4]],model5_7_12[[5]],model5_7_12[[6]],
+                     model5_13_18[[1]],model5_13_18[[2]],model5_13_18[[3]],model5_13_18[[4]],model5_13_18[[5]],model5_13_18[[6]],
+                     model5_19_25[[1]],model5_19_25[[2]],model5_19_25[[3]],model5_19_25[[4]],model5_19_25[[5]],model5_19_25[[6]]),
+                   override.coef=list(odd4_1_6[[1]],odd4_1_6[[2]],odd4_1_6[[3]],odd4_1_6[[4]],odd4_1_6[[5]],odd4_1_6[[6]],
+                                      odd4_7_12[[1]],odd4_7_12[[2]],odd4_7_12[[3]],odd4_7_12[[4]],odd4_7_12[[5]],odd4_7_12[[6]],
+                                      odd4_13_18[[1]],odd4_13_18[[2]],odd4_13_18[[3]],odd4_13_18[[4]],odd4_13_18[[5]],odd4_13_18[[6]],
+                                      odd5_1_6[[1]],odd5_1_6[[2]],odd5_1_6[[3]],odd5_1_6[[4]],odd5_1_6[[5]],odd4_1_6[[6]],
+                                      odd5_7_12[[1]],odd5_7_12[[2]],odd5_7_12[[3]],odd5_7_12[[4]],odd5_7_12[[5]],odd5_7_12[[6]],
+                                      odd5_13_18[[1]],odd5_13_18[[2]],odd5_13_18[[3]],odd5_13_18[[4]],odd5_13_18[[5]],odd5_13_18[[6]],
+                                      odd5_19_25[[1]],odd5_19_25[[2]],odd5_19_25[[3]],odd5_19_25[[4]],odd5_19_25[[5]],odd5_19_25[[6]]),
+                    override.se = list(z4_1_6[[1]],z4_1_6[[2]],z4_1_6[[3]],z4_1_6[[4]],z4_1_6[[5]],z4_1_6[[6]],
+                                       z4_7_12[[1]],z4_7_12[[2]],z4_7_12[[3]],z4_7_12[[4]],z4_7_12[[5]],z4_7_12[[6]],
+                                       z4_13_18[[1]],z4_13_18[[2]],z4_13_18[[3]],z4_13_18[[4]],z4_13_18[[5]],z4_13_18[[6]],
+                                       z5_1_6[[1]],z5_1_6[[2]],z5_1_6[[3]],z5_1_6[[4]],z5_1_6[[5]],z4_1_6[[6]],
+                                       z5_7_12[[1]],z5_7_12[[2]],z5_7_12[[3]],z5_7_12[[4]],z5_7_12[[5]],z5_7_12[[6]],
+                                       z5_13_18[[1]],z5_13_18[[2]],z5_13_18[[3]],z5_13_18[[4]],z5_13_18[[5]],z5_13_18[[6]],
+                                       z5_19_25[[1]],z5_19_25[[2]],z5_19_25[[3]],z5_19_25[[4]],z5_19_25[[5]],z5_19_25[[6]]),digits=3,
+                    custom.coef.map=list("foreignpct" = "Foreign-born (%)",
+                                         "socx" = "Social Welfare Expenditures (% of GDP)",
+                                         "emprate" = "Employment Rate (%)",
+                                          "netmigpct" = "Net Migration (%)",
+                                          "age" = "Age", "agesq" = "Age^2",
+                                         "female" = "Female", "lesshs" = "Less than Secondary",
+                                         "univ" = "University or Above", "ptemp" = "Part-Time Employment",
+                                         "unemp" = "Unemployed", "nolabor" = "Not in Labor Force",
+                                         "selfemp" = "Self-Employed", "inczscore" = "Relative Income",
+                                         "(Intercept)" = "Intercept"),
+                 file = "table.html")
+
+
+

@@ -1,0 +1,211 @@
+Team: 36
+Software: Stata
+Version: ORIGINAL
+
+clear all
+set more off
+
+use "ZA2900.dta", clear
+
+recode v3 (1=36) (20=124)(27=250) (2/3=276) (10=372) (24=392) (19=554) (12=578) (25=724) (13=752) (30=756) (4=826) (6=840), gen(cntry)
+label define countrylabel 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
+label values cntry countrylabel
+
+recode v36 (1/2=1) (3/4=0), gen(b_jobs)
+lab def b_jobs 0 "no support" 1 "support"
+lab val b_jobs b_jobs
+
+recode v38 (1/2=1) (3/4=0), gen(b_hcare)
+lab def b_hcare 0 "no support" 1 "support"
+lab val b_hcare b_hcare
+
+recode v39 (1/2=1) (3/4=0), gen(b_retire)
+lab def b_retire 0 "no support" 1 "support"
+lab val b_retire b_retire
+
+recode v41 (1/2=1) (3/4=0), gen(b_unemp)
+lab def b_unemp 0 "no support" 1 "support"
+lab val b_unemp b_unemp
+
+recode v42 (1/2=1) (3/4=0), gen(b_incdiff)
+lab def b_incdiff 0 "no support" 1 "support"
+lab val b_incdiff b_incdiff
+
+recode v44 (1/2=1) (3/4=0), gen(b_house)
+lab def b_house 0 "no support" 1 "support"
+lab val b_house b_house
+
+rename v201 age
+gen agesq=age^2
+
+recode v200 (1=0) (2=1), gen(gender)
+
+recode v205 (1/4=1) (5/6=2) (7=3), gen(education)
+lab def edlabels 1 "less than Secondary" 2 "Secondary" 3 "University or above"
+lab val education edlabels
+
+gen emplst = .
+replace emplst = 1 if v206 == 1  // full-time employment
+replace emplst = 2 if v206 >= 2 & v206 <= 4  // part-time employment
+replace emplst = 3 if v206 == 5 // unemployed
+replace emplst = 4 if v206 >= 6 & v206 <= 10 // not in labour force
+
+lab def emplstlabel 1 "full-time" 2 "part-time" 3 "unemployed" 4 "not in labour force"
+lab value emplst emplstlabel
+
+gen selfempl = 0
+replace selfempl = 1 if v213 == 1
+
+rename v218 faminc
+
+gen inczscore=.
+levelsof cntry, local(cntries)
+foreach cntryval of local cntries {
+	zscore faminc if cntry==`cntryval', listwise
+	replace inczscore=z_faminc if cntry==`cntryval'
+	drop z_faminc
+}
+
+// year
+gen year=1996
+gen yr2006=0
+
+save "96_recoded.dta", replace
+
+
+use "ZA4700.dta", clear
+
+rename V3a cntry
+
+recode V25 (1/2=1) (3/4=0), gen(b_jobs)
+lab def b_jobs 0 "no support" 1 "support"
+label val b_jobs b_jobs
+
+recode V27 (1/2=1) (3/4=0), gen(b_hcare)
+lab def b_hcare 0 "no support" 1 "support"
+label val b_hcare b_hcare
+
+recode V28 (1/2=1) (3/4=0), gen(b_retire)
+lab def b_retire 0 "no support" 1 "support"
+label val b_retire b_retire
+
+recode V30 (1/2=1) (3/4=0), gen(b_unemp)
+lab def b_unemp 0 "no support" 1 "support"
+label val b_unemp b_unemp
+
+recode V31 (1/2=1) (3/4=0), gen(b_incdiff)
+lab def b_incdiff 0 "no support" 1 "support"
+label val b_incdiff b_incdiff
+
+recode V33 (1/2=1) (3/4=0), gen(b_house)
+lab def b_house 0 "no support" 1 "support"
+label val b_house b_house
+
+gen agesq=age^2
+
+recode sex (1=0) (2=1), gen(gender)
+lab def gender 0"male" 1"female"
+lab val gender gender
+
+recode degree (0 1 2=1) (3 4=2) (5=3), gen(education)
+lab def edlabels 1 "less than Secondary" 2 "Secondary" 3 "University or above"
+lab val education edlabels
+
+gen emplst = .
+replace emplst = 1 if wrkst == 1  // full-time employment
+replace emplst = 2 if wrkst >= 2 & wrkst <= 4  // part-time employment
+replace emplst = 3 if wrkst == 5 // unemployed
+replace emplst = 4 if wrkst >= 6 & wrkst <= 10 // not in labour force
+
+lab def emplstlabel 1 "full-time" 2 "part-time" ///
+3 "unemployed" 4 "not in labour force"
+lab value emplst emplstlabel
+
+gen selfempl = 0
+replace selfempl = 1 if wrktype == 4
+
+gen inczscore=.
+local incvars = "AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC" 
+foreach incvar of local incvars {
+	zscore `incvar', listwise
+	replace inczscore=z_`incvar' if z_`incvar'!=.
+	drop z_`incvar'
+}
+
+
+gen year=2006
+gen yr2006=1
+
+save "06_recoded.dta", replace
+
+append using "96_recoded.dta"
+sort cntry year
+merge m:1 cntry year using "bradyfinnigan2014countrydata.dta"
+
+recode cntry (36=1) (124=1) (250=1) (276=1) (372=1) (392=1) (554=1) ///
+(578=1) (724=1) (752=1) (756=1) (826=1) (840=1) (else=0), gen(keep13)
+keep if keep13 == 1
+
+save "9606_pooled.dta", replace
+
+use "9606_pooled.dta", clear
+
+global controls "age agesq gender ib2.education i.emplst selfempl inczscore"
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' $controls i.cntry yr2006, or 
+	outreg2 using "table4\mod_0", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' foreignpct $controls i.cntry yr2006, or 
+	outreg2 using "table4\mod_1", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' foreignpct socx $controls i.cntry yr2006, or 
+	outreg2 using "table4\mod_2", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' foreignpct emprate $controls i.cntry yr2006, or 
+	outreg2 using "table4\mod_3", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' foreignpct socx emprate $controls i.cntry yr2006, or 
+	outreg2 using "table4\mod_4", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' $controls i.cntry yr2006, or 
+	outreg2 using "table5\mod_5", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' netmigpct $controls i.cntry yr2006, or 
+	outreg2 using "table5\mod_6", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' netmigpct socx $controls i.cntry yr2006, or 
+	outreg2 using "table5\mod_7", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' netmigpct emprate $controls emprate i.cntry yr2006, or 
+	outreg2 using "table5\mod_8", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' netmigpct foreignpct $controls i.cntry yr2006, or 
+	outreg2 using "table5\mod_9", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}
+
+
+foreach v in b_jobs b_unemp b_incdiff b_retire b_house b_hcare {
+	logit `v' netmigpct socx emprate $controls i.cntry yr2006, or 
+	outreg2 using "table5\mod_10", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform  stats(coef tstat)
+}

@@ -1,0 +1,1824 @@
+Team: 70
+Software: R
+Version: ORIGINAL
+
+
+rm(list = ls())
+p_needed <- c("haven", "tidyverse", "labelled", "magrittr", "dummies")
+packages <- rownames(installed.packages())
+p_to_install <- p_needed[!(p_needed %in% packages)]
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install, dependencies = TRUE)
+}
+print(sapply(p_needed, require, character.only = TRUE))
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+
+za2900 <- read_dta("ZA2900.dta")
+
+
+za2900 <- za2900 %>%
+  mutate(v3a =
+    recode(as.numeric(za2900$v3),
+           "1" = 36,
+           "2" = 276,
+           "3" = 276,
+           "4" = 826,
+           "6" = 840, 
+           "8" = 348,
+           
+           "10" = 372, 
+           "12" = 578,
+           "13" = 752,
+           "14" = 203,
+           "15" = 705,
+           "16" = 616,
+           
+           "18" = 643, 
+           "19" = 554,
+           "20" = 124,
+           "21" = 608,
+           "22" = 376,
+           "23" = 376,
+           "24" = 392,
+           "25" = 724,
+           "26" = 428,
+           "27" = 250,
+           
+           "30" = 756))
+
+
+za2900$v3a[za2900$v3a %in% c(9,17,28)] <- NA
+
+
+za2900 <- za2900 %>%
+  mutate(dobeylaws =
+         recode(as.numeric(v4),
+                "2" = 0))
+
+
+za2900 <- za2900 %>%
+  mutate(orgprotest =
+         recode(as.numeric(v5),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "2" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dorgprotest =
+         recode(as.numeric(orgprotest),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+
+za2900 <- za2900 %>%
+  mutate(orgmarch =
+         recode(as.numeric(v6),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "2" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dmarch =
+         recode(as.numeric(orgmarch),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(orgstrike =
+         recode(as.numeric(v7),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "2" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dorgstrike =
+         recode(as.numeric(orgstrike),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendenv =
+         recode(as.numeric(v25),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendenv =
+         recode(as.numeric(spendenv),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendhealth =
+         recode(as.numeric(v26),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendhealth =
+         recode(as.numeric(spendhealth),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendlaw =
+         recode(as.numeric(v27),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendlaw =
+         recode(as.numeric(spendlaw),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendedu =
+         recode(as.numeric(v28),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendedu =
+         recode(as.numeric(spendedu),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spenddef =
+         recode(as.numeric(v29),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspenddef =
+         recode(as.numeric(spenddef),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendret =
+         recode(as.numeric(v30),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendret =
+         recode(as.numeric(spendret),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendunemp =
+         recode(as.numeric(v31),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendunemp =
+         recode(as.numeric(spendunemp),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(spendart =
+         recode(as.numeric(v32),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dspendart =
+         recode(as.numeric(spendart),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+
+za2900 <- za2900 %>%
+  mutate(govjobs =
+         recode(as.numeric(v36),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovjobs =
+         recode(as.numeric(govjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govprices =
+         recode(as.numeric(v38),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovprices =
+         recode(as.numeric(govprices),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govhcare =
+         recode(as.numeric(v38),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dhcare =
+         recode(as.numeric(govhcare),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govretire =
+         recode(as.numeric(v39),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovretire =
+         recode(as.numeric(govretire),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(indgrow =
+         recode(as.numeric(v39),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+
+za2900 <- za2900 %>%
+  mutate(dindgrow =
+         recode(as.numeric(indgrow),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govunemp =
+         recode(as.numeric(v41),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovunemp =
+         recode(as.numeric(govunemp),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govincdiff =
+         recode(as.numeric(v42),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovincdiff =
+         recode(as.numeric(govincdiff),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govstudents =
+         recode(as.numeric(v43),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovstud =
+         recode(as.numeric(govstudents),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(govhousing =
+         recode(as.numeric(v44),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dgovhous =
+         recode(as.numeric(govhousing),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(lawsenv =
+         recode(as.numeric(v45),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dlawsenv =
+         recode(as.numeric(lawsenv),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za2900 <- za2900 %>%
+  mutate(cutspend =
+         recode(as.numeric(v19),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dcutspend =
+         recode(as.numeric(cutspend),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+za2900 <- za2900 %>%
+  mutate(projjobs =
+         recode(as.numeric(v20),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dprojjobs =
+         recode(as.numeric(projjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+za2900 <- za2900 %>%
+  mutate(regbus =
+         recode(as.numeric(v21),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dregbus =
+         recode(as.numeric(regbus),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(indnewprod =
+         recode(as.numeric(v22),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dindnewprod =
+         recode(as.numeric(indnewprod),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(decindjobs =
+         recode(as.numeric(v23),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(ddecindjobs =
+         recode(as.numeric(decindjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+za2900 <- za2900 %>%
+  mutate(workwk =
+         recode(as.numeric(v24),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(dworkwk =
+         recode(as.numeric(workwk),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za2900 <- za2900 %>%
+  mutate(age = v201)
+
+za2900 <- za2900 %>%
+  mutate(agesq = age^2)
+
+za2900 <- za2900 %>%
+  mutate(female =
+         recode(as.numeric(v200),
+                "1" = 0,
+                "2" = 1))
+
+za2900 <- za2900 %>%
+  mutate(marst = v202)
+
+za2900$nevermar <- ifelse(za2900$marst == 5, 1,0)
+
+za2900$married <- ifelse(za2900$marst == 1, 1 , 0)
+
+za2900$divorced <- ifelse(za2900$marst == 3 |za2900$marst == 4, 1, 0 )
+
+za2900$widow <- ifelse(za2900$marst == 2, 1, 0)
+
+za2900$partner <- ifelse(za2900$v203 == 2, 0, 1)
+  
+
+za2900 <- za2900 %>%
+  mutate(hhsize = v273)
+
+
+za2900 <- za2900 %>% 
+  mutate(kidshh = 
+           recode(as.numeric(v274),
+                  "2" = 1,
+                  "3" = 1,
+                  "4" = 1,
+                  "6" = 1,
+                  "7" = 1,
+                  "8" = 1,
+                  .default = 0))
+
+i <- 10
+while(i < 27){
+	za2900$kidshh[as.numeric(za2900$v274) == i & !is.na(za2900$v274)] <- 1
+	i <- i + 2
+}
+
+za2900 <- za2900 %>% 
+  mutate(rural = 
+           recode(as.numeric(v275),
+                  "3" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(suburb = 
+           recode(as.numeric(v275),
+                  "2" = 1,
+                  .default = 0))
+
+
+za2900$ETHNIC <- za2900$v324
+
+za2900$edyears <- za2900$v204
+za2900$edcat <- za2900$v205
+
+za2900 <- za2900 %>% 
+  mutate(degree = 
+           recode(as.numeric(edcat),
+                  "1" = 1,
+                  "2" = 1,
+                  "3" = 1,
+                  "4" = 2,
+                  "5" = 3,
+                  "6" = 4,
+                  "7" = 5))
+
+za2900 <- za2900 %>% 
+  mutate(lesshs = 
+           recode(as.numeric(degree),
+                  "1" = 1,
+                  "2" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(hs = 
+           recode(as.numeric(degree),
+                  "3" = 1,
+                  "4" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(univ = 
+           recode(as.numeric(degree),
+                  "5" = 1,
+                  .default = 0))
+
+za2900$isco <- za2900$v208
+za2900$occ2 <- za2900$v209
+za2900$hourswrk <- za2900$v215
+
+za2900$ftemp <- case_when(
+  as.numeric(za2900$v206) %in% 2:10 ~ 0,
+  as.numeric(za2900$v206) == 1 ~ 1
+)
+
+
+za2900 <- za2900 %>% 
+  mutate(ptemp = 
+           recode(as.numeric(v206),
+                  "2" = 1,
+                  "3" = 1,
+                  "4" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(unemp = 
+           recode(as.numeric(v206),
+                  "5" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(nolabor = 
+           recode(as.numeric(v206),
+                  "6" = 1,
+                  "7" = 1,
+                  "8" = 1,
+                  "9" = 1,
+                  "10" = 1,
+                  .default = 0))
+
+
+za2900$selfemp <- (za2900$v213 == 1)*1
+za2900$selfemp[is.na(za2900$selfemp)] <- 0
+za2900$selfemp[is.na(za2900$v206)] <- NA
+
+za2900$pubemp <- ifelse(za2900$v212 == 1 | za2900$v212 == 2, 1, 0)
+
+za2900$pubemp[is.na(za2900$v206)] <- NA
+
+za2900$pvtemp <- ifelse(za2900$selfemp == 0 & za2900$pubemp == 0, 1, 0)
+
+za2900$pvtemp[is.na(za2900$v206)] <- NA
+
+za2900$faminc <- za2900$v218
+
+za2900$inczscore <- NA
+
+cntries <- levels(factor(za2900$v3a))
+
+for(cntryval in cntries){
+  z_faminc <- scale(za2900$faminc[za2900$v3a==cntryval & !is.na(za2900$v3a)])
+  za2900$inczscore[za2900$v3a==cntryval & !is.na(za2900$v3a)] <- z_faminc
+}
+
+
+za2900 <- za2900 %>% 
+  mutate(union = 
+           recode(as.numeric(v222),
+                  "2" = 0))
+
+za2900$party <- za2900$v223
+
+za2900 <- za2900 %>% 
+  mutate(highrel = 
+           recode(as.numeric(v220),
+                  "1" = 1,
+                  "2" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(lowrel = 
+           recode(as.numeric(v220),
+                  "3" = 1,
+                  "4" = 1,
+                  "5" = 1,
+                  .default = 0))
+
+za2900 <- za2900 %>% 
+  mutate(norel = 
+           recode(as.numeric(v220),
+                  "6" = 1,
+                  .default = 0))
+
+za2900$religion <- za2900$v220
+
+
+za2900$year <- 1996
+za2900$yr2006 <- 0
+
+za2900$cntry <- za2900$v3a
+
+za2900$wghts <- za2900$v325
+
+
+
+za4700 <- read_dta("ZA4700.dta")
+
+
+za4700 <- za4700 %>%
+  mutate(spendenv =
+         recode(as.numeric(V17),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendenv =
+         recode(as.numeric(spendenv),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendhealth =
+         recode(as.numeric(V18),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendhealth =
+         recode(as.numeric(spendhealth),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendlaw =
+         recode(as.numeric(V19),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendlaw =
+         recode(as.numeric(spendlaw),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendedu =
+         recode(as.numeric(V20),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendedu =
+         recode(as.numeric(spendedu),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spenddef =
+         recode(as.numeric(V21),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspenddef =
+         recode(as.numeric(spenddef),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendret =
+         recode(as.numeric(V22),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendret =
+         recode(as.numeric(spendret),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendunemp =
+         recode(as.numeric(V23),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendunemp =
+         recode(as.numeric(spendunemp),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(spendart =
+         recode(as.numeric(V24),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dspendart =
+         recode(as.numeric(spendart),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+
+za4700 <- za4700 %>%
+  mutate(suchcare =
+         recode(as.numeric(V35),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsuchcare =
+         recode(as.numeric(suchcare),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(sucret =
+         recode(as.numeric(V36),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsucret =
+         recode(as.numeric(sucret),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(sucdef =
+         recode(as.numeric(V37),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsucdef =
+         recode(as.numeric(sucdef),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(suclaw =
+         recode(as.numeric(V38),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsuclaw =
+         recode(as.numeric(suclaw),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(sucunemp =
+         recode(as.numeric(V39),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsucunemp =
+         recode(as.numeric(sucunemp),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(sucenv =
+         recode(as.numeric(V40),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dsucenv =
+         recode(as.numeric(sucenv),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(govjobs =
+         recode(as.numeric(V25),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovjobs =
+         recode(as.numeric(govjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+
+za4700 <- za4700 %>%
+  mutate(govprices =
+         recode(as.numeric(V26),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovprices =
+         recode(as.numeric(govprices),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(govhcare =
+         recode(as.numeric(V27),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dhcare =
+         recode(as.numeric(govhcare),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(govretire =
+         recode(as.numeric(V28),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovretire =
+         recode(as.numeric(govretire),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(indgrow =
+         recode(as.numeric(V29),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dindgrow =
+         recode(as.numeric(indgrow),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(govunemp =
+         recode(as.numeric(V30),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovunemp =
+         recode(as.numeric(govunemp),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(govincdiff =
+         recode(as.numeric(V31),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovincdiff =
+         recode(as.numeric(govincdiff),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+za4700 <- za4700 %>%
+  mutate(govstudents =
+         recode(as.numeric(V32),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovstud =
+         recode(as.numeric(govstudents),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+za4700 <- za4700 %>%
+  mutate(govhousing =
+         recode(as.numeric(V33),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dgovhous =
+         recode(as.numeric(govhousing),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+za4700 <- za4700 %>%
+  mutate(lawsenv =
+         recode(as.numeric(V34),
+                "1" = 4,
+                "2" = 3,
+                "3" = 2,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dlawsenv =
+         recode(as.numeric(lawsenv),
+                "1" = 0,
+                "2" = 0,
+                "3" = 1,
+                "4" = 1))
+
+za4700 <- za4700 %>%
+  mutate(cutspend =
+         recode(as.numeric(V11),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dcutspend =
+         recode(as.numeric(cutspend),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+za4700 <- za4700 %>%
+  mutate(projjobs =
+         recode(as.numeric(V12),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dprojjobs =
+         recode(as.numeric(projjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(regbus =
+         recode(as.numeric(V13),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dregbus =
+         recode(as.numeric(regbus),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(indnewprod =
+         recode(as.numeric(V14),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dindnewprod =
+         recode(as.numeric(indnewprod),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(decindjobs =
+         recode(as.numeric(V15),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(ddecindjobs =
+         recode(as.numeric(decindjobs),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(workwk =
+         recode(as.numeric(V16),
+                "1" = 5,
+                "2" = 4,
+                "4" = 2,
+                "5" = 1))
+
+za4700 <- za4700 %>%
+  mutate(dworkwk =
+         recode(as.numeric(workwk),
+                "1" = 0,
+                "2" = 0,
+                "3" = 0,
+                "4" = 1,
+                "5" = 1))
+
+za4700$govdetain <- za4700$V41
+
+za4700 <- za4700 %>% 
+  mutate(dgovdetain = 
+           recode(as.numeric(govdetain),
+                  "1" = 1,
+                  "2" = 1,
+                  "3" = 0,
+                  "4" = 0))
+
+
+za4700$govtapphone <- za4700$V42
+
+za4700 <- za4700 %>% 
+  mutate(dgovtap = 
+           recode(as.numeric(govtapphone),
+                  "1" = 1,
+                  "2" = 1,
+                  "3" = 0,
+                  "4" = 0))
+
+za4700$govsearch <- za4700$V43
+
+za4700 <- za4700 %>% 
+  mutate(dgovsearch = 
+           recode(as.numeric(govsearch),
+                  "1" = 1,
+                  "2" = 1,
+                  "3" = 0,
+                  "4" = 0))
+
+za4700$trustfew <- za4700$V54
+
+za4700 <- za4700 %>% 
+  mutate(dtrust = 
+           recode(as.numeric(trustfew),
+                  "1" = 0,
+                  "2" = 0,
+                  "3" = 1,
+                  "4" = 1,
+                  "5" = 1))
+
+za4700$takeadv <- za4700$V55
+
+za4700 <- za4700 %>% 
+  mutate(dtakeadv = 
+           recode(as.numeric(takeadv),
+                  "1" = 0,
+                  "2" = 0,
+                  "3" = 1,
+                  "4" = 1,
+                  "5" = 1))
+
+
+za4700$agesq <- za4700$age^2
+
+
+za4700 <- za4700 %>%
+  mutate(female =
+         recode(as.numeric(sex),
+                "1" = 0,
+                "2" = 1))
+
+za4700 <- za4700 %>%
+  mutate(marst = marital)
+
+za4700$nevermar <- ifelse(za4700$marst == 5, 1,0)
+
+za4700$married <- ifelse(za4700$marst == 1, 1 , 0)
+
+za4700$divorced <- ifelse(za4700$marst == 3 |za4700$marst == 4, 1, 0 )
+
+za4700$widow <- ifelse(za4700$marst == 2, 1, 0)
+
+za4700$partner <- ifelse(za4700$cohab == 2, 0, 1)
+  
+
+za4700 <- za4700 %>%
+  mutate(hhsize = hompop)
+
+
+za4700 <- za4700 %>% 
+  mutate(kidshh = 
+           recode(as.numeric(hhcycle),
+                  "2" = 1,
+                  "3" = 1,
+                  "4" = 1,
+                  "6" = 1,
+                  "7" = 1,
+                  "8" = 1,
+                  .default = 0))
+
+i <- 10
+while(i < 29){
+	za4700$kidshh[as.numeric(za4700$hhcycle) == i & !is.na(za4700$hhcycle)] <- 1
+	i <- i + 2
+}
+
+za4700 <- za4700 %>% 
+  mutate(rural = 
+           recode(as.numeric(urbrural),
+                  "1" = 0,
+                  "2" = 0,
+                  "3" = 0,
+                  "4" = 1,
+                  "5" = 1))
+
+za4700 <- za4700 %>% 
+  mutate(suburb = 
+           recode(as.numeric(urbrural),
+                  "2" = 1,
+                  "3" = 1,
+                  .default = 0))
+
+
+za4700$edyears <- za4700$educyrs
+za4700$edcat <- za4700$degree
+
+za4700 <- za4700 %>% 
+  mutate(degree = 
+           recode(as.numeric(edcat),
+                  "0" = 1))
+za4700 <- za4700 %>% 
+  mutate(lesshs = 
+           recode(as.numeric(degree),
+                  "1" = 1,
+                  "2" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(hs = 
+           recode(as.numeric(degree),
+                  "3" = 1,
+                  "4" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(univ = 
+           recode(as.numeric(degree),
+                  "5" = 1,
+                  .default = 0))
+
+
+za4700$empstat <- za4700$wrkst
+
+za4700$isco <- za4700$ISCO88
+
+za4700$hourswrk <- za4700$wrkhrs
+
+za4700$ftemp <- case_when(
+  as.numeric(za4700$empstat) %in% 2:10 ~ 0,
+  as.numeric(za4700$empstat) == 1 ~ 1
+)
+
+za4700 <- za4700 %>% 
+  mutate(ptemp = 
+           recode(as.numeric(empstat),
+                  "2" = 1,
+                  "3" = 1,
+                  "4" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(unemp = 
+           recode(as.numeric(empstat),
+                  "5" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(nolabor = 
+           recode(as.numeric(empstat),
+                  "6" = 1,
+                  "7" = 1,
+                  "8" = 1,
+                  "9" = 1,
+                  "10" = 1,
+                  .default = 0))
+
+
+za4700$selfemp <- (za4700$wrktype == 4)*1
+za4700$selfemp[is.na(za4700$selfemp)] <- 0
+za4700$selfemp[is.na(za4700$empstat)] <- NA
+
+za4700$pubemp <- ifelse(za4700$wrktype == 1 | za4700$wrktype == 2, 1, 0)
+
+za4700$pubemp[is.na(za4700$empstat)] <- NA
+
+za4700$pvtemp <- ifelse(za4700$selfemp == 0 & za4700$pubemp == 0, 1, 0)
+
+za4700$pvtemp[is.na(za4700$empstat)] <- NA
+
+
+za4700$inczscore <- NA
+incvars <- c("AU_INC", "CA_INC", "CH_INC", "CL_INC", "CZ_INC", "DE_INC", "DK_INC", 
+"DO_INC", "ES_INC", "FI_INC", "FR_INC", "GB_INC", "HR_INC", "HU_INC", "IE_INC", 
+"IL_INC", "JP_INC", "KR_INC", "LV_INC", "NL_INC", "NO_INC", "NZ_INC", "PH_INC", 
+"PL_INC", "PT_INC", "RU_INC", "SE_INC", "SI_INC", "TW_INC", "US_INC", "UY_INC",
+"VE_INC", "ZA_INC")
+
+
+
+for(incvar in incvars){
+	z_incvar <- scale(scale(za4700[,incvar]))
+  	
+  za4700$inczscore[!is.na(z_incvar)] <- z_incvar[!is.na(z_incvar)]
+
+}
+
+
+za4700 <- za4700 %>% 
+  mutate(union = 
+           recode(as.numeric(union),
+                  "2" = 0,
+                  "3" = 0))
+
+za4700$party <- za4700$PARTY_LR
+
+za4700 <- za4700 %>% 
+  mutate(highrel = 
+           recode(as.numeric(attend),
+                  "1" = 1,
+                  "2" = 1,
+                  "3" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(lowrel = 
+           recode(as.numeric(attend),
+                  "4" = 1,
+                  "5" = 1,
+                  "6" = 1,
+                  "7" = 1,
+                  .default = 0))
+
+za4700 <- za4700 %>% 
+  mutate(norel = 
+           recode(as.numeric(attend),
+                  "8" = 1,
+                  .default = 0))
+
+za4700$religion <- za4700$attend
+
+
+za4700$cntry <- za4700$V3a
+
+za4700$wghts <- za4700$weight
+
+za4700$year <- 2006
+za4700$yr2006 <- 1
+
+
+
+combined <- rbind(data.frame(
+  za2900[,colnames(za2900)[colnames(za2900)%in%colnames(za4700)]]),
+  data.frame(za4700[,colnames(za2900)[colnames(za2900)%in%colnames(za4700)]]))
+  
+country_data <- read_dta("BradyFinnigan2014CountryData.dta")
+
+ISSP9606 <- left_join(combined, country_data, by = c("cntry" = "cntry", "year" = "year"))
+
+ISSP9606 <- ISSP9606 %>% 
+   mutate(orig17 = 
+           recode(as.numeric(cntry),
+                  "36" =1,
+                  "124" = 1,
+                  "208" = 1,
+                  "246" = 1,
+                  "250" = 1,
+                  "276" = 1,
+                  "372" = 1,
+                  "392" = 1,
+                  "528" = 1,
+                  "554" = 1,
+                  "578" = 1,
+                  "620" = 1,
+                  "724" = 1,
+                  "752" = 1,
+                  "756" = 1,
+                  "826" = 1,
+                  "840" = 1,
+                  .default = 0))
+
+
+ISSP9606 <- ISSP9606 %>% 
+   mutate(orig13 = 
+           recode(as.numeric(cntry),
+                  "36" =1,
+                  "124" = 1,
+                  "250" = 1,
+                  "276" = 1,
+                  "372" = 1,
+                  "392" = 1,
+                  "554" = 1,
+                  "578" = 1,
+                  "724" = 1,
+                  "752" = 1,
+                  "756" = 1,
+                  "826" = 1,
+                  "840" = 1,
+                  .default = 0))
+
+use $data, clear
+keep if orig13
+
+global depvars "dgovjobs dgovunemp dgovincdiff dgovretire dgovhous dhcare"
+global controls "age agesq female lesshs univ ptemp unemp nolabor selfemp inczscore yr2006"
+global cntryvars "foreignpct netmigpct socx emprate"
+
+egen allcontrols = rowmiss($controls)
+recode allcontrols (0=1) (nonmiss=0)
+
+quietly tab cntry, gen(cntryfe)
+
+preserve
+keep if allcontrols & year==1996 & dgovincdiff<.
+keep $depvars $cntryvars $controls
+outreg2 using $desc1996.xls", replace noaster excel sideway bdec(3) sdec(3) sum(detail) eqkeep(mean sd)
+restore
+
+preserve
+keep if allcontrols & year==1996
+collapse $depvars, by(cntry)
+outsheet cntry $depvars using $depvars1996", comma replace
+restore
+
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct $controls cntryfe*
+	outreg2 using $forborn9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct socx $controls cntryfe*
+	outreg2 using $forborn9606socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' foreignpct emprate $controls cntryfe*
+	outreg2 using $forborn9606emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct $controls cntryfe*
+	outreg2 using $netmig9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct socx $controls cntryfe*
+	outreg2 using $netmig9606socx.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct emprate $controls cntryfe*
+	outreg2 using $netmig9606emprate.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+foreach depvar in $depvars {
+	logit `depvar' netmigpct foreignpct $controls cntryfe*
+	outreg2 using $netmig9606forborn.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+foreach depvar in $depvars {
+	logit `depvar' $controls cntryfe*
+	outreg2 using $controls9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
+}
+
+
+orig_13 <- ISSP9606[ISSP9606$orig13==1,]
+
+orig_13 <- orig_13[!is.na(orig_13$cntry),]
+
+orig_13 <- as.data.frame(orig_13)
+
+dep_var <- c("dgovjobs", "dgovunemp", "dgovincdiff", "dgovretire", "dgovhous", 
+             "dhcare")
+
+controls <- c("age", "agesq", "female", "lesshs", "univ", "ptemp", "unemp", 
+              "nolabor", "selfemp", "inczscore", "yr2006")
+
+country_var <- c("foreignpct", "netmigpct", "socx", "emprate")
+
+to_keep <- c(dep_var, controls,country_var)
+orig_13 <- dplyr::select(orig_13, to_keep, starts_with("cntry")) 
+
+orig_13$cntry <- as.factor(orig_13$cntry)
+
+orig_13 <- cbind(orig_13, cntry = dummy(orig_13$cntry))
+
+orig_13 <- dplyr::select(orig_13, to_keep, starts_with("cntry.")) 
+
+options(scipen = 999) # turn off scientific notation
+
+
+
+country_dummies <- colnames(orig_13)[grepl("cntry*", colnames(orig_13))] 
+
+results_table4_1 <- list() 
+
+for(i in 1:length(dep_var)){
+  
+results_table4_1[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~foreignpct",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+
+
+results_table4_2 <- list() 
+for(i in 1:length(dep_var)){
+  
+results_table4_2[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~foreignpct + socx",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+ 
+
+results_table4_3 <- list() 
+for(i in 1:length(dep_var)){
+  
+results_table4_3[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~foreignpct + emprate", 
+                                                      controls,country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+
+
+results_table5_1 <- list() 
+
+for(i in 1:length(dep_var)){
+  
+results_table5_1[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~netmigpct",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+
+
+results_table5_2 <- list() 
+for(i in 1:length(dep_var)){
+  
+results_table5_2[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~netmigpct +   socx",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+ 
+results_table5_3 <- list() 
+for(i in 1:length(dep_var)){
+  
+results_table5_3[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~netmigpct + emprate",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+
+results_table5_4 <- list() 
+for(i in 1:length(dep_var)){
+  
+results_table5_4[[i]] <- glm(as.formula(paste(dep_var[i], 
+                                              paste(c("~netmigpct + foreignpct",
+                                                      controls, country_dummies), 
+                                           collapse="+"))), 
+                           data = orig_13,
+                           family = "binomial")
+ 
+}
+
+coef_table <- NULL
+
+for(i in 1:6){
+  tmp_res <-  results_table4_1[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c(tmp_needed[,2], "", "", "", "", "", "", "", 
+             tmp_needed[,c(3:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(
+               colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, 
+               nchar(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table4_2[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c(tmp_needed[,2], tmp_needed[,3], "", "", "", "", "", tmp_needed[,c(4:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table4_3[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c(tmp_needed[,2], "", "", tmp_needed[,3], "", "", "", tmp_needed[,c(4:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table5_1[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c("", "", "", "", "", "", tmp_needed[,2], "", tmp_needed[,c(3:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table5_2[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c("", "", tmp_needed[,3], "", "", tmp_needed[,2], "", tmp_needed[,c(4:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table5_3[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c("", "", "", "", tmp_needed[,3], tmp_needed[,2], "", tmp_needed[,c(4:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+for(i in 1:6){
+  tmp_res <-  results_table5_4[[i]]
+  tmp_coef <- summary(tmp_res)$coefficients
+  tmp_needed <- t(round(cbind(exp(tmp_coef[,1]), tmp_coef[,3]), 3))
+
+tmp_col <- c(tmp_needed[,3], "", "", "", "", tmp_needed[,2], "", tmp_needed[,c(4:ncol(tmp_needed), 1)], "", 
+             nobs(tmp_res),
+             paste(paste0(substr(colnames(tmp_res$data)[grepl("cntry*", colnames(tmp_res$data))], 
+                           14, nchar(colnames(tmp_res$data)[grepl("cntry*", 
+                                                                  colnames(tmp_res$data))])), 
+                    ": ", 
+                    colSums(tmp_res$data[, grepl("cntry*", colnames(tmp_res$data))])), collapse = " | "))
+coef_table <- cbind(coef_table, tmp_col)
+}
+
+
+colnames(coef_table) <- paste(paste0("(",1:42, ")"), 
+                              c("Jobs", "Unemp", "Income Dif.", "Old", "House", "Health"))
+
+control_names <- rownames(tmp_coef)[4:nrow(tmp_coef)]
+
+control_names[12:length(control_names)] <- paste0("Country: ", 
+                                                  substr(control_names[12:length(control_names)], 
+                                                         14, nchar(control_names[12:length(control_names)])))
+
+i <- seq_len(length(control_names)) 
+control_names <- control_names[rep(i, each=2) ] 
+control_names[i*2] <- ""
+coef_table <- cbind(c("Foreign-born (%)", "", "Social Welfare Expenditures (%)", "", "Employment Rate (%)", "", 
+                      "Net Migration (%)", "", "INDIVIDUAL-LEVEL VARIABLES", control_names, "Constant", "", "", 
+                      "Observations (individual level)", "Observations (per Country)"), 
+                    coef_table)
+
+
+write.csv2(coef_table, "coef_table.csv", row.names = F)
+

@@ -1,0 +1,210 @@
+Team: 55
+Software: STATA
+Version: ORIGINAL
+
+
+global path "\"
+
+use ZA4700.dta, clear 
+								
+gen year = 2006
+
+append using ZA2900.dta
+
+replace V3a = 36 if v3 == 1
+replace V3a = 276 if v3 == 2 | v3 == 3
+replace V3a = 826 if v3 == 4
+replace V3a = 840 if v3 == 6
+replace V3a = 348 if v3 == 8
+replace V3a = . if v3 == 9 		
+replace V3a = 372 if v3 == 10
+replace V3a = 578 if v3 == 12 
+replace V3a = 752 if v3 == 13
+replace V3a = 203 if v3 == 14
+replace V3a = 705 if v3 == 15
+replace V3a = 616 if v3 == 16
+replace V3a = 616 if v3 == 17	
+replace V3a = 643 if v3 == 18
+replace V3a = 554 if v3 == 19
+replace V3a = 124 if v3 == 20
+replace V3a = 608 if v3 == 21
+replace V3a = 376 if v3 == 22 | v3 == 23
+replace V3a = 392 if v3 == 24
+replace V3a = 724 if v3 == 25
+replace V3a = 428 if v3 == 26
+replace V3a = 250 if v3 == 27
+replace V3a = . if v3 == 28		
+replace V3a = 756 if v3 == 30
+
+replace year = 1996 if year == .
+
+rename V3a cntry
+sort year cntry
+
+
+merge m:1 year cntry using L2data.dta
+
+drop if _merge != 3
+drop _merge
+
+keep if inlist(cntry, 36, 124, 250, 276, 372, 392, 578, 554, ///
+		724, 752, 756, 826, 840) 
+		
+gen oldCare = .
+replace oldCare = 1 if inlist(V28, 1, 2)
+replace oldCare = 1 if inlist(v39, 1, 2)
+replace oldCare = 0 if inlist(V28, 3, 4)
+replace oldCare = 0 if inlist(v39, 3, 4)
+
+gen unemp = .
+replace unemp = 1 if inlist(V30, 1, 2)
+replace unemp = 1 if inlist(v41, 1, 2)
+replace unemp = 0 if inlist(V30, 3, 4)
+replace unemp = 0 if inlist(v41, 3, 4)
+
+gen redIneq = .
+replace redIneq = 1 if inlist(V31, 1, 2)
+replace redIneq = 1 if inlist(v42, 1, 2)
+replace redIneq = 0 if inlist(V31, 3, 4)
+replace redIneq = 0 if inlist(v42, 3, 4)
+
+gen jobs = .
+replace jobs = 1 if inlist(V25, 1, 2)
+replace jobs = 1 if inlist(v36, 1, 2)
+replace jobs = 0 if inlist(V25, 3, 4)
+replace jobs = 0 if inlist(v36, 3, 4)
+
+gen female = .
+replace female = 1 if sex == 2 | v200 == 2
+replace female = 0 if sex == 1 | v200 == 1
+
+replace age = v201 if year == 1996
+gen age2 = age*age
+
+gen educ = . 		
+replace educ = 1 if degree <= 1 | inlist(v205, 2, 3, 4)
+replace educ = 2 if inlist(degree, 2, 3, 4) | inlist(v205, 5, 6)
+replace educ = 3 if degree == 5 | v205 == 7
+					
+					label define educ 1 "Primary or less" ///
+						2 "Secondary" 3 "University or more"
+					label val educ educ
+
+gen emp = .			
+replace emp = 1 if wrkst == 2 | wrkst == 3 | v206 == 2 | v206 == 3 
+replace emp = 2 if inlist(wrkst, 4, 6, 7, 8, 9, 10) | inlist(v206, 4, 6, 7, 8, 9, 10)
+replace emp = 3 if wrkst == 5 | v206 == 5  
+replace emp = 4 if wrkst == 1 | v206 == 1 
+					
+					label define emp 1 "Part-time" 2 "Not active" ///
+						3 "Active unemployed" 4 "Full-time"
+					label val emp emp
+
+
+label var oldCare "Old age care"
+label var unemp "Unemployment"
+label var redIneq "Reduce income differences"
+label var jobs "Jobs for everyone"
+label var female "Female [ref: male]"
+label var age "Age in years"
+label var age2 "Age in years (squared)"
+label var educ "Education [ref: secondary]"
+label var emp "Employment [ref: full-time]"
+label var foreignpct "Immigrant Stock (%)"
+label var socx "Social Welfare Expenditures (% of GDP)"
+label var emprate "Employment Rate (% in LF)"
+label var netmigpct "Change in Immigrant Stock (1-year in %)"
+label var year "ISSP 2006 [ref: 1996]"
+
+
+
+xtset cntry
+
+local dep "oldCare unemp redIneq jobs" 
+local iv "female age age2 b2.educ b4.emp"
+local i 1
+foreach j of local dep{
+	logit `j' foreignpct `iv' i.cntry i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+
+foreach j of local dep{
+	logit `j' foreignpct socx `iv' i.cntry i.year, or
+	est sto M`i' 
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	logit `j' foreignpct emprate `iv' i.cntry i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	logit `j' netmigpct `iv' i.cntry i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	logit `j' netmigpct socx  `iv' i.cntry i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	logit `j' netmigpct emprate `iv' i.cntry i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+esttab M* using replication_two_fixed.csv, eform label ///
+	order(foreignpct socx emprate netmigpct) nobaselevel z constant replace
+	
+
+
+local dep "oldCare unemp redIneq jobs" 
+local iv "female age age2 b2.educ b4.emp"
+local i 1
+
+foreach j of local dep{
+	xtlogit `j' foreignpct `iv' i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+
+foreach j of local dep{
+	xtlogit `j' foreignpct socx `iv' i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	xtlogit `j' foreignpct emprate  `iv' i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	xtlogit `j' netmigpct `iv'  i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	xtlogit `j' netmigpct socx  `iv' i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+foreach j of local dep{
+	xtlogit `j' netmigpct emprate `iv' i.year, or
+	est sto M`i'
+	local i = `i' + 1
+}
+
+esttab M* using replication_multilevel.csv, eform label ///
+	order(foreignpct socx emprate netmigpct) nobaselevel z constant replace

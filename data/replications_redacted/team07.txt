@@ -1,0 +1,139 @@
+Team: 7
+Software: Stata
+Version: ORIGINAL
+
+clear
+version 15.1
+set more off
+
+use "ZA4700.dta", clear
+
+keep V3a V25 V28 V30 V31 sex age degree wrkst wrkhrs *_DEGR
+
+rename V25 govresp_jobs
+rename V28 govresp_oldage
+rename V30 govresp_unempl
+rename V31 govresp_inequal
+
+compress
+tempfile tempo
+save "`tempo'"
+
+use "ZA2900.dta", clear
+
+keep v3 v36 v39 v41 v42 v200 v201 v205 v206 v215
+
+rename v36 govresp_jobs
+rename v39 govresp_oldage
+rename v41 govresp_unempl
+rename v42 govresp_inequal
+rename v200 sex
+rename v201 age
+rename v206 wrkst
+rename v215 wrkhrs
+
+append using "`tempo'", gen(year)
+recode year (0 = 1996) (1 = 2006)
+
+numlabel, add
+
+gen cntry = V3a if year == 2006
+recode v3 (1 = 36) (2 3 = 276) (4 = 826) (6 = 840) (8 = 348) (9 = 9) (10 = 372) ///
+(12 = 578) (13 = 752) (14 = 203) (15 = 705) (16 = 616) (17 = 17) (18 = 643) ///
+(19 = 554) (20 = 124) (21 = 608) (22 23 = 376) (24 = 392) (25 = 724) (26 = 428) ///
+(27 = 250) (28 = 28) (30 = 756)
+replace cntry = v3 if year == 1996
+
+lab val cntry V3A
+
+recode govresp* (1 2 = 1) (3 4 = 0)
+
+gen female = sex
+recode female (1 = 0) (2 = 1)
+lab var female "Female"
+
+gen emplstat = wrkst
+recode emplstat (1 = 1) (2/3 = 2) (5 = 3) (6/10 = 4)
+lab def emplstat 1 "Fulltime" 2 "Parttime" 3 "Unemployed" 4 "Inactive"
+table emplstat if emplstat <= 2, c(mean wrkhrs p10 wrkhrs p50 wrkhrs p80 wrkhrs p90 wrkhrs)
+
+lab val emplstat emplstat
+replace emplstat = 1 if wrkst == 4 & inrange(wrkhrs, 35, .)
+replace emplstat = 2 if wrkst == 4 & wrkhrs < 35
+
+replace emplstat = . if emplstat == 4 & wrkst == 4
+
+gen edu = degree if year == 2006
+recode edu (0 = 1) (1/3 = 2) (4/5 = 3)
+drop *_DEGR
+
+recode v205 (1/3 = 1) (4/5 = 2) (6/7 = 3)
+replace edu = v205 if year == 1996
+
+lab def edu 1 "Primary or less" 2 "Secondary" 3 "University or more"
+lab val edu edu
+
+keep govresp_* cntry year female age emplstat edu
+merge m:1 cntry year using "Data/L2data.dta",nogen keep(3)
+
+egen cntrynum=group(cntry) /*create sequential number*/
+sum cntrynum
+forvalues n=1/`r(max)'{
+	sum year if cntrynum==`n'
+	drop if cntrynum==`n' & `r(min)'==`r(max)'
+	}
+
+keep if cntry==36 | /// Australia
+		cntry==124 | /// Canada
+		cntry==250 | /// France
+		cntry==276 | /// Germany
+		cntry==372 | /// Ireland
+		cntry==392 | /// Japan
+		cntry==554 | /// New Zealand
+		cntry==578 | /// Norway
+		cntry==724 | /// Spain
+		cntry==752 | /// Sweden
+		cntry==756 | /// Switzerland
+		cntry==826 | /// Great Britain
+		cntry==840   // United States
+		
+lab var foreignpct "Immigrant Stock (%)"
+lab var socx "Social Welfare Expenditures (% of GDP)"
+lab var emprate "Employment Rate (% in LF)"
+lab var netmigpct "Change in Immigrant Stock (1-year, in %)"
+	
+local spec1 "female c.age##c.age b2.edu b1.emplstat i.cntry 2006.year"
+local spec2 "`spec1' foreignpct" 
+local spec3 "`spec1' foreignpct socx"
+local spec4 "`spec1' foreignpct emprate"
+local spec5 "`spec1' netmigpct"
+local spec6 "`spec1' netmigpct socx"
+local spec7 "`spec1' netmigpct emprate"
+
+local m=1
+ 
+
+forvalues s=2/7{ 
+	foreach var in oldage unempl inequal jobs {
+		local m=`m'+1
+		logit govresp_`var' `spec`s''
+		estimates store model`m'
+		}
+	}
+			
+estout model? model?? using "Results/logit_estimates.csv", replace eform ///
+		cells("b(star fmt(2) label(OR))" "z(par fmt(2) label((z-value)))")	///
+		mlabels(,depvar numbers)  eqlab(" ") ///
+		stat(N,fmt(0) label("Observations")) ///
+		varlab(age "Age" c.age#c.age "Age sq." female "Female" 1.edu "Low" 3.edu "Tertiary" ///
+		2.emplstat "Parttime" 3.emplstat "Unemployed" 4.emplstat "Inactive" ///
+		foreignpct "Immigrant Stock (%)" socx "Social Welfare Expenditures (% of GDP)" ///
+		emprate "Employment Rate (% in LF)" netmigpct "Change in Immigrant Stock (1-year, in %)" ///
+		_cons "Constant") ///
+		order(foreignpct socx emprate netmigpct) ///
+		refcat(1.edu "Education (ref. secondary)" 2.emplstat "Employment (ref. full-time)" ///
+		female "INDIVIDUAL-LEVEL VARIABLES" foreignpct "COUNTRY-LEVEL VARIABLES",nolab) ///
+		drop(*cntry *year 1.emplstat 2.edu)	starlevels(* .05 ** .01 *** .001)
+
+
+

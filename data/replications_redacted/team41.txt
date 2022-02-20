@@ -1,0 +1,264 @@
+Team: 41
+Software: Mplus
+Version: ORIGINAL
+
+        Title: xxx
+   
+        Data:
+        File is final.csv ;
+        
+        Variable:
+        Names are 
+        cntry year emprate foreignpct netmig 
+        pop socx issp cforborn netmigpct gdppc2006 
+        socdem liberal ethnichet mcpcat mcp1980 
+        mcp2000 mcp2010 mipex2007 mipex2010 mipex mcp 
+        V36 V38 V39 V41 V42 V44 v200 v201 !jobs, health, retirement, unemployment, income, housing, sex, age
+        v202 v205 v206 v212 v220 V273 v274 !marital status, education, employment1, employment2, # in household, children
+        v275 v325 income  !size of town, weights, income standardized by country
+        ;
+
+
+        USEVARIABLE ARE   
+            foreignpct !percentage of foreign born
+            !netmig !net migration
+            !socx !social welfare expenditures as a percent of GDP
+            !emprate !employment rate
+            !socdem !dummy for social democratic regime
+            !liberal !dummy for liberal regime
+            !mcp !Multiculturalism Policy Index 
+        
+            V201 !age
+            income !relative income  based on country-year-specific z -scores
+            V201sq !age squared
+            sex !sex recoded such 1 = female
+            edu1 !education: less than second education
+            edu2 !education: university or above
+            employ1 !employment status: part-time
+            employ2 !employment status: unemployed
+            employ3 !employment status: not in the labor force
+            employ5 !employment status: self-employment
+            !individual level variables excluded in this analysis
+            !marital1 !marital status: never married
+            !marital2 !marital status: divorced
+            !marital3 !marital status: widowed
+            !V273 !household size
+            !children !1 = household with children
+            !domicil1 !suburb/town
+            !domicil2 !rural
+            !rlgatt1 !religious attendance: low
+            !rlgatt2 !religious attendance: high
+            !employ4 !employment status: public employment
+
+        !!!!!!!!!!!!contry/wave dummies!!!!!!!!!!!
+            Y2006  CND FRA GER IRL 
+            JPN NZL NOR SPA SWE SWZ GBR USA
+       
+        !!!!!!!!!!!!dependent variables!!!!!!!!!!!
+            jobs 
+            !unemp 
+            !incom 
+            !retire 
+            !hsing 
+            !hcare
+                ;
+
+        CATEGORICAL ARE jobs; ! unemp incom retire hsing hcare
+        USEOBSERVATIONS ARE (cntry EQ 36 OR cntry EQ 124  
+        OR cntry EQ 250 OR cntry EQ 276 OR cntry EQ 372
+        OR cntry EQ 392 OR cntry EQ 554 OR cntry EQ 578 
+        OR cntry EQ 724 OR cntry EQ 752 OR cntry EQ 756 
+        OR cntry EQ 826 OR cntry EQ 840); 
+
+        Missing are all (-9999) ; 
+    
+  ANALYSIS: estimator=ML;
+  
+  DEFINE:
+    Y2006 = 0;
+    IF (year EQ 2006) THEN Y2006 = 1;
+    IF (year EQ -9999) THEN Y2006 = -9999;
+    
+    AUS = 0; 
+    IF (cntry EQ 36) THEN AUS = 1;
+    IF (cntry EQ -9999) THEN AUS = -9999;
+
+    CND = 0;
+    IF (cntry EQ 124) THEN CND = 1;
+    IF (cntry EQ -9999) THEN CND = -9999;
+
+    FRA = 0;
+    IF (cntry EQ 250) THEN FRA = 1;
+    IF (cntry EQ -9999) THEN FRA = -9999;
+
+    GER = 0;
+    IF (cntry EQ 276) THEN GER = 1;
+    IF (cntry EQ -9999) THEN GER = -9999;
+
+    IRL = 0;
+    IF (cntry EQ 372) THEN IRL = 1;
+    IF (cntry EQ -9999) THEN IRL = -9999;  
+    
+    JPN = 0;
+    IF (cntry EQ 392) THEN JPN = 1;
+    IF (cntry EQ -9999) THEN JPN = -9999;  
+      
+    NZL = 0;
+    IF (cntry EQ 554) THEN NZL = 1;
+    IF (cntry EQ -9999) THEN NZL = -9999;     
+        
+    NOR = 0;
+    IF (cntry EQ 578) THEN NOR = 1;
+    IF (cntry EQ -9999) THEN NOR = -9999;     
+        
+    SPA = 0;
+    IF (cntry EQ 724) THEN SPA = 1;
+    IF (cntry EQ -9999) THEN SPA = -9999;         
+           
+    SWE = 0;
+    IF (cntry EQ 752) THEN SWE = 1;
+    IF (cntry EQ -9999) THEN SWE = -9999; 
+      
+    SWZ = 0;
+    IF (cntry EQ 756) THEN SWZ = 1;
+    IF (cntry EQ -9999) THEN SWZ = -9999;   
+
+    GBR = 0;
+    IF (cntry EQ 826) THEN GBR = 1;
+    IF (cntry EQ -9999) THEN GBR = -9999; 
+        
+    USA = 0;
+    IF (cntry EQ 840) THEN USA = 1;
+    IF (cntry EQ -9999) THEN USA = -9999;    
+     
+
+    sex = 0; !reference cat "male"
+    IF (v200 EQ 2) THEN sex = 1;
+    IF (v200 EQ -9999) THEN sex = -9999;
+
+    marital1 = 0; !reference cat "married"
+    IF (V202 EQ 5) THEN marital1 = 1;
+    IF (V202 EQ -9999) THEN marital1 = -9999;
+    marital2 = 0;
+    IF (V202 EQ 3) THEN marital2 = 1;
+    IF (V202 EQ -9999) THEN marital2 = -9999;
+    marital3 = 0;
+    IF (V202 EQ 2) THEN marital3 = 1;
+    IF (V202 EQ -9999) THEN marital3 = -9999;
+      
+    children = 0; !reference cat "no children"
+    IF (V274 EQ 2) THEN children = 1;
+    IF (V274 EQ 3) THEN children = 1;
+    IF (V274 EQ 4) THEN children = 1;
+    IF (V274 EQ 6) THEN children = 1;
+    IF (V274 EQ 7) THEN children = 1;
+    IF (V274 EQ 8) THEN children = 1;
+    IF (V274 EQ 10) THEN children = 1;
+    IF (V274 EQ 12) THEN children = 1;
+    IF (V274 EQ 14) THEN children = 1;
+    IF (V274 EQ 16) THEN children = 1;
+    IF (V274 EQ 18) THEN children = 1;
+    IF (V274 EQ 20) THEN children = 1;
+    IF (V274 EQ 22) THEN children = 1;
+    IF (V274 EQ 24) THEN children = 1;
+    IF (V274 EQ 26) THEN children = 1;
+    IF (V274 EQ 28) THEN children = 1;
+    IF (V274 EQ -9999) THEN children = -9999;    
+
+    domicil1 = 0; !reference cat "urban"
+    IF (V275 EQ 2) THEN domicil1 = 1;
+    IF (V275 EQ -9999) THEN domicil1 = -9999;
+    domicil2 = 0;
+    IF (V275 EQ 3) THEN domicil2 = 1;
+    IF (V275 EQ -9999) THEN domicil2 = -9999;
+
+    edu1 = 0; !reference cat "secondary degree"
+    IF (V205 LT 5) THEN edu1 = 1;
+    IF (V205 EQ -9999) THEN edu1 = -9999;
+    edu2 = 0; 
+    IF (V205 GT 5) THEN edu2 = 1;
+    IF (V205 EQ -9999) THEN edu2 = -9999;
+
+    rlgatt1 = 0; !reference cat "no attendance"
+    IF (V220 EQ 7) THEN rlgatt1 = 1;
+    IF (V220 EQ 6) THEN rlgatt1 = 1;
+    IF (V220 EQ -9999) THEN rlgatt1 = -9999;
+    rlgatt2 = 0; 
+    IF (V220 LE 5) THEN rlgatt2 = 1;
+    IF (V220 EQ -9999) THEN rlgatt2 = -9999;
+
+    employ1 = 0; !reference cat "private full-time". 
+    IF (V206 EQ 2) THEN employ1 = 1;
+    IF (V206 EQ -9999) THEN employ1 = -9999;
+    employ2 = 0; 
+    IF (V206 EQ 5) THEN employ2 = 1;
+    IF (V206 EQ -9999) THEN employ2 = -9999;
+    employ3 = 0; 
+    IF (V206 EQ 10) THEN employ3 = 1;
+    IF (V206 EQ -9999) THEN employ3 = -9999;
+    employ4 = 0; 
+    IF (V212 EQ 4) THEN employ4 = 1;
+    IF (V212 EQ -9999) THEN employ4 = -9999;
+    employ5 = 0;
+    IF (V212 LE 2) THEN employ5 = 1;
+    IF (V212 EQ -9999) THEN employ5 = -9999;
+
+    V201sq = V201**2/10000; 
+
+    !dicotomize dependent variables
+    IF (V36 EQ 1) THEN jobs = 1;
+    IF (V36 EQ 2) THEN jobs = 1;
+    IF (V36 GE 3) THEN jobs = 0;
+    IF (V36 EQ -9999) THEN jobs = -9999;
+
+    IF (V41 EQ 1) THEN unemp = 1;
+    IF (V41 EQ 2) THEN unemp = 1;
+    IF (V41 GE 3) THEN unemp = 0;
+    IF (V41 EQ -9999) THEN unemp = -9999;
+
+    IF (V42 EQ 1) THEN incom = 1;
+    IF (V42 EQ 2) THEN incom = 1;
+    IF (V42 GE 3) THEN incom = 0;
+    IF (V42 EQ -9999) THEN incom = -9999;
+
+    IF (V39 EQ 1) THEN retire = 1;
+    IF (V39 EQ 2) THEN retire = 1;
+    IF (V39 GE 3) THEN retire = 0;
+    IF (V39 EQ -9999) THEN retire = -9999;
+
+    IF (V44 EQ 1) THEN hsing = 1;
+    IF (V44 EQ 2) THEN hsing = 1;
+    IF (V44 GE 3) THEN hsing = 0;
+    IF (V44 EQ -9999) THEN hsing = -9999;
+
+    IF (V38 EQ 1) THEN hcare = 1;
+    IF (V38 EQ 2) THEN hcare = 1;
+    IF (V38 GE 3) THEN hcare = 0;
+    IF (V38 EQ -9999) THEN hcare = -9999;
+
+    MODEL:
+    jobs on 
+         foreignpct 
+         !netmig
+         !socx
+         !emprate        
+    
+        !country/year dummies
+         Y2006  CND FRA GER IRL 
+         JPN NZL NOR SPA SWE SWZ GBR USA
+
+        !individual level controls
+            V201 
+            V201sq 
+            sex 
+            edu1 
+            edu2 
+            employ1 
+            employ2 
+            employ3 
+            employ5 
+            income             
+              ;
+
+
+

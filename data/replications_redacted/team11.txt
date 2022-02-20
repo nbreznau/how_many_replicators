@@ -1,0 +1,265 @@
+Team: 11
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta", clear
+
+gen year = 1996
+gen id = _n // id values from 1 to 35,313 (= number of respondents)
+replace id = 100000 + id // 100001 to 135313
+sort id
+save "issp1996.dta", replace
+
+use "ZA4700.dta", clear
+gen year = 2006
+gen id = _n
+replace id = 200000 + id
+sort id
+save "issp2006.dta", replace
+
+use "issp1996.dta", clear
+merge 1:1 id using "issp2006.dta"
+
+gen country =.
+replace country =	1	if v3 ==	1   | V3a ==	36	                //	AU-Australia
+replace country =	2	if v3 ==	20	| V3a ==	124	                //	CA-Canada
+replace country =	3	if v3 ==	30	| V3a ==	756	                //	CH-Switzerland
+replace country =	4	if v3 ==	2	| V3a ==	276	| v3 ==	2       //	DE-Germany
+replace country =	5	if v3 ==	25	| V3a ==	724	                //	ES-Spain
+replace country =	6	if v3 ==	27	| V3a ==	250	                //	FR-France
+replace country =	7	if v3 ==	4	| V3a ==	826	                //	GB-Great Britain
+replace country =	8	if v3 ==	10	| V3a ==	372	                //	IE-Ireland
+replace country =	9	if v3 ==	24	| V3a ==	392	                //	JP-Japan
+replace country =	10	if v3 ==	12	| V3a ==	578	                //	NO-Norway
+replace country =	11	if v3 ==	19	| V3a ==	554	                //	NZ-New Zealand
+replace country =	12	if v3 ==	13	| V3a ==	752              	//	SE-Sweden
+replace country =	13	if v3 ==	6	| V3a ==	840	                //	US-United States
+drop if country ==.
+
+gen old_age = v39
+replace old_age = V28 if old_age ==.
+recode old_age (2=1) (3 4=0)
+tab old_age
+
+gen unemployed = v41
+replace unemployed = V30 if unemployed ==.
+recode unemployed (2=1) (3 4=0)
+tab unemployed
+
+gen incdiff = v42
+replace incdiff = V31 if incdiff ==.
+recode incdiff (2=1) (3 4=0)
+tab incdiff
+
+gen jobs = v36
+replace jobs = V25 if jobs ==.
+recode jobs (2=1) (3 4=0)
+tab jobs
+
+gen female =.
+replace female = 0 if v200 == 1 | sex == 1
+replace female = 1 if v200 == 2 | sex == 2
+tab female, m
+
+replace age = v201 if year == 1996
+
+gen edu1996 = v205 // Education 1996 wave: 1 - Primary or less, 2 - Secondary, 3 - University or more
+recode edu1996 ( 1 2 3 = 1) (4 5 = 2) (6 7 =3)
+
+gen edu2006 = degree // Education 2006 wave: 1- Primary or less, 2 - Secondary, 3 - University or more
+recode edu2006 ( 0 1 = 1) (2 3 = 2) (4 5 =3)
+
+gen edu_prim = edu1996 // Primary education
+replace edu_prim = 1 if edu2006 == 1
+replace edu_prim = 0 if edu2006 == 2 | edu2006 == 3 | edu1996 == 2 | edu1996 == 3
+
+gen edu_sec = edu1996 // Secondary education
+replace edu_sec = 0 if edu2006 == 1 | edu2006 == 3 | edu1996 == 1 | edu1996 == 3
+replace edu_sec = 1 if edu2006 == 2 | edu1996 == 2
+
+gen edu_uni = edu1996 // University or more
+replace edu_uni = 0 if edu2006 == 1 | edu2006 == 2 | edu1996 == 1 | edu1996 == 2
+replace edu_uni = 1 if edu2006 == 3 | edu1996 == 3
+
+gen empl= v206
+replace empl = wrkst if empl ==.
+recode empl(1=1) ( 2 3 = 2) (4 6 8 =3) (5 7 9 10 = 4)  
+
+gen full_time = empl // Full-time employed
+recode full_time (2  3 4 = 0)
+tab full_time
+
+gen part_time = empl // Part-time employed
+recode part_time (1 3 4 = 0) (2 =1)
+tab part_time
+
+gen act_unempl = empl // Active unemployed
+recode act_unempl (1 2 4 = 0) (3 =1)
+tab act_unempl
+
+gen not_active= empl // Not active
+recode not_active (1 2 3 = 0) (4 =1)
+tab not_active
+
+drop if age==.
+drop if female ==.
+drop if edu_prim ==.
+drop if empl==.
+
+gen immstock =.
+replace immstock =	21.29999924	if country ==	1	& year ==	1996
+replace immstock =	17.20000076	if country ==	2	& year ==	1996
+replace immstock =	20.89999962	if country ==	3	& year ==	1996
+replace immstock =	11.00000000	if country ==	4	& year ==	1996
+replace immstock =	2.59999990	if country ==	5	& year ==	1996
+replace immstock =	10.50000000	if country ==	6	& year ==	1996
+replace immstock =	7.19999981	if country ==	7	& year ==	1996
+replace immstock =	7.30000019	if country ==	8	& year ==	1996
+replace immstock =	1.08599997	if country ==	9	& year ==	1996
+replace immstock =	5.40000010	if country ==	10	& year ==	1996
+replace immstock =	16.20000076	if country ==	11	& year ==	1996
+replace immstock =	10.30000019	if country ==	12	& year ==	1996
+replace immstock =	10.69999981	if country ==	13	& year ==	1996
+					
+replace immstock =	21.29999924	if country ==	1	& year ==	2006
+replace immstock =	19.50000000	if country ==	2	& year ==	2006
+replace immstock =	22.29999924	if country ==	3	& year ==	2006
+replace immstock =	12.89999962	if country ==	4	& year ==	2006
+replace immstock =	10.60000038	if country ==	5	& year ==	2006
+replace immstock =	10.60000038	if country ==	6	& year ==	2006
+replace immstock =	9.69999981	if country ==	7	& year ==	2006
+replace immstock =	14.80000019	if country ==	8	& year ==	2006
+replace immstock =	1.56400001	if country ==	9	& year ==	2006
+replace immstock =	8.00000000	if country ==	10	& year ==	2006
+replace immstock =	20.70000076	if country ==	11	& year ==	2006
+replace immstock =	12.30000019	if country ==	12	& year ==	2006
+replace immstock =	13.30000019	if country ==	13	& year ==	2006
+
+gen ch_immstock=.
+replace ch_immstock =	1.29490924	if country ==	1	& year ==	1996
+replace ch_immstock =	2.18959260	if country ==	2	& year ==	1996
+replace ch_immstock =	3.22248268	if country ==	3	& year ==	1996
+replace ch_immstock =	3.24450660	if country ==	4	& year ==	1996
+replace ch_immstock =	0.82168734	if country ==	5	& year ==	1996
+replace ch_immstock =	0.41396859	if country ==	6	& year ==	1996
+replace ch_immstock =	0.28843811	if country ==	7	& year ==	1996
+replace ch_immstock =	-0.03458165	if country ==	8	& year ==	1996
+replace ch_immstock =	0.37720755	if country ==	9	& year ==	1996
+replace ch_immstock =	0.97341746	if country ==	10	& year ==	1996
+replace ch_immstock =	3.88337779	if country ==	11	& year ==	1996
+replace ch_immstock =	1.70722461	if country ==	12	& year ==	1996
+replace ch_immstock =	2.46555519	if country ==	13	& year ==	1996
+					
+replace ch_immstock =	3.14409065	if country ==	1	& year ==	2006
+replace ch_immstock =	3.33456159	if country ==	2	& year ==	2006
+replace ch_immstock =	2.69005394	if country ==	3	& year ==	2006
+replace ch_immstock =	1.12776864	if country ==	4	& year ==	2006
+replace ch_immstock =	5.76934290	if country ==	5	& year ==	2006
+replace ch_immstock =	1.24947679	if country ==	6	& year ==	2006
+replace ch_immstock =	1.57342863	if country ==	7	& year ==	2006
+replace ch_immstock =	5.52292585	if country ==	8	& year ==	2006
+replace ch_immstock =	0.06418485	if country ==	9	& year ==	2006
+replace ch_immstock =	1.82521141	if country ==	10	& year ==	2006
+replace ch_immstock =	2.48007941	if country ==	11	& year ==	2006
+replace ch_immstock =	2.06375408	if country ==	12	& year ==	2006
+replace ch_immstock =	1.91910112	if country ==	13	& year ==	2006
+
+gen empl_rate =.				
+replace empl_rate =	72.97335815	if country ==	1	& year ==	2006
+replace empl_rate =	72.69680023	if country ==	2	& year ==	2006
+replace empl_rate =	84.54134369	if country ==	3	& year ==	2006
+replace empl_rate =	67.40676117	if country ==	4	& year ==	2006
+replace empl_rate =	64.84596252	if country ==	5	& year ==	2006
+replace empl_rate =	61.84713745	if country ==	6	& year ==	2006
+replace empl_rate =	70.22309875	if country ==	7	& year ==	2006
+replace empl_rate =	69.33929443	if country ==	8	& year ==	2006
+replace empl_rate =	76.22027588	if country ==	9	& year ==	2006
+replace empl_rate =	76.38436127	if country ==	10	& year ==	2006
+replace empl_rate =	76.01436615	if country ==	11	& year ==	2006
+replace empl_rate =	72.93346405	if country ==	12	& year ==	2006
+replace empl_rate =	71.92974091	if country ==	13	& year ==	2006
+					
+replace empl_rate =	68.38307953	if country ==	1	& year ==	1996
+replace empl_rate =	66.95101166	if country ==	2	& year ==	1996
+replace empl_rate =	82.60142517	if country ==	3	& year ==	1996
+replace empl_rate =	64.15186310	if country ==	4	& year ==	1996
+replace empl_rate =	47.57519531	if country ==	5	& year ==	1996
+replace empl_rate =	58.16967773	if country ==	6	& year ==	1996
+replace empl_rate =	68.31567383	if country ==	7	& year ==	1996
+replace empl_rate =	56.05609894	if country ==	8	& year ==	1996
+replace empl_rate =	74.41401672	if country ==	9	& year ==	1996
+replace empl_rate =	74.37256622	if country ==	10	& year ==	1996
+replace empl_rate =	71.75603485	if country ==	11	& year ==	1996
+replace empl_rate =	70.34078979	if country ==	12	& year ==	1996
+replace empl_rate =	71.77012634	if country ==	13	& year ==	1996
+
+gen soc_wel=.
+replace soc_wel =	17.10000038	if country ==	1	& year ==	2006
+replace soc_wel =	16.39999962	if country ==	2	& year ==	2006
+replace soc_wel =	20.20000076	if country ==	3	& year ==	2006
+replace soc_wel =	26.70000076	if country ==	4	& year ==	2006
+replace soc_wel =	21.20000076	if country ==	5	& year ==	2006
+replace soc_wel =	29.10000038	if country ==	6	& year ==	2006
+replace soc_wel =	21.20000076	if country ==	7	& year ==	2006
+replace soc_wel =	16.70000076	if country ==	8	& year ==	2006
+replace soc_wel =	18.50000000	if country ==	9	& year ==	2006
+replace soc_wel =	21.60000038	if country ==	10	& year ==	2006
+replace soc_wel =	18.50000000	if country ==	11	& year ==	2006
+replace soc_wel =	29.39999962	if country ==	12	& year ==	2006
+replace soc_wel =	15.89999962	if country ==	13	& year ==	2006
+					
+replace soc_wel =	16.60000038	if country ==	1	& year ==	1996
+replace soc_wel =	18.00000000	if country ==	2	& year ==	1996
+replace soc_wel =	18.00000000	if country ==	3	& year ==	1996
+replace soc_wel =	27.00000000	if country ==	4	& year ==	1996
+replace soc_wel =	21.29999924	if country ==	5	& year ==	1996
+replace soc_wel =	28.79999924	if country ==	6	& year ==	1996
+replace soc_wel =	19.89999962	if country ==	7	& year ==	1996
+replace soc_wel =	14.69999981	if country ==	8	& year ==	1996
+replace soc_wel =	14.50000000	if country ==	9	& year ==	1996
+replace soc_wel =	22.50000000	if country ==	10	& year ==	1996
+replace soc_wel =	18.89999962	if country ==	11	& year ==	1996
+replace soc_wel =	31.60000038	if country ==	12	& year ==	1996
+replace soc_wel =	15.10000038	if country ==	13	& year ==	1996
+
+su old_age unemployed incdiff jobs
+su age age2 female edu_prim edu_sec edu_uni full_time part_time act_unempl not_active
+su immstock ch_immstock empl_rate soc_wel
+
+xi i.country i.year
+
+global controls "female age age2 edu_prim edu_uni part_time act_unempl not_active"
+
+logit old_age immstock  $controls i.country i.year, or
+logit unemployed immstock $controls i.country i.year, or
+logit incdiff immstock  $controls i.country i.year, or
+logit jobs immstock  $controls i.country i.year, or
+
+
+logit old_age immstock soc_wel $controls i.country i.year, or
+logit unemployed immstock soc_wel $controls i.country i.year, or
+logit incdiff immstock soc_wel $controls i.country i.year, or
+logit jobs immstock soc_wel $controls i.country i.year, or
+
+logit old_age immstock empl_rate $controls i.country i.year, or
+logit unemployed immstock empl_rate $controls i.country i.year, or
+logit incdiff immstock empl_rate $controls i.country i.year, or
+logit jobs immstock empl_rate $controls i.country i.year, or
+
+logit old_age ch_immstock $controls i.country i.year, or
+logit unemployed ch_immstock $controls i.country i.year, or
+logit incdiff ch_immstock  $controls i.country i.year, or
+logit jobs ch_immstock $controls i.country i.year, or
+
+logit old_age ch_immstock soc_wel $controls i.country i.year, or
+logit unemployed ch_immstock soc_wel $controls i.country i.year, or
+logit incdiff ch_immstock soc_wel $controls i.country i.year, or
+logit jobs ch_immstock soc_wel $controls i.country i.year, or
+
+logit old_age ch_immstock empl_rate  $controls i.country i.year, or
+logit unemployed ch_immstock empl_rate $controls i.country i.year, or
+logit incdiff ch_immstock empl_rate $controls i.country i.year, or
+logit jobs ch_immstock empl_rate $controls i.country i.year, or
+
+
+

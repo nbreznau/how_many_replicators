@@ -1,0 +1,204 @@
+Team: 4
+Software: Stata
+Version: ORIGINAL
+
+use "ZA2900.dta" , clear
+
+foreach var of varlist v36 v39 v41 v42 {
+replace `var'=1 if `var'==1|`var'==2
+replace `var'=0 if `var'==3|`var'==4
+}
+rename v36 jobs
+rename v39 oldagecare
+rename v41 unemployed
+rename v42 reduceincomedifferences
+
+
+gen sex=0 if v200==1
+replace sex=1 if v200==2
+
+gen age=v201
+
+gen age2=age*age
+
+gen education=1 if v205==1|v205==2|v205==3
+replace education=2 if v205==4|v205==5
+replace education=3 if v205==6|v205==7
+
+gen employment=1 if v206==1
+replace employment=2 if v206==2|v206==3
+replace employment=3 if v206==4|v206==6|v206==8
+replace employment=4 if v206==5|v206==7|v206==9|v206==10
+lab def employment 1 "Full-time" 2 "Part-time" 3 "Active unemployed" 4 "Not active"
+lab val employment employment
+
+gen year=1996
+
+gen country=36 if v3==1	
+replace country=276 if v3==2	
+replace country=276 if v3==3	
+replace country=826 if v3==4	
+replace country=840 if v3==6	
+replace country=348 if v3==8	
+replace country=372 if v3==10	
+replace country=578 if v3==12	
+replace country=752 if v3==13	
+replace country=203 if v3==14	
+replace country=705 if v3==15	
+replace country=616 if v3==16	
+replace country=643 if v3==18	
+replace country=554 if v3==19	
+replace country=124 if v3==20	
+replace country=376 if v3==22	
+replace country=376 if v3==23	
+replace country=392 if v3==24	
+replace country=724 if v3==25	
+replace country=428 if v3==26	
+replace country=250 if v3==27	
+replace country=756 if v3==30	
+
+
+gen ID_merge=country+year
+
+
+save "ISSP_1996_coded.dta" , replace
+
+
+use "ZA4700.dta" , clear
+
+foreach var of varlist V25 V28 V30 V31 {
+replace `var'=1 if `var'==1|`var'==2
+replace `var'=0 if `var'==3|`var'==4
+}
+rename V25 jobs
+rename V28 oldagecare
+rename V30 unemployed
+rename V31 reduceincomedifferences
+
+
+replace sex=0 if sex==1
+replace sex=1 if sex==2
+label values sex .
+
+gen age2=age*age
+
+gen education=1 if degree==0|degree==1|degree==2	//is 'above lowest' primary?
+replace education=2 if degree==3
+replace education=3 if degree==4|degree==5	//is 'above higher secondary' university?
+
+gen employment=1 if wrkst==1
+replace employment=2 if wrkst==2|wrkst==3	//is 'less than part-time' part-time?
+replace employment=3 if wrkst==4|wrkst==6|wrkst==8
+replace employment=4 if wrkst==5|wrkst==7|wrkst==9|wrkst==10
+lab val employment employment
+
+gen year=2006
+gen country=V3a
+gen ID_merge=country+year
+
+
+save "ISSP_2006_coded" , replace
+
+use "L2data.dta" , clear
+
+drop country
+rename cntry country
+gen ID_merge=country+year
+
+save "Aggregate_coded", replace
+
+use "ISSP_1996_coded.dta" , clear
+append using "ISSP_2006_coded.dta"
+
+merge m:m ID_merge using "Aggregate_coded.dta"
+
+
+save "Replication_data_final.dta" , replace
+
+************
+
+use "Replication_data_final.dta" , clear
+
+drop if country==208|country==246|country==528|country==620	//Only 2006
+
+	logit jobs oldagecare unemployed reduceincomedifferences sex age education employment emprate foreignpct socx netmigpct year country
+	keep if e(sample)
+
+//Model 1
+logit oldagecare i.sex age age2 ib2.education i.employment foreignpct i.year i.country , or
+
+//Model 2
+logit unemployed i.sex age age2 ib2.education i.employment foreignpct i.year i.country , or
+
+//Model 3
+logit reduceincomedifferences age2 ib2.sex age i.education i.employment foreignpct i.year i.country , or
+
+//Model 4
+logit jobs ib2.sex age age2 i.education i.employment foreignpct i.year i.country , or
+
+*social welfare spending
+//Model 5
+logit oldagecare ib2.sex age age2 i.education i.employment foreignpct socx i.year i.country , or
+
+//Model 6
+logit unemployed ib2.sex age age2 i.education i.employment foreignpct socx i.year i.country , or
+
+//Model 7
+logit reduceincomedifferences ib2.sex age age2 i.education i.employment foreignpct socx i.year i.country , or
+
+//Model 8
+logit jobs i.sex age age2 ib2.education i.employment foreignpct socx i.year i.country , or
+
+*employment rate
+//Model 9
+logit oldagecare ib2.sex age age2 i.education i.employment foreignpct emprate i.year i.country , or
+
+//Model 10
+logit unemployed ib2.sex age age2 i.education i.employment foreignpct emprate i.year i.country , or
+
+//Model 11
+logit reduceincomedifferences ib2.sex age age2 i.education i.employment foreignpct emprate i.year i.country , or
+
+//Model 12
+logit jobs i.sex age age2 ib2.education i.employment foreignpct emprate i.year i.country , or
+
+
+*** Change in proportion immigrants ***
+//Model 13
+logit oldagecare i.sex age age2 ib2.education i.employment netmigpct i.year i.country , or
+
+//Model 14
+logit unemployed i.sex age age2 ib2.education i.employment netmigpct i.year i.country , or
+
+//Model 15
+logit reduceincomedifferences age2 ib2.sex age i.education i.employment netmigpct i.year i.country , or
+
+//Model 16
+logit jobs ib2.sex age age2 i.education i.employment netmigpct i.year i.country , or
+
+*social welfare spending
+//Model 17
+logit oldagecare ib2.sex age age2 i.education i.employment netmigpct socx i.year i.country , or
+
+//Model 18
+logit unemployed ib2.sex age age2 i.education i.employment netmigpct socx i.year i.country , or
+
+//Model 19
+logit reduceincomedifferences age2 ib2.sex age i.education i.employment netmigpct socx i.year i.country , or
+
+//Model 20
+logit jobs i.sex age age2 ib2.education i.employment netmigpct socx i.year i.country , or
+
+*employment rate
+//Model 21
+logit oldagecare ib2.sex age age2 i.education i.employment netmigpct emprate i.year i.country , or
+
+//Model 22
+logit unemployed ib2.sex age age2 i.education i.employment netmigpct emprate i.year i.country , or
+
+//Model 23
+logit reduceincomedifferences age2 ib2.sex age i.education i.employment netmigpct emprate i.year i.country , or
+
+//Model 24
+logit jobs i.sex age age2 ib2.education i.employment netmigpct emprate i.year i.country , or
+
