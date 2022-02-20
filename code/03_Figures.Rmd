@@ -136,7 +136,7 @@ P99 <- expression(paste(italic("P"), " > 99% confidence"))
 P95 <- expression(paste(italic("P"), " > 95%"))
 P90 <- expression(paste(italic("P"), " > 90%"))
 
-reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4 of these 7) are successful in 99% of\nall potential replication trials"
+reps <- "If the true binomial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4 of these 7) are successful in 99% of\nall potential replication trials"
 
 agg_png(filename = here::here("results","Fig1.png"), res = 144, width = 1000, height = 700)
 fig1_plot %>%
@@ -505,7 +505,7 @@ fig2bb <- ggplot(data = fig2b) +
   annotate("text", x = 8.5, y = 92, label = paste0(round(icc_out$percent[8],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
   # add percentages
   geom_text(aes(y = result - c(7,7,7,7,7,-6,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2b$result), family = "Times New Roman") +
-  ylab("Percent of Teams") +
+  ylab("Percent of Replicating Teams") +
   xlab(" ") +
   labs(title = "B. Team-Level Results, N = 85") +
   coord_flip(ylim = c(5,100), clip = "on") +
