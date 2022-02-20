@@ -13,7 +13,6 @@ global idv   " age age_sq female lessthansecondary university
 			 // currently taken from table S6 of online supplement;
 			 
 			 
-
 capture net install zscore.pkg;
 
 

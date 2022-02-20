@@ -3,7 +3,7 @@ title: "03 Tables and Figures"
 output: html_document
 ---
 
-NOTE: File 02_Analysis must be run first for this file to run in its entirety
+NOTE: All previous files must be run first for this file to run in its entirety
 
 
 |Metric|Definition|Measure|
@@ -21,6 +21,7 @@ pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", 
 
 ```
 
+## Load Data
 
 ```{r setup2, warning = F, message = F}
 # load data from 01_Data_Prep
@@ -66,6 +67,8 @@ $P(X=x)=(\frac{n}{x}) p^x(1-p)^{(n-x)}$
 Then we calculate n for different values of P and p. 
 
 First we need to map values of *x* for *n* trials (so that *x* is always at least 51% of n). We do this in a matrix to make plotting of the figure easy.
+
+### Map Probabilities
 
 ```{r fig1_prep}
 # calculate x for each value of n
@@ -124,7 +127,7 @@ fig1_plot$p <- seq(75,99)
 
 ```
 
-## Figure 1. Simulated Replication Reliabilities
+### Figure 1. Simulated Replication Reliabilities
 
 ```{r fig1_out, warning = F, message = F}
 yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
@@ -470,7 +473,7 @@ fig2b$result <- round(fig2b$result,1)
 
 #### Produce Fig2b
 
-```{r fig2bout}
+```{r fig2bout, warning = F, message = F}
 agg_png(here::here("results","Fig2b.png"), height = 700, width = 475, res = 144)
 fig2bb <- ggplot(data = fig2b) +
   geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
@@ -523,16 +526,18 @@ knitr::include_graphics(here::here("results","Fig2b.png"))
 ### Figure 2 Combined
 
 This chunk is no longer used because the ggarrange package doesn't deal with Times New Roman very well.
-```{r fig2final}
+
+```{r fig2final, eval = F}
 agg_png(here::here("results","Fig2.png"), width = 1300, height = 800, res = 144)
 ggarrange(fig2a,fig2bb, ncol = 2, nrow = 1, widths = c(1.4,1))
 dev.off()
 
 knitr::include_graphics(here::here("results", "Fig2.png"))
 ```
+
 ### Fig 2C Effect-Level
 
-```{r ddeviance_fig2effect}
+```{r ddeviance_fig2effect, warning = F, message = F}
 agg_png(here::here("results","Fig2c1.png"), height = 350, width = 475, res = 144)
 
 fig2c1 <- ggplot(data = fig3) +
@@ -569,7 +574,7 @@ knitr::include_graphics(here::here("results","Fig2c1.png"))
 
 ### Fig 2C Team-Level
 
-```{r deviance_fig2}
+```{r deviance_fig2, warning = F, message = F}
 agg_png(here::here("results","Fig2c2.png"), height = 350, width = 475, res = 144)
 fig2c2 <- ggplot(data = fig3b) +
   geom_col(aes(y = result, x = c(1,2,3,4), fill = interaction(group, version))) +
@@ -615,7 +620,7 @@ knitr::include_graphics(here::here("results","Fig2c2.png"))
 
 ### Setup
 
-```{r table2, message = F}
+```{r table2, message = F, warning = F}
 cri_team <- readRDS(here::here("data","cri_team.RDS"))
 
 # start with descriptive table

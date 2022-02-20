@@ -1,7 +1,6 @@
 Team: 32
 Software: Stata
-Version: Original
-
+Version: ORIGINAL
 
 clear all
 set more off

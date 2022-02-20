@@ -8,7 +8,6 @@ decode v3, gen (country)
 
 rename v2 id
 
-
 replace country="Germany" if country=="D-E" | country=="D-W"
 replace country="Israel" if country=="IL-A" | country=="IL-J"
 replace country="Ireland" if country=="irl"

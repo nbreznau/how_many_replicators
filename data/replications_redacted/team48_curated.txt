@@ -2,17 +2,12 @@ TEAM: 48
 SOFTWARE: STATA
 VERSION: CURATED
 
-
-
 cd "\"
 use "ZA2900.dta", clear
-
-
 
 recode v3 (1=36) (2/3=276) (4=826) (6=840) (8=348) (9=.) (10=372) (12=578) (13=752) (14=203) (15=705) (16=616) (17=.) (18=643) (19=554) (20=124) (21=608) (22/23=376) (24=392) (25=724) (26=428) (27=250) (28=.) (30=756), gen(v3a)
 label define cntrylbl 36 "Australia" 124 "Canada" 152 "Chile" 158 "Taiwan" 191 "Croatia" 203 "Czech" 208 "Denmark" 246 "Finland" 250 "France" 276 "Germany" 348 "Hungary" 372 "Ireland" 376 "Isreal" 392 "Japan" 410 "S Korea" 428 "Latvia" 528 "Netherlands" 554 "New Zealand" 578 "Norway" 608 "Philippines" 616 "Poland" 620 "Portugal" 643 "Russia" 705 "Slovenia" 724 "Spain" 752 "Sweden" 756 "Switzerland" 826 "Great Britain" 840 "United States" 
 label values v3a cntrylbl
-
 
 recode v36 1/2=1 nonmiss=0, gen(Rjobs)
 recode v38 1/2=1 nonmiss=0, gen(Rhealthcare)
@@ -20,9 +15,6 @@ recode v41 1/2=1 nonmiss=0, gen(Runempl)
 recode v42 1/2=1 nonmiss=0, gen(Rincome)
 recode v39 1/2=1 nonmiss=0, gen(Rretire)
 recode v44 1/2=1 nonmiss=0, gen(Rhousing)
-
-
-
 
 rename v201 age
 gen age2=age^2
@@ -38,11 +30,6 @@ recode v206 (5=1) (nonmiss=0), gen(unemployed)
 recode v206 (4 6 7 8 9 10=1) (nonmiss=0), gen(notinlaborforce)
 recode v206 (4 6 8 9 10=1) (nonmiss=0), gen(notinlaborforce2)
 label var notinlaborforce2 "housemen not included in dummy"
-
-
-
-
-
 
 recode v213 (1=1) (2=0) (else=.), gen(selfemployed)
 clonevar selfemployed2= selfemployed
@@ -63,9 +50,7 @@ tempfile issp96
 save `issp96'
 
 
-
 use "ZA4700.dta", clear
-
 
 recode V25 1/2=1 nonmiss=0, gen(Rjobs)
 recode V27 1/2=1 nonmiss=0, gen(Rhealthcare)
@@ -73,10 +58,6 @@ recode V36 1/2=1 nonmiss=0, gen(Runempl)
 recode V31 1/2=1 nonmiss=0, gen(Rincome)
 recode V28 1/2=1 nonmiss=0, gen(Rretire)
 recode V33 1/2=1 nonmiss=0, gen(Rhousing)
-
-
-
-
 
 gen age2=age^2
 recode sex 2=1 nonmiss=0, gen(female)
@@ -89,11 +70,9 @@ recode wrkst 2 3=1 nonmiss=0, gen(parttime)
 recode wrkst 4 6 7 8 9 10=1 nonmiss=0, gen(notinlaborforce)
 recode wrkst 4 6 7 9 10=1 nonmiss=0, gen(notinlaborforce2)
 
-
 recode wrktype 4=1 nonmiss=0, gen(selfemployed)
 clonevar selfemployed2=selfemployed
 replace selfemployed=0 if (notinlaborforce==1 | unemployed==1) & selfemployed!=1
-
 
 egen income= rowtotal(AU_INC CA_INC CH_INC CL_INC CZ_INC DE_INC DK_INC DO_INC ES_INC FI_INC FR_INC GB_INC HR_INC HU_INC IE_INC IL_INC JP_INC KR_INC LV_INC NL_INC NO_INC NZ_INC PH_INC PL_INC PT_INC RU_INC SE_INC SI_INC TW_INC US_INC UY_INC VE_INC ZA_INC)
 
@@ -126,8 +105,6 @@ eststo `y'42
 
 logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry foreignpct emprate , or
 eststo `y'43 
-
-
 
 logit R`y' age age2 female lowersecondary university unemployed parttime notinlaborforce selfemployed stdincome i.year i.cntry netmigpct, or
 eststo `y'51 

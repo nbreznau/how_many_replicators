@@ -1,6 +1,6 @@
-TEAM: 60
-SOFTWARE: STATA
-VERSION: CURATED
+Team: 60
+Software: Stata
+Version: CURATED
 
 use "ZA2900.dta", clear
 

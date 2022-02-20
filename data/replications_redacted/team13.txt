@@ -1,3 +1,7 @@
+Team: 13
+Software: Stata
+Version: ORIGINAL
+
 set more off
 clear
 use "ZA2900.dta", clear

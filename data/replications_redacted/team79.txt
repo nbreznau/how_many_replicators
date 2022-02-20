@@ -1,6 +1,6 @@
-TEAM: 79
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 79
+Software: R
+Version: ORIGINAL
 
 rm(list=ls())
 options(scipen=999)

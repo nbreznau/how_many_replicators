@@ -1,23 +1,6 @@
-TEAM: 68
-SOFTWARE: R (R-STUDIO)
-VERSION: ORIGINAL
-
-```{r, include = FALSE}
-knitr::knit_hooks$set(crop = knitr::hook_pdfcrop)
-
-if (identical(knitr:::pandoc_to(), 'latex'))
-  knitr::knit_hooks$set(plot = knitr::hook_plot_tex)
-
-knitr::opts_chunk$set(
-  echo = TRUE,
-  dev = "pdf",
-  dev.args = list(pointsize = 8),
-  crop = NULL,
-  highlight = TRUE
-)
-
-options(digits = 3)
-
+Team: 68
+Software: R
+Version: ORIGINAL
 
 pacman::p_load(
   dplyr,
@@ -25,13 +8,6 @@ pacman::p_load(
   foreign, 
   readxl,
   kableExtra)
-
-
-
-```
-
-
-```{r issp1996, message=FALSE, warning=FALSE, paged.print=FALSE}
 
   issp1996 <- read.csv2(file="ZA2900.csv", 
                         header = TRUE, sep=",")
@@ -128,11 +104,6 @@ pacman::p_load(
                                          "employment", "country", "old.age.care",
                                          "unemployed", "reduce.income.differences",
                                          "jobs.for.everyone", "age2"))
-```
-  
-
-  
-```{r issp2006, message=FALSE, warning=FALSE, paged.print=FALSE}
 
   issp2006 <- read.csv(file="ZA4700.csv")
   
@@ -228,10 +199,6 @@ pacman::p_load(
                                          "jobs.for.everyone", "age2"))
 
 
-```
-
-
-```{r rename-countries}
   issp1996$country <- recode(issp1996$country,
                              "aus" = "Australia",
                              "cdn" = "Canada",
@@ -270,33 +237,18 @@ pacman::p_load(
                              "826.1" = "United Kingdom",
                              "376.1" = "Israel", 
                              "376.2" = "Israel") # (arabs and jews)
-```
 
-
-```{r country-sample}
   country.sample <- c("Australia", "Canada", "Switzerland",
                      "Germany", "Spain", "France", 
                      "United Kingdom", "Israel", "Norway",
                      "New Zealand", "Ireland",
                      "Sweden", "Japan")
-```
-
-
-```{r subset-countries}
 
   issp1996 <- issp1996 %>% filter(country %in% country.sample)
   issp2006 <- issp2006 %>% filter(country %in% country.sample)
-```
 
-
-
-```{r rename-subset-countries}
   issp.data <- bind_rows(issp1996, issp2006)
-```
 
-
-
-```{r import-level2-data}
   countrylevel.data <- read.csv(file="L2data.csv")
   countrylevel.data$country_chr <- as.character(countrylevel.data$country)
 
@@ -308,19 +260,11 @@ pacman::p_load(
                           "immigrant.stock.change" = "netmigpct")
 
 
-```
-
-
-
-```{r merge-datasets, message=FALSE, warning=FALSE, paged.print=FALSE}
   issp.data$year.lvl1 <- issp.data$year
   countrylevel.data$year.lvl2 <- countrylevel.data$year
   data <- left_join(issp.data, countrylevel.data, by = c("country","year"))
   table(data$country)
-```
 
-
-```{r table-summary-stats-1996, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
   summary.stats  <- data %>% select(-year.lvl1, -year.lvl2, - country, -id, -cntry) %>% filter(year == 1996)
   stargazer::stargazer(summary.stats, 
                        summary = TRUE, 
@@ -336,10 +280,7 @@ pacman::p_load(
                        notes = "\\parbox[t]{7cm}{Note: Summary statistics for numeric variables.}",  #\\textwidth
                        notes.append = FALSE, 
                        notes.align = "l")
-```
 
-
-```{r table-summary-stats-2006, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
   summary.stats  <- data %>% select(-year.lvl1, -year.lvl2, - country, -id, -cntry) %>% filter(year == 2006)
   stargazer::stargazer(summary.stats, 
                        summary = TRUE, 
@@ -355,12 +296,6 @@ pacman::p_load(
                        notes = "\\parbox[t]{7cm}{Note: Summary statistics for numeric variables.}",  #\\textwidth
                        notes.append = FALSE, 
                        notes.align = "l")
-```
-
-
-
-
-```{r table-employment-qwraps, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 
   data.summary <- data %>% na.omit(employment) %>% select(employment, year)
 
@@ -376,10 +311,6 @@ pacman::p_load(
               "active unemployed"  = ~ qwraps2::n_perc0(employment == "active unemployed"))
          )
   summary_table(dplyr::group_by(data.summary, year), our_summary1)
-```
-
-
-```{r table-education-qwraps, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 
   data.summary <- data %>% na.omit(education) %>% select(education, year)
 
@@ -395,12 +326,7 @@ pacman::p_load(
          )
 
   summary_table(dplyr::group_by(data.summary, year), our_summary1)
-```
 
-
-
-
-```{r estimation-logit-model}
   data$country.fac <- as.factor(data$country)
   data$year.fac <- as.factor(data$year)
   outcomes <- c("old.age.care", "unemployed", "reduce.income.differences", "jobs.for.everyone")
@@ -431,11 +357,7 @@ pacman::p_load(
 for (i in 1:24){
   assign(paste0("M", 1:24)[i], glm(as.formula(models[i]), data = data, family = "binomial"))
   }
-```
 
-
-
-```{r M1-4, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 library(stargazer)
 stargazer(M1, M2, M3, M4,
           type="latex", 
@@ -463,11 +385,6 @@ stargazer(M1, M2, M3, M4,
           font.size = "footnotesize",
           apply.coef = exp 
           )
-```
-
-
-
-```{r M5-8, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 
 stargazer(M5, M6, M7, M8,
           type="latex", 
@@ -495,11 +412,7 @@ stargazer(M5, M6, M7, M8,
           font.size = "footnotesize",
           apply.coef = exp 
           )
-```
 
-
-
-```{r M9-12, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 stargazer(M9, M10, M11, M12,
           type="latex", 
           title = "Immigration and welfare state attitudes",
@@ -526,12 +439,7 @@ stargazer(M9, M10, M11, M12,
           font.size = "footnotesize",
           apply.coef = exp 
           )
-```
 
-
-
-
-```{r M13-16, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 stargazer(M13, M14, M15, M16,
           type="latex", 
           title = "Immigration and welfare state attitudes",
@@ -558,11 +466,7 @@ stargazer(M13, M14, M15, M16,
           font.size = "footnotesize",
           apply.coef = exp 
           )
-```
 
-
-
-```{r M17-20, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 stargazer(M17, M18, M19, M20,
           type="latex", 
           title = "Immigration and welfare state attitudes",
@@ -589,11 +493,7 @@ stargazer(M17, M18, M19, M20,
           font.size = "footnotesize",
           apply.coef = exp 
           )
-```
 
-
-
-```{r M21-24, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, results="asis"}
 stargazer(M21, M22, M23, M24,
           type="latex", 
           title = "Immigration and welfare state attitudes",
@@ -621,10 +521,6 @@ stargazer(M21, M22, M23, M24,
           apply.coef = exp 
           )
 
-```
-
-
-```{r produce-html-tables, message=FALSE, warning=FALSE, echo=T, results='hide', paged.print=FALSE}
 stargazer(M1, M2, M3, M4, M5, M6, M7, M8,
           M9, M10, M11, M12, M13, M14, M15, M16, M17, M18,
           M19, M20, M21, M22, M23, M24,
@@ -689,8 +585,6 @@ stargazer(M1, M2, M3, M4, M5, M6, M7, M8,
           font.size = "footnotesize"
           # apply.coef = exp
           )
-
-```
 
 
 

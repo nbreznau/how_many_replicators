@@ -1,7 +1,6 @@
-TEAM: 74
-SOFTWARE: STATA
-VERSION: ORIGINAL
-
+Team: 74
+Software: Stata
+Version: ORIGINAL
 
 use L2data.dta, clear
 sort cntry year 

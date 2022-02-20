@@ -1,6 +1,6 @@
-TEAM: 54
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 54
+Software: Stata
+Version: ORIGINAL
 
 version 15.1
 clear

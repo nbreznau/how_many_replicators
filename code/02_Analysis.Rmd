@@ -1,7 +1,9 @@
 ---
-title: "Researcher Variability in Replications: Replication File, Step 2"
+title: "02 Data Analysis"
 output: html_document
 ---
+
+This file uses the cleaned data for the following variables to provide statistical output.
 
 |Metric|Definition|Measure|
 |------|----------|---------|
@@ -13,12 +15,11 @@ output: html_document
 rm(list = ls())
 library(pacman)
 
-
 pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr")
-
 
 ```
 
+## Load Data
 
 ```{r setup2, warning = F, message = F}
 # load data from 01_Data_Prep
@@ -30,7 +31,7 @@ options(scipen = 999)
 ```
 
 
-## Explaining Variance
+## Team-Level Data Prep
 
 Our observations take place only at the team level, therefore it is only necessary to run a regression on the team averages ('level-2') of the three outcome variables *verif*, *exact* and *deviance_abs*.
 
@@ -100,11 +101,11 @@ cri_team_orig <- cri_team_orig %>%
 
 ```
 
-## What predicts replication results?
+## Statistics and Predictive Models
 
 ### Correlations by Group
 
-```{r corr}
+```{r corr, warning = F, message = F}
 cri_team_c<- cri_team %>%
   select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
 
@@ -215,7 +216,7 @@ tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold 
 
 ### Regressions Predicting Error Sources
 
-we investigate the multivariate associations of team-level variables and whether they made mistakes and/or had procedural variations. To do this we subset our team sample first to include only those teams that had at least one instance of the category Mistake or Mistake-Procedural (=1) and all other teams except those with instances of Procedural (=0). If a team has a Mistake and Procedural code they are coded as = 1. Next we do a similar subset where cases are kept with at least one instance of Procedural and Mistake-Procedural (=1) with those having any Mistake dropped.
+We investigate the multivariate associations of team-level variables and whether they made mistakes and/or had procedural variations. To do this we subset our team sample first to include only those teams that had at least one instance of the category Mistake or Mistake-Procedural (=1) and all other teams except those with instances of Procedural (=0). If a team has a Mistake and Procedural code they are coded as = 1. Next we do a similar subset where cases are kept with at least one instance of Procedural and Mistake-Procedural (=1) with those having any Mistake dropped.
 
 ```{r reg_error}
 # set up data
@@ -239,17 +240,16 @@ PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(
 
 ### Results
 
-```{r results}
+```{r results4, warning = F, message = F}
 tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
 
 tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
 ```
 
-## Comparing Stata and R Users
+## Colophon
 
-```{r r_vs_stata}
-r_vs_stata <- read_csv(here::here("data","r_vs_stata.csv"))
-
+```{r sessioninfo}
+sessionInfo()
 ```
 
 

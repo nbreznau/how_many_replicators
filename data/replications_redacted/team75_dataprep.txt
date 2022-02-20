@@ -1,6 +1,6 @@
-TEAM: 75
-SOFTWARE: SPSS
-VERSION: ORIGINAL 
+Team: 75
+Software: SPSS
+Version: ORIGINAL 
 
 DATASET CLOSE ALL.
 get stata file="ZA4700.dta".

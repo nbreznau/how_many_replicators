@@ -1,6 +1,6 @@
-TEAM: 82
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 82
+Software: Stata
+Version: ORIGINAL
 
 set more off
 

@@ -1,6 +1,6 @@
-TEAM: 69
-SOFTWARE: STATA
-VERSION: CURATED
+Team: 69
+Software: Stata
+Version: CURATED
 
 use "L2data.dta", clear
 rename cntry isocode

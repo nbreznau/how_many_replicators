@@ -1,6 +1,6 @@
 Team: 24
 Software: MLWin (Stata)
-Version: Original
+Version: ORIGINAL
 
 use "ZA2900.dta", clear
 

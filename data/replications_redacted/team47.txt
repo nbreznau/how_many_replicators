@@ -1,7 +1,6 @@
-TEAM: 47
-SOFTWARE: R
-VERSION: ORIGINAL
-
+Team: 47
+Software: R
+Version: ORIGINAL
 
 rm(list = ls())
 library(haven)

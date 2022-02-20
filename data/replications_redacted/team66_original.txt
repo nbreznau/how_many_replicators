@@ -1,6 +1,6 @@
-TEAM: 66
-SOFTWARE: R
-VERSION: ORIGINAL 
+Team: 66
+Software: R
+Version: ORIGINAL 
 
 stopifnot(require(dplyr))
 stopifnot(require(ggplot2))

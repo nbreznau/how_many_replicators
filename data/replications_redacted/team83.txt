@@ -1,7 +1,6 @@
-TEAM: 83
-SOFTWARE: R
-VERSION: ORIGINAL
-
+Team: 83
+Software: R
+Version: ORIGINAL
 
 p_needed <- c("devtools", "plyr", "tidyverse", "foreign", "readxl", "lubridate","broom")
 packages <- rownames(installed.packages())

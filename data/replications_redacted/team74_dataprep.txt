@@ -1,6 +1,6 @@
-TEAM: 74 
-SOFTWARE: SPSS
-VERSION: ORIGINAL
+Team: 74 
+Software: SPSS
+Version: ORIGINAL
 
 GET 
   STATA FILE='ZA4700.dta'.
@@ -88,8 +88,6 @@ VALUE LABELS emplcat
 3 'activ unemployed'
 4 'full time'.
 
-fre emplcat.
-
 SAVE OUTFILE='ZA2900_2.sav'
     /KEEP V1 V3 Oldagecare  Unemployment Redincomdiff Jobs sex age age_sq  degree emplcat.
 
@@ -115,7 +113,6 @@ if V3 = 30 cntry = 756.
 if V3 = 4 cntry = 826.
 EXECUTE.
 
-fre cntry.
 compute delete = 0.
 if cntry  lt 100  delete = 1.
 EXECUTE.

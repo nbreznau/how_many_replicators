@@ -1,5 +1,5 @@
 ---
-title: "Researcher Variability in Replications: Replication File, Step 1"
+title: "01 Data Preparation"
 output: html_document
 ---
 
@@ -13,7 +13,7 @@ Datafiles needed
 | cristageone.cur1.xlsx | Results after code curation |
 | cri_survey_wide_public_nolabs.dta | Survey of the replicators, with anonymized team numbers |
 | teamsize.csv | Datafile containing teamsize and primary software used |
-
+| qual_out.csv | Qualitative categories extracted in code routine 00 |
 
 
 ```{r setup, warning = F, message = F}
@@ -65,9 +65,11 @@ An anonymized version of this survey is cleaned and available for public use her
 
 Breznau, Nate, Eike Mark Rinke, and Alexander Wuttke. [2021](https://doi.org/10.7910/DVN/UUP8CX). “The Crowdsourced Replication Initiative Participant Survey.” Harvard Dataverse.
 
-Our workflow was done prior to publication of this so, original work up of individual/team researcher qualities done in Stata
+The current workflow included a version of the survey that preceeded the public use file. Moreover, we made efforts to anonymize the participants, thus team numbers and range of variables are different. 
 
-NOTE: These Stata files include identifying information breaking the anonymity of the teams,  so we have to clean them before making them public. The CRI provided a file with the cleaned and merged data "cri_survey_wide_public_nolabs.dta" and its raw data (without labels) version with "cri_survey_wide_public_nolabs.dta"
+The following Stata file and its dependent SPSS files (the original survey data) were necessary to complete this routine, but the files used to create the following are not-anonymous so they are not shared. 
+
+"cri_survey_wide_public_nolabs.dta" 
 
 This was created from the following:
 
@@ -84,9 +86,8 @@ Required SPSS data files:
   W3_export.sav
   W4_export.sav
   
-The above files contain personal identifiers and are therefore not permitted for public use. 
-  
-Note that teams are now in wide format,  so that each variable has up to three values,  one for each team member. Also,  each result is attached to each team member,  thus there are N-results repeated observations of team members.
+
+Note that teams are in wide format,  so that each variable has up to three values depending on the number of team members. 
 
 
 
@@ -99,9 +100,9 @@ cri2 <- readstata13::read.dta13(here::here("data","cri_survey_wide_public_nolabs
 ```
 
 
-### Set up Measurement Variables
+## Measurement of Variables
 
-Team maximum used for statistics skills and mean for difficulty of replication. The logic is that as long as each team member took part in production of the final product, the one with the highest skills will apply those skills before accepting it, might be the supervisor or should ultimately have some influence. Also,  even if it was very difficult for some team members (maybe because they had to learn software,  routines,  code,  etc.),  it may have been easy for others because the one with greater skills had to do more work; we think it more accurate to take the mean as a result of this risk. 
+Team maximum used for statistics skills and mean for difficulty of replication. The logic is that as long as each team member took part in production of the final product, the one with the highest skills might have the highest likelihood of influencing team decisions; if not, this at least gives a maximum possible source of skill influence. Whereas, with difficulty we expected that as long as all team members took part or were assigned tasks, that if it was difficult they might have been more likely to commit errors.
 
 
 ```{r recodes,  warning=F,  message=F}
@@ -150,7 +151,7 @@ cri2 <- select(cri2, -c(stat3i))
 
 ```
 
-### Measure Difficulty and Stats-Skills
+### Confirmatory Factor Analysis
 
 ```{r measure}
 m1 <- ' difficult =~  stat3
@@ -180,7 +181,7 @@ rm(cri2_nomis,  preds,  cfa)
 ```
 
 
-### Merge
+## Merge Data
 
 ```{r merge_two}
 
@@ -223,10 +224,18 @@ rm(teamsize,  routine, cri2)
 
 ```
 
-### Replication Results
+## Prepare Replication Results
 
-It is necessary to convert them into long form for plotting and analysis. Also, note that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 59 and 81)
+### Original Results
 
+It is necessary to convert them into long form for plotting and analysis. Also, note that u_teamid2 keeps the two teams that submitted separate analyses by wave as distinct teams for now (team 59 and 81). If users want to identify which effects are replications of which odd-ratios and NHST tests, labels are in the file [variable_labels.R](../code/variable_labels.R). The following are the original results from Brady and Finnigan (2014:32-33), Tables 4 and 5. 
+
+<img src="../data/BanFTable4.png" width="500">
+
+<img src="../data/BanFTable5.png" width="500">
+
+
+### Crowdsourced Replication Results
 
 ```{r results}
 
@@ -247,7 +256,6 @@ cri_cur_long <- reshape(as.data.frame(cri_cur), varying = c("oa10", "s10", "dif1
                     direction = "long",
                     v.names = c("oa","s","dif"),
                     sep = "")
-
 
 rm(columns)
 ```
@@ -284,11 +292,11 @@ rm(cri_long_orig)
 
 ## Create Verification Measures
 
-The goal is to produce three metrics
+We have three variables to measure 'verification'
 
 |Metric|Definition|Measure|
 |------|----------|---------|
-|*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
+|*Verification* (verif)| The direction of the regression coefficient is the same as the original (pos/pos or neg/neg = 1, or both ns diff from zero = 1)
 |*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
 |*Replication Error* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
 
@@ -323,7 +331,7 @@ cri_cur_long <- cri_cur_long %>%
          verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif))
 ```
 
-Remove teams that did not complete the replication
+### Remove Missing
 
 ```{r absdev}
 # remove teams without results
@@ -332,9 +340,9 @@ cri_long <- completeFun(cri_long, "or")
 cri_cur_long <- completeFun(cri_cur_long, "or")
 ```
 
-## Replication Error
+### Replication Error
 
-```{r absdev}
+```{r reperror}
 #create replication error
 
 cri_long <- cri_long %>%
@@ -375,8 +383,9 @@ cri_cur_long <- cri_cur_long %>%
          count = ifelse(Exp1 == 1, round((max/max1)*count,3), count))
 ```
 
-Some Clean Up
-```{r absdev}
+### Cleaning
+
+```{r clean}
 # relevel to have transparent group first
 
 cri_long$Exp1 <- relevel(cri_long$Exp1, "1")
@@ -428,7 +437,7 @@ cri_long$degree_soc <- ifelse(cri_long$degree_soc == 1, 1, 0)
 
 ```
 
-## Combine qualitative codes
+## Combine Qualitiatie Categories
 
 ```{r qualdat}
 qual_out <- read.csv(here::here("results", "qual_out.csv"))
@@ -450,8 +459,6 @@ save.image(file = here::here("data","data.Rdata"))
 ```
 
 ## Colophon
-
-This file is part of [https://github.com/nbreznau/how_many_replicators](https://github.com/nbreznau/how_many_replicators), the reproduction materials for [*How Many Replicators Does It Take to Achieve Reliability? Investigating Researcher Variability in a Crowdsourced Replication*](https://osf.io/preprints/socarxiv/j7qta/).
 
 ```{r colophon, echo=FALSE}
 sessionInfo()

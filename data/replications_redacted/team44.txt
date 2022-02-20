@@ -1,6 +1,6 @@
-TEAM: 44
-SOFTWARE: STATA-13
-VERSION: ORIGINAL
+Team: 44
+Software: Stata
+Version: ORIGINAL
 
 clear all
 

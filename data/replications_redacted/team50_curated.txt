@@ -1,10 +1,9 @@
-TEAM: 50
+Team: 50
 SOFTWARE: R
 VERSION: CURATED
 
 rm(list=ls())
 setwd("/")
-
 
 library(tidyverse)
 library(readr)
@@ -16,15 +15,12 @@ ZA4700 <- read_dta("ZA4700.dta")
 ZA2900 <- read_dta("ZA2900.dta")
 L2data <- read_dta("L2data.dta")
 
-
-
 ZA4700 <- ZA4700 %>% select(-ends_with("DEGR"), -ends_with("INC"), -ends_with("PRTY"),
                             -ends_with("REG"), -ends_with("SIZE"))
 
 ISSP96 <- ZA2900 %>% select(v2, v3, v36, v39, v41, v42, v200, v201, v205, v206)
 ISSP06 <- ZA4700 %>% select(V2, V3a, V25, V28, V30, V31, sex, age, degree, wrkst)
 rm(ZA2900, ZA4700)
-
 
 colnames(ISSP96) <- c("ID", "code96", "Jobs", "OldAge", "Unemployed", 
                       "Reduce", "Sex", "Age", "Educ", "Employ")
@@ -37,7 +33,6 @@ country_data96 <- country_data %>% filter(year==1996)
 country_data06 <- country_data %>% filter(year==2006)
 
 rm(country_data, L2data)
-
 
 countrycodes96 <- data.frame( code96=c(1:4,6,8,9:10,12:28,30),
                                countrynames=c("AUS","D-W","D-E","GB","US",
@@ -60,8 +55,6 @@ countrycodes06 <- data.frame( code06=c(36,124,152,158,191,203,208,214,246,
 
 countrycodesjoined <- inner_join(countrycodes96,countrycodes06,by=c("countrynames"))
 rm(countrycodes06, countrycodes96)
-
-
 
 b1 <- inner_join(ISSP96,countrycodesjoined,by=c("code96"))
 b1$code06 <- ifelse(b1$code06 == 2761 | b1$code06 == 2762 , 276, b1$code06)
@@ -92,8 +85,6 @@ b <- read.csv("bcri59.csv")
 finaldata <- rbind(a,b)
 rm(a,a1,b,b1)
 
-
-
 finaldata$Jobs <- car::recode(finaldata$Jobs, "1:2=1;3:4=0;else=NA")
 finaldata$OldAge <- car::recode(finaldata$OldAge, "1:2=1;3:4=0;else=NA")
 finaldata$Unemployed <- car::recode(finaldata$Unemployed, "1:2=1;3:4=0;else=NA")
@@ -104,7 +95,6 @@ finaldata$Sex <- car::recode(finaldata$Sex, "1=0;2=1;else=NA")
 finaldata <- data.frame(finaldata)
 finaldata$year <- as.factor(finaldata$year)
 finaldata$country <- as.factor(finaldata$country)  #12 countries: but 1 is 2.
-
 
 finaldata <- finaldata %>%
   mutate(Educ = as.factor(Educ),

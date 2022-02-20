@@ -1,6 +1,6 @@
-TEAM: 67
-SOFTWARE: R
-VERSION: CURATED
+Team: 67
+Software: R
+Version: CURATED
 
 library("readr")
 library("dplyr")

@@ -1,6 +1,6 @@
 Team: 21
 Software: Stata
-Version: Original
+Version: ORIGINAL
 
 set more off
 set memory 1g

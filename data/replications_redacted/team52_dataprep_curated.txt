@@ -1,6 +1,6 @@
-TEAM: 52
-SOFTWARE: R (R-STUDIO)
-VERSION: CURATED
+Team: 52
+Software: R
+Version: CURATED
 
 pacman::p_load(tidyverse, 
                haven,

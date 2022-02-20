@@ -1,6 +1,6 @@
-TEAM: 58
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 58
+Software: Stata
+Version: ORIGINAL
 
 use "ZA4700.dta", clear
 
@@ -216,18 +216,5 @@ outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform b
 logit g_inc $i_controls netmigpct emprate i.year cntryfe*, or cluster(cntry)
 outreg2 using issp.xlsx, excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 
-
-
-
-
-
-
-
-
-egen allcontrols=rowmiss($controls year cntry )
-recode allcontrols (0=1)(nonmiss=0)
-keep if allcontrols
-
-quietly tab cntry, gen(cntryfe)
 
 

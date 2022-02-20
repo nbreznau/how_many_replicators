@@ -1,6 +1,6 @@
 Team: 17
 Software: Stata
-Version: Original
+Version: ORIGINAL
 
 use "bradyfinnigan2014countrydata.dta", clear 
 

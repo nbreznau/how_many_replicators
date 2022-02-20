@@ -1,6 +1,6 @@
-TEAM: 52
-SOFTWARE: R (R-STUDIO)
-VERSION: ORIGINAL
+Team: 52
+Software: R (R-STUDIO)
+Version: ORIGINAL
 
 pacman::p_load(tidyverse, 
                haven,

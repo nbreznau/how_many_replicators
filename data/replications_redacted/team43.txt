@@ -1,6 +1,6 @@
-TEAM: 43
-SOFTWARE: SPSS-24
-VERSION: ORIGINAL
+Team: 43
+Software: SPSS-
+Version: ORIGINAL
 
 
 GET FILE='\ZA4747.sav'.

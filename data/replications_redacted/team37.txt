@@ -1,6 +1,6 @@
 Team: 37
 Software: Stata
-Version: Original
+Version: ORIGINAL
 
 clear
 version 14

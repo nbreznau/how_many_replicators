@@ -1,6 +1,6 @@
-TEAM: 52
-SOFTWARE: STATA
-VERSION: CURATED
+Team: 52
+Software: STATA
+Version: ORIGINAL
 
 use issp.dta, clear
 

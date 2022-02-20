@@ -1,9 +1,8 @@
-TEAM: 70
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 70
+Software: R
+Version: ORIGINAL
 
 
-```{r message=FALSE}
 rm(list = ls())
 p_needed <- c("haven", "tidyverse", "labelled", "magrittr", "dummies")
 packages <- rownames(installed.packages())
@@ -18,11 +17,6 @@ knitr::knit_hooks$set(chunk = function(x, options) {
   x <- def.chunk.hook(x, options)
   ifelse(options$size != "normalsize", paste0("\\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
 })
-
-```
-
-
-```{r}
 
 za2900 <- read_dta("ZA2900.dta")
 
@@ -92,7 +86,6 @@ za2900 <- za2900 %>%
                 "3" = 2,
                 "2" = 1))
 
-
 za2900 <- za2900 %>%
   mutate(dmarch =
          recode(as.numeric(orgmarch),
@@ -100,7 +93,6 @@ za2900 <- za2900 %>%
                 "2" = 0,
                 "3" = 1,
                 "4" = 1))
-
 
 za2900 <- za2900 %>%
   mutate(orgstrike =
@@ -708,10 +700,7 @@ za2900$cntry <- za2900$v3a
 
 za2900$wghts <- za2900$v325
 
-```
 
-
-```{r}
 
 za4700 <- read_dta("ZA4700.dta")
 
@@ -1465,11 +1454,6 @@ za4700$year <- 2006
 za4700$yr2006 <- 1
 
 
-```
-
-
-
-```{r message=FALSE}
 
 combined <- rbind(data.frame(
   za2900[,colnames(za2900)[colnames(za2900)%in%colnames(za4700)]]),
@@ -1519,12 +1503,7 @@ ISSP9606 <- ISSP9606 %>%
                   "826" = 1,
                   "840" = 1,
                   .default = 0))
-```
 
-
-
-
-```{r eval = FALSE, highlight = FALSE, size = "tiny"}
 use $data, clear
 keep if orig13
 
@@ -1592,13 +1571,7 @@ foreach depvar in $depvars {
 	logit `depvar' $controls cntryfe*
 	outreg2 using $controls9606.xls", excel alpha(0.001, 0.01, 0.05)  sym(***, **, *) eform bdec(3) sdec(2) stats(coef tstat) onecol append
 }
-```
 
----
-
-
-
-```{r}
 
 orig_13 <- ISSP9606[ISSP9606$orig13==1,]
 
@@ -1622,11 +1595,7 @@ orig_13$cntry <- as.factor(orig_13$cntry)
 orig_13 <- cbind(orig_13, cntry = dummy(orig_13$cntry))
 
 orig_13 <- dplyr::select(orig_13, to_keep, starts_with("cntry.")) 
-```
 
-
-
-```{r}
 options(scipen = 999) # turn off scientific notation
 
 
@@ -1671,10 +1640,7 @@ results_table4_3[[i]] <- glm(as.formula(paste(dep_var[i],
                            family = "binomial")
  
 }
-```
 
-
-```{r}
 
 results_table5_1 <- list() 
 
@@ -1725,11 +1691,7 @@ results_table5_4[[i]] <- glm(as.formula(paste(dep_var[i],
                            family = "binomial")
  
 }
-```
 
-
-
-```{r, size = "footnotesize"}
 coef_table <- NULL
 
 for(i in 1:6){
@@ -1859,4 +1821,4 @@ coef_table <- cbind(c("Foreign-born (%)", "", "Social Welfare Expenditures (%)",
 
 
 write.csv2(coef_table, "coef_table.csv", row.names = F)
-```
+

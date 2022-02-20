@@ -1,3 +1,7 @@
+Team: 8
+Software: Stata
+Version: ORIGINAL
+
 use "ZA2900.dta", clear
 
 gen year=1996

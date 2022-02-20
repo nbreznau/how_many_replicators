@@ -1,6 +1,6 @@
-TEAM: 50
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 50
+Software: R
+Version: ORIGINAL
 
 
 rm(list=ls())
@@ -15,8 +15,6 @@ library(car)
 ZA4700 <- read_dta("ZA4700.dta")
 ZA2900 <- read_dta("ZA2900.dta")
 L2data <- read_dta("L2data.dta")
-
-
 
 ZA4700 <- ZA4700 %>% select(-ends_with("DEGR"), -ends_with("INC"), -ends_with("PRTY"),
                             -ends_with("REG"), -ends_with("SIZE"))
@@ -39,7 +37,6 @@ country_data06 <- country_data %>% filter(year==2006)
 
 rm(country_data, L2data)
 
-
 countrycodes96 <- data.frame( code96=c(1:4,6,8,9:10,12:28,30),
                                countrynames=c("AUS","D-W","D-E","GB","US",
                                               "HU", "I", "IRL", "NO", "SE", "CZ",
@@ -61,10 +58,6 @@ countrycodes06 <- data.frame( code06=c(36,124,152,158,191,203,208,214,246,
 
 countrycodesjoined <- inner_join(countrycodes96,countrycodes06,by=c("countrynames"))
 rm(countrycodes06, countrycodes96)
-
-
-
-
 
 b1 <- inner_join(ISSP96,countrycodesjoined,by=c("code96"))
 b1$code06 <- ifelse(b1$code06 == 2761 | b1$code06 == 2762 , 276, b1$code06)
@@ -89,8 +82,6 @@ b$ID <- b$ID * 10
 finaldata <- rbind(a,b)
 rm(a,a1,b,b1)
 
-
-
 finaldata$Jobs <- car::recode(finaldata$Jobs, "1:2=1;3:4=0;else=NA")
 finaldata$OldAge <- car::recode(finaldata$OldAge, "1:2=1;3:4=0;else=NA")
 finaldata$Unemployed <- car::recode(finaldata$Unemployed, "1:2=1;3:4=0;else=NA")
@@ -98,11 +89,9 @@ finaldata$Reduce <- car::recode(finaldata$Reduce, "1:2=1;3:4=0;else=NA")
 
 finaldata$Sex <- car::recode(finaldata$Sex, "1=0;2=1;else=NA")
 
-
 finaldata <- data.frame(finaldata)
 finaldata$year <- as.factor(finaldata$year)
 finaldata$country <- as.factor(finaldata$country)  #12 countries: but 1 is 2.
-
 
 finaldata <- within(finaldata, Educ <- relevel(Educ, ref=2))
 finaldata <- within(finaldata, Employ <- relevel(Employ, ref=4))
@@ -161,7 +150,6 @@ model16 <- glm(Jobs ~ netmigpct + Sex + Age + Age^2 + Educ + Employ +  year + co
 exp(coef(model16))
 summary(model16)
 
-
 model17 <- glm(OldAge ~ netmigpct  + socx + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
 exp(coef(model17))
 summary(model17)
@@ -174,7 +162,6 @@ summary(model19)
 model20<- glm(Jobs ~ netmigpct  +  socx + Sex + Age + Age^2 + Educ + Employ + year + country, data =  finaldata, family="binomial")
 exp(coef(model20))
 summary(model20)
-
 
 model21 <- glm(OldAge ~ netmigpct + emprate + Sex + Age + Age^2 + Educ + Employ +  year + country, data =  finaldata, family="binomial")
 exp(coef(model21))

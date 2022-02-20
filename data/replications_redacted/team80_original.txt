@@ -1,6 +1,6 @@
-TEAM: 80
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 80
+Software: R
+Version: ORIGINAL
 
 library(haven)
 library(dplyr)

@@ -1,6 +1,6 @@
-TEAM: 81
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 81
+Software: Stata
+Version: ORIGINAL
 
 clear
 use "L2data.dta"

@@ -1,7 +1,6 @@
-TEAM: 73 
-SOFTWARE: STATA
-VERSION: ORIGINAL
-
+Team: 73 
+Software: Stata
+Version: ORIGINAL
 
 use "ZA2900.dta" 
 

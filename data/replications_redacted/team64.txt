@@ -1,6 +1,6 @@
-TEAM: 64
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 64
+Software: Stata
+Version: ORIGINAL
 
 *NOTE: this team re-ran the original study's code to generate the data used in this analysis
 

@@ -1,6 +1,7 @@
 TEAM: 85
 SOFTWARE: R
 VERSION: ORIGINAL
+
 # install.packages(c("tidyverse", "plyr", "haven", "rms", "stringi", "stargazer"))
 library(tidyverse)
 library(plyr)
@@ -8,17 +9,9 @@ library(haven)
 library(rms)
 library(stargazer)
 
-
-
-
 data96 <- read_dta("ZA2900.dta")
 data06 <- read_dta("ZA4700.dta")
 datal2 <- read_dta("L2data.dta")
-
-
-
-
-
 
 lab96 <- data96 %>% 
   map_chr(~attributes(.)$label) %>%
@@ -31,8 +24,6 @@ lab06 <- data06 %>%
 labl2 <- datal2 %>% 
   map_chr(~attributes(.)$label) %>%
   data.frame(variable = names(.), label = ., row.names = NULL)
-
-
 
 data96 <- data96 %>%
   mutate(oldAge     = mapvalues(v39,
@@ -97,9 +88,6 @@ datal2 <- datal2 %>%
          immgrStockCh = netmigpct)  %>%                        
   select(cntry, year, immgrStock, immgrStockCh, socx, emprate)
 
-
-
-
   data96$cntry <- as.numeric(data96$cntry)
   data06$cntry <- as.numeric(data06$cntry)
   datal2$cntry <- as.numeric(datal2$cntry)
@@ -124,14 +112,9 @@ datal2 <- datal2 %>%
     mutate(dupl = duplicated(cntrylist)) %>%                    
     dplyr::filter(dupl)                                          
   
-
   data <- data_raw %>%
     dplyr::filter(!is.na(year) & !is.na(cntry)) %>%
     dplyr::filter(cntry %in% cntrykeep$cntry)
-
-
-
-
 
   data$female <- factor(data$female)
   data$educ <- factor(data$educ,
@@ -143,9 +126,6 @@ datal2 <- datal2 %>%
   
   data$agesq <- data$age ^ 2
   
-  
-  
-
   model1 <-
     lrm(
       oldAge ~ immgrStock + cntry + year + female + age + agesq + educ + employ,
@@ -154,8 +134,6 @@ datal2 <- datal2 %>%
       na.action = "na.delete",
       data = data
     )
-
-
 
   model2 <-
     lrm(
@@ -166,7 +144,6 @@ datal2 <- datal2 %>%
       data = data
     )
 
-
   model3 <-
     lrm(
       incomeDiff ~ immgrStock + cntry + year + female + age + agesq + educ + employ,
@@ -175,8 +152,6 @@ datal2 <- datal2 %>%
       na.action = "na.delete",
       data = data
     )
-
-
 
   model4 <-
     lrm(
@@ -197,8 +172,6 @@ oddsR1_4 <-
              model3 = exp(model3$coefficients),
              model4 = exp(model4$coefficients))
   
-
-
 model5 <-
   lrm(
     oldAge ~ immgrStock + socx + cntry + year + female + age + agesq + educ + employ,
@@ -207,8 +180,6 @@ model5 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model6 <-
   lrm(
@@ -219,8 +190,6 @@ model6 <-
     data = data
   )
 
-
-
 model7 <-
   lrm(
     incomeDiff ~ immgrStock + socx + cntry + year + female + age + agesq + educ + employ,
@@ -229,8 +198,6 @@ model7 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model8 <-
   lrm(
@@ -241,18 +208,13 @@ model8 <-
     data = data
   )
 
-
-
 stargazer(model5, model6, model7, model8, type="text", report = "vctp*") 
-
 
 oddsR5_8 <-
   data.frame(model5 = exp(model5$coefficients),
              model6 = exp(model6$coefficients),
              model7 = exp(model7$coefficients),
              model8 = exp(model8$coefficients))
-
-
 model9 <-
   lrm(
     oldAge ~ immgrStock + emprate + cntry + year + female + age + agesq + educ + employ,
@@ -261,8 +223,6 @@ model9 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model10 <-
   lrm(
@@ -273,8 +233,6 @@ model10 <-
     data = data
   )
 
-
-
 model11 <-
   lrm(
     incomeDiff ~ immgrStock + emprate + cntry + year + female + age + agesq + educ + employ,
@@ -283,8 +241,6 @@ model11 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model12 <-
   lrm(
@@ -295,8 +251,6 @@ model12 <-
     data = data
   )
 
-
-
 stargazer(model9, model10, model11, model12, type="text", report = "vctp*")
 
 
@@ -305,9 +259,6 @@ oddsR9_12 <-
              model10 = exp(model10$coefficients),
              model11 = exp(model11$coefficients),
              model12 = exp(model12$coefficients))
-
-
-
 
 model13 <-
   lrm(
@@ -319,7 +270,6 @@ model13 <-
   )
 
 
-
 model14 <-
   lrm(
     unemployed ~ immgrStockCh + cntry + year + female + age + agesq + educ + employ,
@@ -328,8 +278,6 @@ model14 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model15 <-
   lrm(
@@ -340,8 +288,6 @@ model15 <-
     data = data
   )
 
-
-
 model16 <-
   lrm(
     jobs ~ immgrStockCh + cntry + year + female + age + agesq + educ + employ,
@@ -351,19 +297,13 @@ model16 <-
     data = data
   )
 
-
-
 stargazer(model13, model14, model15, model16, type="text", report = "vctp*") 
-
 
 oddsR13_16 <-
   data.frame(model13 = exp(model13$coefficients),
              model14 = exp(model14$coefficients),
              model15 = exp(model15$coefficients),
              model16 = exp(model16$coefficients))
-
-
-
 
 model17 <-
   lrm(
@@ -374,8 +314,6 @@ model17 <-
     data = data
   )
 
-
-
 model18 <-
   lrm(
     unemployed ~ immgrStockCh + socx + cntry + year + female + age + agesq + educ + employ,
@@ -384,8 +322,6 @@ model18 <-
     na.action = "na.delete",
     data = data
   )
-
-
 
 model19 <-
   lrm(
@@ -396,8 +332,6 @@ model19 <-
     data = data
   )
 
-
-
 model20 <-
   lrm(
     jobs ~ immgrStockCh + socx + cntry + year + female + age + agesq + educ + employ,
@@ -407,18 +341,13 @@ model20 <-
     data = data
   )
 
-
 stargazer(model17, model18, model19, model20, type="text", report = "vctp*") 
-
 
 oddsR17_20 <-
   data.frame(model17 = exp(model17$coefficients),
              model18 = exp(model18$coefficients),
              model19 = exp(model19$coefficients),
              model20 = exp(model20$coefficients))
-
-
-
 
 model21 <-
   lrm(
@@ -429,8 +358,6 @@ model21 <-
     data = data
   )
 
-
-
 model22 <-
   lrm(
     unemployed ~ immgrStockCh + emprate + cntry + year + female + age + agesq + educ + employ,
@@ -440,8 +367,6 @@ model22 <-
     data = data
   )
 
-
-
 model23 <-
   lrm(
     incomeDiff ~ immgrStockCh + emprate + cntry + year + female + age + agesq + educ + employ,
@@ -450,7 +375,6 @@ model23 <-
     na.action = "na.delete",
     data = data
   )
-
 
 model24 <-
   lrm(
@@ -462,20 +386,13 @@ model24 <-
   )
 
 
-
 stargazer(model21, model22, model23, model24, type="text", report = "vctp*")
-
 
 oddsR21_24 <-
   data.frame(model21 = exp(model21$coefficients),
              model22 = exp(model22$coefficients),
              model23 = exp(model23$coefficients),
              model24 = exp(model24$coefficients))
-
-
-
-
-
 
 stargazer(model1, model2, model3, model4, model5, model6, model7, model8, model9, model10, model11, model12, model13, model14, model15, model16, model17, model18, model19, model20, model21, model22, model23, model24, 
           type="html", 
@@ -485,8 +402,6 @@ stargazer(model1, model2, model3, model4, model5, model6, model7, model8, model9
           title = "regressions with estimate, z-values, non-adjusted p-values",
           out = "model1-24.html"
           )
-
-
 
 oddsR1_4_out <- data.frame(variable = rownames(oddsR1_4), oddsR1_4)
 oddsR5_8_out <- data.frame(variable = rownames(oddsR5_8), oddsR5_8)

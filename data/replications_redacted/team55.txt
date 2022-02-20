@@ -1,9 +1,7 @@
-TEAM: 55
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 55
+Software: STATA
+Version: ORIGINAL
 
-clear
-clear matrix
 
 global path "\"
 

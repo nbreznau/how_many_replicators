@@ -1,6 +1,6 @@
-TEAM: 80
-SOFTWARE: R
-VERSION: CURATED
+Team: 80
+Software: R
+Version: CURATED
 
 library(haven)
 library(dplyr)

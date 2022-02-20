@@ -1,6 +1,6 @@
-TEAM: 67
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 67
+Software: R
+Version: ORIGINAL
 
 install.packages("jetpack")
 jetpack::init()

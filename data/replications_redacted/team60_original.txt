@@ -1,6 +1,6 @@
-TEAM: 60
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 60
+Software: Stata
+Version: ORIGINAL
 
 use "ZA2900.dta", clear
 
@@ -89,14 +89,12 @@ label values single yesno
 
 capture drop divsep
 egen divsep = rmax(divorced separated)
-tab divsep v202
 label variable divsep "Divorced or Separated"
 label values divsep yesno
 
 capture drop hhsize
 gen hhsize = v273
 label variable hhsize "Household Size"
-tab hhsize
 
 capture drop childhh
 gen childhh = 0 if (v274!=.)

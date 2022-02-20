@@ -1,6 +1,6 @@
-TEAM: 53
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 53
+Software: R
+Version: ORIGINAL
 
 library(tidyverse)
 library(haven)

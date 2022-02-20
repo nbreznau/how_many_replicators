@@ -1,6 +1,6 @@
-TEAM: 72
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 72
+Software: R
+Version: ORIGINAL
 
 
 rm(list=ls())

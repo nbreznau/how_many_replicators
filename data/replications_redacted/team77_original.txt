@@ -1,6 +1,6 @@
-TEAM: 77
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 77
+Software: STATA
+Version: ORIGINAL
 
 clear all 
 use "L2data.dta", clear
@@ -63,7 +63,6 @@ replace employment=4 if v206==5
 lab var employment "Employment"
 lab def employment 1"Full-time" 2"Part-time" 3"Not active" 4"Active unemployed"
 lab val employment employment
-tab v206 employment, m
 
 keep id_96 year country oldagecare unemployed income job female age education employment
 sort country

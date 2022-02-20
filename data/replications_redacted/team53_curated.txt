@@ -1,6 +1,6 @@
-TEAM: 53
-SOFTWARE: R
-VERSION: CURATED
+Team: 53
+Software: R
+Version: CURATED
 
 library(tidyverse)
 library(haven)

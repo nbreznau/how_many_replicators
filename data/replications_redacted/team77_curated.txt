@@ -1,6 +1,6 @@
-TEAM: 77
-SOFTWARE: STATA
-VERSION: CURATED 
+Team: 77
+Software: STATA
+Version: CURATED 
 
 clear all 
 use "L2data.dta", clear

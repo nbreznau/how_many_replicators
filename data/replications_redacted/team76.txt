@@ -1,10 +1,7 @@
-TEAM: 76
-SOFTWARE: R 
-VERSION: ORIGINAL
+Team: 76
+Sotware: R 
+Version: ORIGINAL
 
-
-getwd()
-#setwd("/")
 rm(list=ls())
 
 

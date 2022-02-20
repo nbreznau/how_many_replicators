@@ -1,6 +1,6 @@
 Team: 22
 Software: Stata
-Version: Original
+Version: ORIGINAL
 
 use ZA2900.dta
 gen year=1996

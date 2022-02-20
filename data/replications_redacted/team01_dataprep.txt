@@ -2,10 +2,8 @@ Team: 1
 Software: Stata
 Version: ORIGINAL
 
-*redacted file path
-cd "/"
 
-use "/ZA2900.dta"
+use "ZA2900.dta", clear
 
 rename v2 id
 lab var id "id"
@@ -91,10 +89,10 @@ rename v325 weight
 lab var weight "weight"
 keep id year cntry oldagecare unemployment incomedifferences job female age age2 educ employment weight
 drop if cntry == . 
-save "Data/temp_1996.dta", replace
+save "temp_1996.dta", replace
 
 
-use "Data/ZA4700.dta", clear
+use "ZA4700.dta", clear
 
 rename V2 id
 lab var id "id"
@@ -155,13 +153,13 @@ lab var weight "weight"
 
 keep id year cntry oldagecare unemployment incomedifferences job female age age2 educ employment weight
 drop if cntry == .
-save "/temp_2006.dta", replace
+save "temp_2006.dta", replace
 
-use "/temp_1996.dta", clear
+use "temp_1996.dta", clear
 append using "/temp_2006.dta"
 sort cntry year
 
-merge m:1 cntry year using "/L2data.dta"
+merge m:1 cntry year using "L2data.dta"
 keep if _merge == 3
 drop _merge
 
@@ -169,7 +167,7 @@ drop if emprate == . | foreignpct == . | socx == . | netmigpct == .
 drop if cntry == 208 | cntry == 246 | cntry == 528 | cntry == 620
 
 
-save "/pooled.dta", replace
-export delimited using "/pooled.csv", replace delimit(";")
-export delimited using "/pooled_nolab.csv", replace delimit(";") nolab
+save "pooled.dta", replace
+export delimited using "pooled.csv", replace delimit(";")
+export delimited using "pooled_nolab.csv", replace delimit(";") nolab
 

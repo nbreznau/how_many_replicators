@@ -2,7 +2,6 @@ Team: 38
 Software: Stata
 Version: ORIGINAL
 
-
 version 15     
 clear all         
 macro drop _all    

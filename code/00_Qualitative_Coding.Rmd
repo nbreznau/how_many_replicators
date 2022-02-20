@@ -1,11 +1,10 @@
 ---
 title: "00 Qualitative Codes"
-author: "Nate Breznau"
-date: "12/12/2021"
 output: html_document
 ---
+In this workflow, the file 'dataout_print.xlsx' is the template used for qualitative coding and notes. This routine extracts categories by team for this file. The categories are saved in the file 'qual_out.csv' for use with later quantitative analyses.
 
-```{r setup, include=FALSE}
+```{r setup}
 
 pacman::p_load("tidyverse",
                "readtext",
@@ -71,11 +70,17 @@ counterfact_num <- length(unique(teamcodes$ID[teamcodes[,"Counterfactual"] == "Y
 counterfact_teams <- length(unique(teamcodes$Team[teamcodes[,"Counterfactual"] == "Yes"]))
 ```
 
-## Qualitative summary
-```{r makedf}
+## Outfile
 
+```{r makedf}
 
 write.csv(teamcodes_teamwise, here::here("results", "qual_out.csv"), row.names = F)
 
+```
+
+## Colophon
+
+```{r colophon}
+sessionInfo()
 ```
 

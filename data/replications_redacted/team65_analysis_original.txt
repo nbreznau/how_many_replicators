@@ -1,7 +1,6 @@
-TEAM: 65
-SOFTWARE: SPSS
-VERSION: ORIGINAL 
-
+Team: 65
+Software: SPSS
+Version: ORIGINAL 
 
 GET FILE='merged_analyses.sav'.
 

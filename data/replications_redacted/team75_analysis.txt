@@ -1,6 +1,6 @@
-TEAM: 75
-SOFTWARE: MPLUS
-VERSION: ORIGINAL
+Team: 75
+Software: MPlus
+Version: ORIGINAL
 
 
  TITLE: CRI Fixed Effects, Model 1-4 (Immigrant Stock only);

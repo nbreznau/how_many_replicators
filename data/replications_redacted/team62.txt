@@ -1,6 +1,6 @@
-TEAM: 62
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 62
+Software: R
+Version: ORIGINAL
 
 library(foreign)
 library(dplyr)

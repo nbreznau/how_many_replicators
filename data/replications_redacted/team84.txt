@@ -1,6 +1,6 @@
-TEAM: 84
-SOFTWARE: R
-VERSION: ORIGINAL
+Team: 84
+Software: R
+Version: ORIGINAL
 
 L2data <- read.csv("L2data.csv")
 

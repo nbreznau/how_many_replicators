@@ -1,6 +1,6 @@
-TEAM: 71
-SOFTWARE: STATA
-VERSION: ORIGINAL
+Team: 71
+Software: Stata
+Version: ORIGINAL
 
 version 14.2
 clear all
@@ -30,7 +30,6 @@ forvalues i=1/17 {
 
 
 recode region (1 2=1) (3 4=2) (5=3)(6=4)(7 8=5) (9=6) if v3==392
-tab jp_reg region if v3==392,m 
 
 replace region= v3a*100+region    
 
