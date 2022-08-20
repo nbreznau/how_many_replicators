@@ -182,7 +182,7 @@ knitr::include_graphics(here::here("results","Fig1.png"))
 
 ### Trimmed Results
 
-Based on peer review feedback we decided it is pertinent to generate a set of results where the three most deviant verification result teams were excluded from both groups (roughly 7% of each group). This carries the logic that teams that were unmotivated, unskilled or made major mistakes would probably not get their results published in a journal or in a study if they were subject to peer review, editor review or if seen by the original study's authors. It also reflects that in the opaque group there were three cases of questionable methods competencies.
+Based on peer review feedback we decided it is pertinent to generate a set of results where the two most deviant verification result teams were excluded from both groups (roughly 5% of each group). This carries the logic that teams that were unmotivated, unskilled or made major mistakes would probably not get their results published in a journal or in a study if they were subject to peer review, editor review or if seen by the original study's authors. It also reflects that in three teams in the study had questionable methods competencies (also just under 5% of the total study).
 
 ```{r trimmed}
 # find most distant verifications
@@ -192,7 +192,7 @@ cri_team_trimmed <- cri_team %>%
   mutate(count = row_number())
 
 #select lowest scores on verif by team
-team_trim <- unique(cri_team_trimmed$u_teamid[cri_team_trimmed$count < 4])
+team_trim <- unique(cri_team_trimmed$u_teamid[cri_team_trimmed$count < 3])
 
 #create new df with those lowest two teams removed
 cri_long_trim <- cri_long %>%
