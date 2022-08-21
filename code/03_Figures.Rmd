@@ -252,11 +252,10 @@ cri_sums <- cri_sums %>%
 cri_sums[is.na(cri_sums)] <- 0
 ```
 
-## Figure 2. Comparing Replication Outcomes
+## Figure 2
 
-### Part A. Effect-Level
+### Effect-Level Prep
 
-#### Prep Fig2a Data
 ```{r fig2prep, warning = F, message = F}
 fig2 <- cri_long %>%
   select(verif, exact, deviance_abs, Exp1) %>%
@@ -303,7 +302,103 @@ fig3$se <- fig3$verif_fn2/sqrt(1874)
 
 
 rm(fig2cur)
+```
 
+### Team-Level Prep
+
+```{r fig2b_teamsummaries}
+fig2b <- cri_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# collapse team-level scores
+fig2b_c <- fig2b %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Original Results",
+         stat = "Verification")
+  
+  
+
+fig2bcur <- cri_cur_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# collapse team-level scores
+fig2bcur_c <- fig2bcur %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Curated Results",
+         stat = "Verification")
+
+fig2b <- rbind(fig2b_c, fig2bcur_c)
+#rm(fig2b_c, fig2bcur, fig2bcur_c)
+
+fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
+fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
+fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
+fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
+
+
+fig2b[5:8, "stat"] <- "Exact Replication"
+fig2b[9:12, "stat"] <- "Replication Error"
+
+fig2b[5:8, "group"] <- fig2b[1:4, "group"]
+fig2b[9:12, "group"] <- fig2b[1:4, "group"]
+
+fig2b[5:8, "version"] <- fig2b[1:4, "version"]
+fig2b[9:12, "version"] <- fig2b[1:4, "version"]
+
+fig3b <- fig2b[9:12,]
+fig2b <- fig2b[1:8,]
+fig2b$result <- fig2b$verif_fn1*100 # put in % scale
+fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3b$result <- fig3b$verif_fn1
+fig3b$se <- (fig3b$verif_fn2/sqrt(1874))
+
+
+
+fig2b$result <- round(fig2b$result,1)
+
+```
+### NEW Figure 2. Comparing Replication Outcomes
+
+```{r fig2new}
+## to make a normal dist
+
+ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("") +
+  scale_y_continuous(breaks = NULL)
+```
+
+
+## OLD Figure 2. Comparing Replication Outcomes
+
+### Part A. Effect-Level
+
+```{r fig2prepa, warning = F, message = F}
 f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
 f2colors1 <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
 fig2$result <- round(fig2$result,1)
@@ -427,86 +522,7 @@ icc_out <- rbind(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 rm(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 ```
 
-### Part C. Team Level
 
-#### Prep Fig2b Data
-```{r fig2b_teamsummaries}
-fig2b <- cri_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = deviance_abs_fn1
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2b_c <- fig2b %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Original Results",
-         stat = "Verification")
-  
-  
-
-fig2bcur <- cri_cur_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = deviance_abs_fn1
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2bcur_c <- fig2bcur %>%
-  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Curated Results",
-         stat = "Verification")
-
-fig2b <- rbind(fig2b_c, fig2bcur_c)
-#rm(fig2b_c, fig2bcur, fig2bcur_c)
-
-fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
-fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
-fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
-fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
-
-
-fig2b[5:8, "stat"] <- "Exact Replication"
-fig2b[9:12, "stat"] <- "Replication Error"
-
-fig2b[5:8, "group"] <- fig2b[1:4, "group"]
-fig2b[9:12, "group"] <- fig2b[1:4, "group"]
-
-fig2b[5:8, "version"] <- fig2b[1:4, "version"]
-fig2b[9:12, "version"] <- fig2b[1:4, "version"]
-
-fig3b <- fig2b[9:12,]
-fig2b <- fig2b[1:8,]
-fig2b$result <- fig2b$verif_fn1*100 # put in % scale
-fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
-fig3b$result <- fig3b$verif_fn1
-fig3b$se <- (fig3b$verif_fn2/sqrt(1874))
-
-
-
-fig2b$result <- round(fig2b$result,1)
-
-```
 
 #### Produce Fig2b
 
