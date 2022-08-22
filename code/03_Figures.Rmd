@@ -275,8 +275,20 @@ fig2cur <- cri_cur_long %>%
          version = "Curated Results",
          stat = "Verification")
 
+fig2trim <- cri_long_trim %>%
+  select(verif, exact, deviance_abs, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Trimmed Results",
+         stat = "Verification")
+
+fig2t <- rbind(fig2, fig2trim)
 fig2 <- rbind(fig2, fig2cur)
 
+
+#### This is for raw and curated (OLD)
 fig2[5:8, "verif_fn1"] <- fig2[1:4, "exact_fn1"] # put in long form
 fig2[9:12, "verif_fn1"] <- fig2[1:4, "deviance_abs_fn1"] 
 fig2[5:8, "verif_fn2"] <- fig2[1:4, "exact_fn2"]
@@ -300,8 +312,31 @@ fig2$se <- (fig2$verif_fn2/sqrt(1874))*100 # add standard error in % scale
 fig3$result <- fig3$verif_fn1
 fig3$se <- fig3$verif_fn2/sqrt(1874)
 
+#### This is for raw and trimmed (NEW)
+fig2t[5:8, "verif_fn1"] <- fig2t[1:4, "exact_fn1"] # put in long form
+fig2t[9:12, "verif_fn1"] <- fig2t[1:4, "deviance_abs_fn1"] 
+fig2t[5:8, "verif_fn2"] <- fig2t[1:4, "exact_fn2"]
+fig2t[9:12, "verif_fn2"] <- fig2t[1:4, "deviance_abs_fn2"]
 
-rm(fig2cur)
+
+fig2t[5:8, "stat"] <- "Exact Replication"
+fig2t[9:12, "stat"] <- "Replication Error"
+
+fig2t[5:8, "group"] <- fig2t[1:4, "group"]
+fig2t[9:12, "group"] <- fig2t[1:4, "group"]
+
+fig2t[5:8, "version"] <- fig2t[1:4, "version"]
+fig2t[9:12, "version"] <- fig2t[1:4, "version"]
+
+fig3t <- fig2t[9:12,]
+fig2t <- fig2t[1:8,]
+
+fig2t$result <- fig2t$verif_fn1*100 # put in % scale
+fig2t$se <- (fig2t$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3t$result <- fig3t$verif_fn1
+fig3t$se <- fig3t$verif_fn2/sqrt(1874)
+
+rm(fig2cur, fig2trim)
 ```
 
 ### Team-Level Prep
@@ -353,7 +388,30 @@ fig2bcur_c <- fig2bcur %>%
          version = "Curated Results",
          stat = "Verification")
 
+fig2btrim <- cri_long_trim %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# collapse team-level scores
+fig2btrim_c <- fig2btrim %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Trimmed Results",
+         stat = "Verification")
+
 fig2b <- rbind(fig2b_c, fig2bcur_c)
+fig2bt <- rbind(fig2b_c, fig2btrim_c)
 #rm(fig2b_c, fig2bcur, fig2bcur_c)
 
 fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
@@ -382,16 +440,36 @@ fig3b$se <- (fig3b$verif_fn2/sqrt(1874))
 
 fig2b$result <- round(fig2b$result,1)
 
-```
-### NEW Figure 2. Comparing Replication Outcomes
 
-```{r fig2new}
-## to make a normal dist
 
-ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1)) + ylab("") +
-  scale_y_continuous(breaks = NULL)
+fig2bt[5:8, "verif_fn1"] <- fig2bt[1:4, "exact_fn1"] # put in long form
+fig2bt[9:12, "verif_fn1"] <- fig2bt[1:4, "deviance_fn1"] 
+fig2bt[5:8, "verif_fn2"] <- fig2bt[1:4, "exact_fn2"]
+fig2bt[9:12, "verif_fn2"] <- fig2bt[1:4, "deviance_fn2"]
+
+
+fig2bt[5:8, "stat"] <- "Exact Replication"
+fig2bt[9:12, "stat"] <- "Replication Error"
+
+fig2bt[5:8, "group"] <- fig2bt[1:4, "group"]
+fig2bt[9:12, "group"] <- fig2bt[1:4, "group"]
+
+fig2bt[5:8, "version"] <- fig2bt[1:4, "version"]
+fig2bt[9:12, "version"] <- fig2bt[1:4, "version"]
+
+fig3bt <- fig2bt[9:12,]
+fig2bt <- fig2bt[1:8,]
+fig2bt$result <- fig2bt$verif_fn1*100 # put in % scale
+fig2bt$se <- (fig2bt$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3bt$result <- fig3bt$verif_fn1
+fig3bt$se <- (fig3bt$verif_fn2/sqrt(1874))
+
+
+
+fig2bt$result <- round(fig2bt$result,1)
+
 ```
+
 
 
 ## OLD Figure 2. Comparing Replication Outcomes
@@ -400,7 +478,11 @@ ggplot(data = data.frame(x = c(-3, 3)), aes(x)) +
 
 ```{r fig2prepa, warning = F, message = F}
 f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
+
 f2colors1 <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
+
+f2colors3 <- c("#2D708EFF", "#95D840FF", "#2D708EFF", "#95D840FF", "#2D708EFF", "#95D840FF", "#2D708EFF", "#95D840FF")
+
 fig2$result <- round(fig2$result,1)
 ```
 
@@ -449,6 +531,210 @@ dev.off()
 
 knitr::include_graphics(here::here("results","Fig2a.png"))
 ```
+
+### NEW Figure 2. Comparing Replication Outcomes
+
+#### Fig2aN Raw Effect-Level Results
+```{r fig2new}
+
+fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
+  geom_col(aes(y = result, x = c(2,3,5,6), fill = interaction(group, version)), size = 3) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(2.58*se), ymax = result+(2.58*se), x = c(2,3,5,6),), color = "grey30", width = 0.5) +
+  scale_x_reverse() +
+  scale_fill_manual(values = f2colors3,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 100, x = c(2,3,5,6),                 
+                label = round(fig2t$result[c(1,2,5,6)],1)), 
+            family = "Times New Roman",
+            #hjust = 1,
+            size = 5) + 
+  theme_classic() +
+  ylab("Percent of Replicated Effects") +
+  xlab(" ") +
+  #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
+  coord_flip(xlim = c(6.5,1), ylim = c(25,100),  clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = c(1.2,4.2), y = c(22, 22), 
+           label = c("VERIFICATION (same sign)", "EXACT REPLICATION (within 0.01)"), 
+           hjust = 0, 
+           size = 5, 
+           fontface = "italic", 
+           color = "gray30") +
+  annotate("text", x = c(2,3,5,6), y = c(23, 23, 23, 23), 
+           label = c("Transparent Group (TG)", "Opaque Group (OG)", "TG", "OG"),
+           hjust = 0, 
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.title = element_blank(),
+        legend.position = "none",
+        plot.title = element_blank())
+fig2aN
+
+```
+
+#### Fig2bN Raw Team-Level Results
+```{r fig2newb}
+
+fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
+  geom_col(aes(y = result, x = c(2,3,5,6), fill = interaction(group, version)), size = 3) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(2.58*se), ymax = result+(2.58*se), x = c(2,3,5,6),), color = "grey30", width = 0.5) +
+  scale_x_reverse() +
+  scale_fill_manual(values = f2colors3,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 100, x = c(2,3,5,6),                 
+                label = round(fig2bt$result[c(1,2,5,6)],1)), 
+            family = "Times New Roman",
+            hjust = 1, size = 5) + 
+  theme_classic() +
+  ylab("Percent of Teams") +
+  xlab(" ") +
+  #labs(title = "B. Raw Team-Level Results, N = 85") +
+  coord_flip(xlim = c(6.5,1), ylim = c(5,100),  clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = c(1.2,4.2), y = c(0, 0), 
+           label = c("VERIFICATION (95%+ of team results)", "EXACT REPLICATION (95%+ of team results)"), 
+           hjust = 0, 
+           size = 5, 
+           fontface = "italic", 
+           color = "gray30") +
+  annotate("text", x = c(2,3,5,6), y = c(2, 2, 2, 10), 
+           label = c("TG", "OG", "TG", "OG"),
+           hjust = 0, 
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.title = element_blank(),
+        legend.position = "none",
+        plot.title = element_blank())
+
+fig2bN
+
+```
+#### Fig2aN_dev Deviance Raw Effect-Level
+
+```{r fig2newc}
+f2colors32 <- c("#482677FF", "#29AF7FFF")
+
+fig2aN_dev <- ggplot(data = fig3t[c(1,2),]) +
+  
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(2.58*se), ymax = result+(2.58*se), x = c(2,3),), color = "grey30", width = 0.3) +
+  geom_point(aes(y = result, x = c(2,3), color = interaction(group, version)), size = 5) +
+  scale_x_reverse() +
+  scale_color_manual(values = f2colors32,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 0.1, x = c(2,3),                 
+                label = round(fig3t$result[c(1,2)],3)), 
+            family = "Times New Roman",
+            hjust = 0,
+            size = 5) + 
+  theme_classic() +
+  ylab("Average of Absolute Differences") +
+  xlab(" ") +
+  #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
+  coord_flip(xlim = c(3.5,1), 
+             ylim = c(0,0.13),  
+             clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = 1.5, 
+           y = 0, 
+           label = c("REPLICATION ERROR"), 
+           hjust = 0, 
+           size = 5, 
+           fontface = "italic", 
+           color = "gray30") +
+  annotate("text", x = c(2,3), y = c(0.001,0.001), 
+           label = c("TG", "OG"),
+           hjust = 0, 
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.title = element_blank(),
+        legend.position = "none",
+        #plot.title = element_text(hjust = 0, size = 18)
+        )
+fig2aN_dev
+
+```
+#### Fig2bN_dev Deviance Raw Team-Level
+
+```{r fig2newd}
+f2colors32 <- c("#482677FF", "#29AF7FFF")
+
+fig2bN_dev <- ggplot(data = fig3bt[c(1,2),]) +
+  
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(2.58*se), ymax = result+(2.58*se), x = c(2,3),), color = "grey30", width = 0.3) +
+  geom_point(aes(y = result, x = c(2,3), color = interaction(group, version)), size = 5) +
+  scale_x_reverse() +
+  scale_color_manual(values = f2colors32,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 0.1, x = c(2,3),                 
+                label = round(fig3bt$result[c(1,2)],3)), 
+            family = "Times New Roman",
+            hjust = 0,
+            size = 5) + 
+  theme_classic() +
+  ylab("Average of Absolute Differences") +
+  xlab(" ") +
+  #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
+  coord_flip(xlim = c(3.5,1), 
+             ylim = c(0,0.13),  
+             clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = 1.5, 
+           y = 0, 
+           label = c("REPLICATION ERROR"), 
+           hjust = 0, 
+           size = 5, 
+           fontface = "italic", 
+           color = "gray30") +
+  annotate("text", x = c(2,3), y = c(0.001,0.001), 
+           label = c("TG", "OG"),
+           hjust = 0, 
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 11),
+        legend.title = element_blank(),
+        legend.position = "none",
+        #plot.title = element_text(hjust = 0, size = 18)
+        )
+fig2bN_dev
+
+```
+#### Build Fig2 NEW
+
+```{r fig2newbuild}
+agg_png(here::here("results","Fig2_New.png"), res = 144, height = 1000, width = 1800)
+
+ggarrange(fig2aN, fig2bN, fig2aN_dev, fig2bN_dev, nrow = 2, ncol = 2, heights = c(2,1))
+
+dev.off()
+
+knitr::include_graphics(here::here("results","Fig2_New.png"))
+```
+
+
+
 ### Part B. ICC
 
 ```{r fig2b_icc}
