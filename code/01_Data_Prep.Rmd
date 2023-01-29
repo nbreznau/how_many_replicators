@@ -290,7 +290,7 @@ rm(cri_long_orig)
 
 ```
 
-## Create Verification Measures
+## Create Replication Measures
 
 We have three variables to measure 'verification'
 
@@ -330,6 +330,22 @@ cri_cur_long <- cri_cur_long %>%
          verif = ifelse(verif == 0 & exact == 1, 1, verif),
          verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif))
 ```
+
+### Exact replication - sig test
+
+One reviewer questioned if the <0.01 cutoff included a similar p-value test, as with the 'verification' measure. We test this quickly here.
+
+```{r exact_sig_test}
+cri_long <- cri_long %>%
+  mutate(test_sig_exact = ifelse(sig - orig_sig == 0 & exact == 1, 1, 0))
+
+a <- sum(cri_long$test_sig_exact, na.rm = T)
+b <- sum(cri_long$exact, na.rm = T)
+
+
+```
+
+For Exact Replication, `r round(a/b, 1)*100`% of 95% sig signs from NHST match. 
 
 ### Remove Missing
 

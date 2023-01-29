@@ -325,6 +325,7 @@ tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold 
 ```{r trim_results}
 tab_model(trim_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"))
 ```
+
 #### Error Source
 
 We investigate the multivariate associations of team-level variables and whether they made mistakes and/or had procedural variations. To do this we subset our team sample first to include only those teams that had at least one instance of the category Mistake or Mistake-Procedural (=1) and all other teams except those with instances of Procedural (=0). If a team has a Mistake and Procedural code they are coded as = 1. Next we do a similar subset where cases are kept with at least one instance of Procedural and Mistake-Procedural (=1) with those having any Mistake dropped.
@@ -343,11 +344,12 @@ cri_team_proc <- cri_team %>%
 
 MIS_1 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake)
 PRO_1 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc)
-MIS_2 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 1))
-PRO_2 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 1))
-MIS_3 <- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 0))
-PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 0))
+MIS_2 <- lm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 1))
+PRO_2 <- lm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 1))
+MIS_3 <- lm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 0))
+PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 0))
 ```
+
 
 ```{r results4, warning = F, message = F}
 tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
@@ -355,11 +357,39 @@ tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.
 tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
 ```
 
+#### Robustness check as logits
+
+```{r reg_error_logit}
+# reviewer asked us to re-run these as logits
+MIS_1L <- glm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake, family = 'binomial')
+PRO_1L <- glm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc, family = 'binomial')
+MIS_2L <- glm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 1), family = 'binomial')
+PRO_2L <- glm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 1), family = 'binomial')
+MIS_3L <- glm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 0), family = 'binomial')
+PRO_3L <- glm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 0), family = 'binomial')
+```
+Note that there are only 5 outcomes of 1 in Procedural for the TG. This seems to cause convergence problems when specifying a binomial function. So this is left out of the regression table. 
+
+```{r logitout}
+tab_model(MIS_1L, MIS_2L, MIS_3L, PRO_1L, PRO_3L, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
+```
+#### Test # of Teams with 0.0 Error
+
+```{r t}
+unique(cri_team$u_teamid[cri_team$dev_m == 0])
+```
+
+They are all in the TG
+
+```{r tg}
+unique(cri_team$u_teamid[cri_team$dev_m == 0 & cri_team$exp == 1])
+```
+
 
 ## Save Image
 
 ```{r data_figs}
-rm(MIS_1, MIS_2, MIS_3, M_1, M_1_OG, M_1_aTG, M_2, M_2_OG, M_2_aTG, M_3, M_3_OG, M_3_aTG, T_1, T_1_OG, T_1_aTG, T_2, T_2_OG, T_2_aTG, T_3, T_3_OG, T_3_aTG, O_1, O_1_OG, O_1_aTG, O_2, O_2_OG, O_2_aTG, O_3, O_3_OG, O_3_aTG, PRO_1, PRO_2, PRO_3)
+rm(MIS_1, MIS_2, MIS_3, M_1, M_1_OG, M_1_aTG, M_2, M_2_OG, M_2_aTG, M_3, M_3_OG, M_3_aTG, T_1, T_1_OG, T_1_aTG, T_2, T_2_OG, T_2_aTG, T_3, T_3_OG, T_3_aTG, O_1, O_1_OG, O_1_aTG, O_2, O_2_OG, O_2_aTG, O_3, O_3_OG, O_3_aTG, PRO_1, PRO_2, PRO_3, MIS_1L, MIS_2L, MIS_3L, PRO_1L, PRO_2L, PRO_3L)
 
 save.image(file = here::here("data","data_figs.Rdata"))
 ```
