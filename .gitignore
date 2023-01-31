@@ -4,3 +4,4 @@
 .Ruserdata
 /surveyprep/notforpublicuse/**
 renv/
+.Rprofile
