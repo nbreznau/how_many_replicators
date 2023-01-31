@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 /surveyprep/notforpublicuse/**
+renv/
