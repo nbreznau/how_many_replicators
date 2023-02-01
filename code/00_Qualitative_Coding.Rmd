@@ -5,7 +5,7 @@ output: html_document
 In this workflow, the file 'dataout_print.xlsx' is the template used for qualitative coding and notes. This routine extracts categories by team for this file. The categories are saved in the file 'qual_out.csv' for use with later quantitative analyses.
 
 ```{r setup}
-
+rm(list=ls())
 pacman::p_load("tidyverse",
                "readtext",
                "readxl")
