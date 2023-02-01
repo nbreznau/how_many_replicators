@@ -13,21 +13,25 @@ NOTE: All previous files must be run first for this file to run in its entirety
 |*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
 ```{r setup, warning = F, message = F}
-rm(list = ls())
+
 library(pacman)
 
 
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr", "ggtext")
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr", "ggtext","extrafont")
+
+#font_import()
+loadfonts(device = "win")
 
 ```
 
 ## Load Data
 
 ```{r setup2, warning = F, message = F}
-# load data from 01_Data_Prep
-load(file = here::here("data","data.Rdata"))
+# load data saved in 02_Analysis
+load(file = here::here("data","data_figs.Rdata"))
 
-
+#load team data from 02_Analysis
+cri_team <- readRDS(here::here("data","cri_team.RDS"))
 # disable scientific notation
 options(scipen = 999)
 ```
@@ -56,7 +60,7 @@ kable_styling(kable(t_rct, caption = "Test for Random Assignment\n(NHST t-test o
 
 A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid))` teams
 
-## Figure 1
+## Figure 2
 
 This plots how many replicators it would take to achieve replication reliability defined as the minimum number of replicators to result in a majority coming to the correct answer (here a verification) at a confidence level of 95%. 
 
@@ -115,30 +119,30 @@ colnames(fig1_plot) <- c("P_90","P_95","P_99","p")
 i = 1
 for (col in c("p_75","p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_84","p_85","p_86","p_87","p_88","p_89","p_90","p_91","p_92","p_93","p_94","p_95","p_96","p_97","p_98","p_99")) {
   figx <- fig1 %>%
-  select(n, col) 
+  select(n, col)
   colnames(figx) <- c("n","p")
   fig1_plot[i,1] <- min(figx$n[figx$p > 0.90])
   fig1_plot[i,2] <- min(figx$n[figx$p > 0.95])
   fig1_plot[i,3] <- min(figx$n[figx$p > 0.99])
   i = i + 1
-} 
+}
 
 fig1_plot$p <- seq(75,99)
 
 ```
 
-### Figure 1. Simulated Replication Reliabilities
+### Plot Simulated Replication Reliabilities
 
 ```{r fig1_out, warning = F, message = F}
 yl <- expression(paste("Number of Replications Required (", italic("n"), ")", sep = ""))
-xl <- expression(paste("Binomial Probability that a Single Replication is Accurate (", italic("p"), ")", sep = ""))
+xl <- expression(paste("Binomial Probability that a\nSingle Replication is Accurate (", italic("p"), ")", sep = ""))
 P99 <- expression(paste(italic("P"), " > 99% confidence"))
 P95 <- expression(paste(italic("P"), " > 95%"))
 P90 <- expression(paste(italic("P"), " > 90%"))
 
-reps <- "If the true binamial probability of any given\nreplication being correct is 89% (x-axis) then\nat least 7 independent replications (y-axis) are\nneeded to guarantee that a majority (here at\nleast 4 of these 7) are successful in 99% of\nall potential replication trials"
+reps <- "If the true binomial probability of a replication\nbeing correct is 89% (x-axis) then 7+ independent\nreplications (y-axis) guarantees that a majority\n(at least 4 of 7) are correct in 99% of all potential\nreplication trials"
 
-agg_png(filename = here::here("results","Fig1.png"), res = 144, width = 1000, height = 700)
+agg_png(filename = here::here("results","Fig2.png"), res = 144, width = 500, height = 400)
 fig1_plot %>%
   mutate(P_90 = P_90 - 0.05,
          P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
@@ -146,43 +150,57 @@ fig1_plot %>%
   geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5, family = "Times New Roman") +
   geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5, family = "Times New Roman") +
   geom_line(aes(y = P_90), color = "#453781FF", size = 1.5, family = "Times New Roman") +
-  # P labels
-  annotate("label", x = 83, y = 10, label = P99, color = "#3CBB75FF", fill = "white", family = "Times New Roman") +
-  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white", family = "Times New Roman") +
-  annotate("label", x = 80.5, y = 4, label = P90, color = "#453781FF", fill = "white", family = "Times New Roman") +
   # text box and curved arrow
   geom_curve(
-    aes(x = 93, y = 11, xend = 89.1, yend = 7.5),
+    aes(x = 93, y = 12, xend = 89.1, yend = 7.5),
     arrow = arrow(length = unit(0.03, "npc"), type = "closed", angle = 20),
     color = "grey40", curvature = -0.3, lwd = 0.3) +
-  annotate("label", x = 98, y = 13, label = reps, color = "grey40", size = 3, hjust = 0, fill = "white", family = "Times New Roman") +
+  annotate("label", x = 98.5, y = 15.5, label = reps, color = "grey40", size = 2.75, hjust = 0, fill = "white", family = "Times New Roman") +
   # add white points on top of lines
   geom_point(aes(y = P_99), color = "white", size = 0.8, family = "Times New Roman") +
   geom_point(aes(y = P_95), color = "white", size = 0.8, family = "Times New Roman") +
   geom_point(aes(y = P_90), color = "white", size = 0.8, family = "Times New Roman") +
-  scale_x_reverse() +
+  # P labels
+  annotate("label", x = 83, y = 9, label = P99, color = "#3CBB75FF", fill = "white", family = "Times New Roman", size = 2.5) +
+  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white", family = "Times New Roman", size = 2.5) +
+  annotate("label", x = 80.5, y = 2.75, label = P90, color = "#453781FF", fill = "white", family = "Times New Roman", size = 2.5) +
+    scale_x_reverse() +
 
   ylim(1,20) +
   labs(y = yl, x = xl) +
   scale_y_continuous(breaks = waiver(), n.breaks = 20) +
   theme_classic() +
-  theme(text = element_text(family = "Times New Roman"),
-        axis.title.x = element_text(vjust=-1),
-        axis.title.y = element_text(vjust=2),
+  theme(text = element_text(family = "Times New Roman", size = 8),
+        axis.title.x = element_text(family = "Times New Roman", size = 9, margin = margin(t = 18)),
+        axis.title.y = element_text(family = "Times New Roman", size = 9),
         panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
 dev.off()
 
-knitr::include_graphics(here::here("results","Fig1.png"))
+knitr::include_graphics(here::here("results","Fig2.png"))
 ```
 
 ## Summary Statistics 
+
+### Descriptives
 
 ```{r team_sums}
 cri_sum <- cri_long %>%
   group_by(u_teamid2) %>%
   mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
   select(verif, exact, deviance_abs, Exp) %>%
-  summarise_all(.funs = c(mean))
+  summarise_all(.funs = c(mean)) %>%
+  ungroup()
+
+cri_sum_trim <- cri_long_trim %>%
+  group_by(u_teamid2) %>%
+  mutate(Exp = ifelse(Exp1 == "1",1,0)) %>%
+  select(verif, exact, deviance_abs, Exp) %>%
+  mutate(verif_trim = verif,
+         exact_trim = exact,
+         deviance_trim = deviance_abs) %>%
+  select(-c(verif, exact, deviance_abs, Exp)) %>%
+  summarise_all(.funs = c(mean)) %>%
+  ungroup()
 
 cri_sum_cur <- cri_cur_long %>%
   group_by(u_teamid2) %>%
@@ -192,13 +210,16 @@ cri_sum_cur <- cri_cur_long %>%
          exact_cur = exact,
          deviance_cur = deviance_abs) %>%
   select(-c(verif, exact, deviance_abs, Exp)) %>%
-  summarise_all(.funs = c(mean))
+  summarise_all(.funs = c(mean)) %>%
+  ungroup()
 
-cri_sums <- left_join(cri_sum, cri_sum_cur, by = "u_teamid2")
+cri_sums <- cri_sum %>%
+  left_join(cri_sum_cur, by = "u_teamid2") %>%
+  left_join(cri_sum_trim, by = "u_teamid2")
 
 cri_sums <- cri_sums %>%
   arrange(Exp, u_teamid2) %>%
-  select(u_teamid2, verif, exact, deviance_abs, verif_cur, exact_cur, deviance_cur, Exp) %>%
+  select(u_teamid2, verif, exact, deviance_abs, verif_cur, exact_cur, deviance_cur, verif_trim, exact_trim, deviance_trim, Exp) %>%
   mutate(Team = ifelse(u_teamid2 == 591, 59,
                        ifelse(u_teamid2 == 8101, 81, u_teamid2)))
 
@@ -215,11 +236,10 @@ cri_sums <- cri_sums %>%
 cri_sums[is.na(cri_sums)] <- 0
 ```
 
-## Figure 2. Comparing Replication Outcomes
+## Figure 1
 
-### Part A. Effect-Level
+### Effect-Level Prep
 
-#### Prep Fig2a Data
 ```{r fig2prep, warning = F, message = F}
 fig2 <- cri_long %>%
   select(verif, exact, deviance_abs, Exp1) %>%
@@ -239,8 +259,22 @@ fig2cur <- cri_cur_long %>%
          version = "Curated Results",
          stat = "Verification")
 
+fig2trim <- cri_long_trim %>%
+  select(verif, exact, deviance_abs, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Trimmed Results",
+         stat = "Verification")
+
+
+
+fig2t <- rbind(fig2, fig2trim)
 fig2 <- rbind(fig2, fig2cur)
 
+
+#### This is for raw and curated (OLD)
 fig2[5:8, "verif_fn1"] <- fig2[1:4, "exact_fn1"] # put in long form
 fig2[9:12, "verif_fn1"] <- fig2[1:4, "deviance_abs_fn1"] 
 fig2[5:8, "verif_fn2"] <- fig2[1:4, "exact_fn2"]
@@ -262,62 +296,427 @@ fig2 <- fig2[1:8,]
 fig2$result <- fig2$verif_fn1*100 # put in % scale
 fig2$se <- (fig2$verif_fn2/sqrt(1874))*100 # add standard error in % scale
 fig3$result <- fig3$verif_fn1
-fig3$se <- fig3$verif_fn2/sqrt(1874)
+fig3$se <- fig3$verif_fn2/sqrt(85)
+
+#### This is for raw and trimmed (NEW)
+fig2t[5:8, "verif_fn1"] <- fig2t[1:4, "exact_fn1"] # put in long form
+fig2t[9:12, "verif_fn1"] <- fig2t[1:4, "deviance_abs_fn1"] 
+fig2t[5:8, "verif_fn2"] <- fig2t[1:4, "exact_fn2"]
+fig2t[9:12, "verif_fn2"] <- fig2t[1:4, "deviance_abs_fn2"]
 
 
-rm(fig2cur)
+fig2t[5:8, "stat"] <- "Exact Replication"
+fig2t[9:12, "stat"] <- "Replication Error"
 
-f2colors <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF", "#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
-f2colors1 <- c("#482677FF", "#29AF7FFF", "#2D708EFF", "#95D840FF")
-fig2$result <- round(fig2$result,1)
+fig2t[5:8, "group"] <- fig2t[1:4, "group"]
+fig2t[9:12, "group"] <- fig2t[1:4, "group"]
+
+fig2t[5:8, "version"] <- fig2t[1:4, "version"]
+fig2t[9:12, "version"] <- fig2t[1:4, "version"]
+
+fig3t <- fig2t[9:12,]
+fig2t <- fig2t[1:8,]
+
+fig2t$result <- fig2t$verif_fn1*100 # put in % scale
+fig2t$se <- (fig2t$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3t$result <- fig3t$verif_fn1
+fig3t$se <- fig3t$verif_fn2/sqrt(85) #85 teams
+
+rm(fig2cur, fig2trim)
+```
+
+### Team-Level Prep
+
+```{r fig2b_teamsummaries}
+# RAW
+fig2bZ <- cri_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# CURATED (for tbl1)
+tbl1a <- cri_cur_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# TRIMMED (for tbl1)
+tbl1b <- cri_long_trim %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# Raw collapse team-level scores
+fig2b_c <- fig2bZ %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd)) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Original Results",
+         stat = "Verification")
+  
+  
+
+fig2bcur <- cri_cur_long %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# Curated collapse team-level scores
+fig2bcur_c <- fig2bcur %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Curated Results",
+         stat = "Verification")
+
+fig2btrim <- cri_long_trim %>%
+  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
+  group_by(Exp1,u_teamid2) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
+         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
+         deviance = deviance_abs_fn1
+         ) %>%
+  ungroup()
+
+# Trimmed collapse team-level scores
+fig2btrim_c <- fig2btrim %>%
+  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
+  select(verif, exact, deviance, Exp1) %>%
+  group_by(Exp1) %>%
+  mutate(n = n()) %>%
+  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
+  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
+         version = "Trimmed Results",
+         stat = "Verification")
+
+fig2b <- rbind(fig2b_c, fig2bcur_c)
+fig2bt <- rbind(fig2b_c, fig2btrim_c)
+#rm(fig2b_c, fig2bcur, fig2bcur_c)
+
+fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
+fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
+fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
+fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
+
+
+fig2b[5:8, "stat"] <- "Exact Replication"
+fig2b[9:12, "stat"] <- "Replication Error"
+
+fig2b[5:8, "group"] <- fig2b[1:4, "group"]
+fig2b[9:12, "group"] <- fig2b[1:4, "group"]
+
+fig2b[5:8, "version"] <- fig2b[1:4, "version"]
+fig2b[9:12, "version"] <- fig2b[1:4, "version"]
+
+fig3b <- fig2b[9:12,]
+fig2b <- fig2b[1:8,]
+fig2b$result <- fig2b$verif_fn1*100 # put in % scale
+fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3b$result <- fig3b$verif_fn1
+fig3b$se <- (fig3b$verif_fn2/sqrt(85))
+
+fig2b$result <- round(fig2b$result,1)
+
+fig2bt[5:8, "verif_fn1"] <- fig2bt[1:4, "exact_fn1"] # put in long form
+fig2bt[9:12, "verif_fn1"] <- fig2bt[1:4, "deviance_fn1"] 
+fig2bt[5:8, "verif_fn2"] <- fig2bt[1:4, "exact_fn2"]
+fig2bt[9:12, "verif_fn2"] <- fig2bt[1:4, "deviance_fn2"]
+
+fig2bt[5:8, "stat"] <- "Exact Replication"
+fig2bt[9:12, "stat"] <- "Replication Error"
+
+fig2bt[5:8, "group"] <- fig2bt[1:4, "group"]
+fig2bt[9:12, "group"] <- fig2bt[1:4, "group"]
+
+fig2bt[5:8, "version"] <- fig2bt[1:4, "version"]
+fig2bt[9:12, "version"] <- fig2bt[1:4, "version"]
+
+fig3bt <- fig2bt[9:12,]
+fig2bt <- fig2bt[1:8,]
+fig2bt$result <- fig2bt$verif_fn1*100 # put in % scale
+fig2bt$se <- (fig2bt$verif_fn2/sqrt(1874))*100 # add standard error in % scale
+fig3bt$result <- fig3bt$verif_fn1
+fig3bt$se <- (fig3bt$verif_fn2/sqrt(85))
+
+
+
+fig2bt$result <- round(fig2bt$result,1)
+
 ```
 
 
-#### Produce Fig2a
-```{r fig2out}
-agg_png(here::here("results","Fig2a.png"), height = 700, width = 650, res = 144)
-fig2a <- ggplot(data = fig2) +
-  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors,
-                    labels = c(" \nCURATED\n   Opaque\n   Group\n ",
-                               " \nCURATED\n   Transparent\n   Group\n ",
-                               " \nORIGINAL\n   Opaque\n   Group\n ",
-                               " \nORIGINAL\n   Transparent\n   Group\n "),
+#### Raw Effect-Level Results
+```{r fig2new}
+f2colors3 <- c("#2D708EFF", "#95D840FF") 
+
+agg_png(filename = here::here("results", "Fig1a.png"), res = 72, height = 400, width = 400)
+fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
+  geom_col(aes(y = result, x = c(2,3,5,6), fill = interaction(group, version)), size = 3) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(2.58*se), ymax = result+(2.58*se), x = c(2,3,5,6),), color = "grey30", width = 0.5) +
+  scale_x_reverse() +
+  scale_fill_manual(values = f2colors3,
                     guide = guide_legend(reverse = TRUE)) +
-  geom_vline(aes(xintercept = 4.75)) +
-  #annotate("text", x = 2.5, y = 34, label = "Verification\n(same sign)", angle = 90) +
-    geom_richtext(aes(x = 2.5, y = 32, label = "VERIFICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman"
-                ) +
-  geom_richtext(aes(x = 2.5, y = 34, label = "<p style = 'font-size:10px; text-align:justify'><i>(same sign)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  geom_richtext(aes(x = 7, y = 33, label = "EXACT<br>REPLICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman") +
-  geom_richtext(aes(x = 7, y = 37, label = "<p style = 'font-size:10px; text-align:justify'><i>(within 0.01)</i></p>"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  geom_text(aes(y = result - c(7,7,7,7,7,-7,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2$result), family = "Times New Roman") +
+  geom_text(aes(y = -7, x = c(2,3,5,6),                 
+                label = c(paste0(round(fig2t$result[1],1), "%"),
+                          paste0(round(fig2t$result[2],1), "%"),
+                          paste0(round(fig2t$result[5],1), "%"),
+                          paste0(round(fig2t$result[6],1), "%"))), 
+            family = "Times New Roman",
+            #hjust = 1,
+            size = 5) + 
+  theme_classic() +
   ylab("Percent of Replicated Effects") +
   xlab(" ") +
-  labs(title = "A. Effect-Level Results, N = 3,742") +
-  coord_flip(ylim = c(25,100), clip = "on") +
+  #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
+  coord_flip(xlim = c(6.5,1), ylim = c(-12,100),  clip = "on") +
   scale_x_reverse() +
+  annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
+           label = c("VERIFICATION (same sign)", "EXACT REPLICATION (within 0.01)"), 
+           hjust = 0, 
+           size = 6, 
+           fontface = "italic",
+           family = "Times New Roman",
+           color = "gray30") +
+  annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 1), 
+           label = c("Transparent Group (TG)", "Opaque Group (OG)", "TG", "OG"),
+           hjust = 0, 
+           family = "Times New Roman",
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman", size = 14),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
+        legend.title = element_blank(),
+        legend.position = "none",
+        plot.title = element_blank())
+fig2aN
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1a.png"))
+```
+
+#### Raw Team-Level Results
+```{r fig2newb}
+# data had se's calculated wrong, fix here
+fig2bt$se[c(1,2)] = (fig2bt$verif_fn2[c(1,2)]*100)/sqrt(fig2bt$n_fn1[c(1,2)])
+fig2bt$se[c(5,6)] = (fig2bt$exact_fn2[c(1,2)]*100)/sqrt(fig2bt$n_fn1[c(1,2)])
+
+agg_png(filename = here::here("results", "Fig1b.png"), res = 72, height = 400, width = 400)
+fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
+  geom_col(aes(y = result, x = c(2,3,5,6), fill = interaction(group, version)), size = 3) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = result-(1.96*se), ymax = result+(1.96*se), x = c(2,3,5,6),), color = "grey30", width = 0.5) +
+  scale_x_reverse() +
+  scale_fill_manual(values = f2colors3,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = -7, x = c(2,3,5,6),                 
+                label = c(paste0(round(fig2bt$result[1],1), "%"),
+                          paste0(round(fig2bt$result[2],1), "%"),
+                          paste0(round(fig2bt$result[5],1), "%"),
+                          paste0(round(fig2bt$result[6],1), "%"))), 
+            family = "Times New Roman",
+            #hjust = 1, 
+            size = 5) + 
+  theme_classic() +
+  ylab("Percent of Teams") +
+  xlab(" ") +
+  #labs(title = "B. Raw Team-Level Results, N = 85") +
+  coord_flip(xlim = c(6.5,1), ylim = c(-12,100),  clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
+           label = c("VERIFICATION (95%+ of team results)", "EXACT REPLICATION (95%+ of team results)"), 
+           hjust = 0, 
+           size = 6, 
+           fontface = "italic", 
+           family = "Times New Roman",
+           color = "gray30") +
+  annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 21), 
+           label = c("TG", "OG", "TG", "OG"),
+           hjust = 0, 
+           size = 5) +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
+        axis.text.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
         legend.title = element_blank(),
-        plot.title = element_text(hjust = 0))
-fig2a
+        legend.position = "none",
+        plot.title = element_blank())
+
+fig2bN
 dev.off()
 
-knitr::include_graphics(here::here("results","Fig2a.png"))
+knitr::include_graphics(here::here("results", "Fig1b.png"))
+
 ```
-### Part B. ICC
+#### Deviance Raw Effect-Level
+
+```{r fig2newc}
+f2colors32 <- c("#2D708EFF", "#95D840FF") 
+
+agg_png(here::here("results", "Fig1c.png"), res = 72, height = 225, width = 400)
+
+fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = deviance_abs_fn1-(2.58*(deviance_abs_fn2/sqrt(n_fn1))), ymax = deviance_abs_fn1+(2.58*(deviance_abs_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
+  geom_point(aes(y = deviance_abs_fn1, x = c(2,3), color = group, size = 5)) +
+  scale_x_reverse() +
+  scale_color_manual(values = f2colors32,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 0.1, x = c(2,3),                 
+                label = round(fig3t$result[c(1,2)],3)), 
+            family = "Times New Roman",
+            hjust = 0,
+            size = 5) + 
+  theme_classic() +
+  ylab("Average of Absolute Differences in Odds-Ratios") +
+  xlab(" ") +
+  #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
+  coord_flip(xlim = c(3.5,1), 
+             ylim = c(-0.005,0.09),  
+             clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = 1.5, 
+           y = -0.005, 
+           label = c("REPLICATION ERROR"), 
+           hjust = 0, 
+           size = 6, 
+           fontface = "italic",
+           family = "Times New Roman",
+           color = "gray30") +
+  annotate("text", x = c(2,3), y = c(0.00,0.00), 
+           label = c("TG", "OG"),
+           family = "Times New Roman",
+           hjust = 0, 
+           size = 5) +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
+        legend.title = element_blank(),
+        legend.position = "none",
+        )
+fig2aN_dev
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1c.png"))
+```
+#### Deviance Raw Team-Level
+
+```{r fig2newd}
+f2colors32 <- c("#2D708EFF", "#95D840FF")
+
+agg_png(here::here("results", "Fig1d.png"), res = 72, height = 225, width = 400)
+fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
+  coord_flip() +
+  geom_errorbar(aes(ymin = deviance_fn1-(1.96*(deviance_fn2/sqrt(n_fn1))), ymax = deviance_fn1+(1.96*(deviance_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
+  geom_point(aes(y = deviance_fn1, x = c(2,3), color = group, size = 5)) +
+  scale_x_reverse() +
+  scale_color_manual(values = f2colors32,
+                    guide = guide_legend(reverse = TRUE)) +
+  geom_text(aes(y = 0.1, x = c(2,3),                 
+                label = round(fig3bt$result[c(1,2)],3)), 
+            family = "Times New Roman",
+            hjust = 0,
+            size = 5) + 
+  theme_classic() +
+  ylab("Average of the Average Absolute Difference by Team") +
+  xlab(" ") +
+  coord_flip(xlim = c(3.5,1), 
+             ylim = c(-0.005,0.09),  
+             clip = "on") +
+  scale_x_reverse() +
+  annotate("text", x = 1.5, 
+           y = -0.005, 
+           label = c("REPLICATION ERROR"), 
+           hjust = 0, 
+           size = 6, 
+           fontface = "italic",
+           family = "Times New Roman",
+           color = "gray30") +
+  annotate("text", x = c(2,3), y = c(0.001,0.001), 
+           label = c("TG", "OG"),
+           hjust = 0, 
+           size = 5,
+           family = "Times New Roman") +
+  theme_classic() +
+  theme(text = element_text(family = "Times New Roman"),
+        axis.line.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
+        legend.title = element_blank(),
+        legend.position = "none",
+        #plot.title = element_text(hjust = 0, size = 18)
+        )
+fig2bN_dev
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1d.png"))
+```
+
+
+#### Bundled
+
+Paste individual graphs into Word in a Table to optimize presentation.
+
+```{r fig2newbuild}
+agg_png(here::here("results","Fig1_New.png"), res = 144, height = 800, width = 1500)
+
+ggarrange(fig2aN, fig2bN, fig2aN_dev, fig2bN_dev, nrow = 2, ncol = 2, heights = c(2,1))
+
+dev.off()
+
+knitr::include_graphics(here::here("results","Fig1_New.png"))
+```
+
+
+
+#### Part B. ICC
 
 ```{r fig2b_icc}
 # calculate ICC/rho
@@ -390,260 +789,45 @@ icc_out <- rbind(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 rm(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 ```
 
-### Part C. Team Level
-
-#### Prep Fig2b Data
-```{r fig2b_teamsummaries}
-fig2b <- cri_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = deviance_abs_fn1
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2b_c <- fig2b %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd)) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Original Results",
-         stat = "Verification")
-  
-  
-
-fig2bcur <- cri_cur_long %>%
-  select(verif, exact, deviance_abs, Exp1, u_teamid2) %>%
-  group_by(Exp1,u_teamid2) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(verif = ifelse(verif_fn1 >= .95, 1, 0), # if 95% or more of team results are verif then team-level verification = 1
-         exact = ifelse(exact_fn1 >= .95, 1, 0), # same criteria as verif
-         deviance = deviance_abs_fn1
-         ) %>%
-  ungroup()
-
-# collapse team-level scores
-fig2bcur_c <- fig2bcur %>%
-  subset(u_teamid2 != 591 & u_teamid2 != 8101) %>%
-  select(verif, exact, deviance, Exp1) %>%
-  group_by(Exp1) %>%
-  mutate(n = n()) %>%
-  summarise_all(.funs = c(mean,sd), na.rm = T) %>%
-  mutate(group = ifelse(Exp1 == 1, "Transparent Group", "Opaque Group"),
-         version = "Curated Results",
-         stat = "Verification")
-
-fig2b <- rbind(fig2b_c, fig2bcur_c)
-#rm(fig2b_c, fig2bcur, fig2bcur_c)
-
-fig2b[5:8, "verif_fn1"] <- fig2b[1:4, "exact_fn1"] # put in long form
-fig2b[9:12, "verif_fn1"] <- fig2b[1:4, "deviance_fn1"] 
-fig2b[5:8, "verif_fn2"] <- fig2b[1:4, "exact_fn2"]
-fig2b[9:12, "verif_fn2"] <- fig2b[1:4, "deviance_fn2"]
-
-
-fig2b[5:8, "stat"] <- "Exact Replication"
-fig2b[9:12, "stat"] <- "Replication Error"
-
-fig2b[5:8, "group"] <- fig2b[1:4, "group"]
-fig2b[9:12, "group"] <- fig2b[1:4, "group"]
-
-fig2b[5:8, "version"] <- fig2b[1:4, "version"]
-fig2b[9:12, "version"] <- fig2b[1:4, "version"]
-
-fig3b <- fig2b[9:12,]
-fig2b <- fig2b[1:8,]
-fig2b$result <- fig2b$verif_fn1*100 # put in % scale
-fig2b$se <- (fig2b$verif_fn2/sqrt(1874))*100 # add standard error in % scale
-fig3b$result <- fig3b$verif_fn1
-fig3b$se <- (fig3b$verif_fn2/sqrt(1874))
-
-
-
-fig2b$result <- round(fig2b$result,1)
-
-```
-
-#### Produce Fig2b
-
-```{r fig2bout, warning = F, message = F}
-agg_png(here::here("results","Fig2b.png"), height = 700, width = 475, res = 144)
-fig2bb <- ggplot(data = fig2b) +
-  geom_col(aes(y = result, x = c(1,2,3,4,5.5,6.5,7.5,8.5), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4,5.5,6.5,7.5,8.5),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors) +
-  geom_vline(aes(xintercept = 4.75)) +
-  geom_richtext(aes(x = 2.5, y = 28, label = "VERIFICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman"
-                ) +
-  geom_richtext(aes(x = 2.5, y = 32.5, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  geom_richtext(aes(x = 6.9, y = 32, label = "EXACT<br>REPLICATION<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman") +
-  geom_richtext(aes(x = 6.9, y = 38, label = "<p style = 'font-size:10px; text-align:justify'><i>(95%+ of within</i><br><i>team effects</i>)"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  
-  # add ICC to plot
-  # title
-  annotate("text", x = 0.7, y = 92, parse = T, label = expression(paste("Between ", sigma^{2})), size = 3, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 1, y = 92, label = paste0(round(icc_out$percent[1],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 2, y = 92, label = paste0(round(icc_out$percent[2],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 3, y = 92, label = paste0(round(icc_out$percent[3],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 4, y = 92, label = paste0(round(icc_out$percent[4],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 5.5, y = 92, label = paste0(round(icc_out$percent[5],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 6.5, y = 92, label = paste0(round(icc_out$percent[6],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 7.5, y = 92, label = paste0(round(icc_out$percent[7],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 8.5, y = 92, label = paste0(round(icc_out$percent[8],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  # add percentages
-  geom_text(aes(y = result - c(7,7,7,7,7,-6,7,-7), x = c(1,2,3,4,5.5,6.5,7.5,8.5), label = fig2b$result), family = "Times New Roman") +
-  ylab("Percent of Teams") +
-  xlab(" ") +
-  labs(title = "B. Team-Level Results, N = 85") +
-  coord_flip(ylim = c(5,100), clip = "on") +
-  scale_x_reverse() +
-  theme_classic() +
-  theme(text = element_text(family = "Times New Roman"),
-        axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
-        legend.position = "none",
-        plot.title = element_text(hjust = 0))
-fig2bb
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2b.png"))
-```
-### Figure 2 Combined
-
-This chunk is no longer used because the ggarrange package doesn't deal with Times New Roman very well.
-
-```{r fig2final, eval = F}
-agg_png(here::here("results","Fig2.png"), width = 1300, height = 800, res = 144)
-ggarrange(fig2a,fig2bb, ncol = 2, nrow = 1, widths = c(1.4,1))
-dev.off()
-
-knitr::include_graphics(here::here("results", "Fig2.png"))
-```
-
-### Fig 2C Effect-Level
-
-```{r ddeviance_fig2effect, warning = F, message = F}
-agg_png(here::here("results","Fig2c1.png"), height = 350, width = 475, res = 144)
-
-fig2c1 <- ggplot(data = fig3) +
-  geom_col(aes(y = result, x = c(1,2,3,4), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors1,
-                    guide = guide_legend(reverse = TRUE)) +
-    geom_richtext(aes(x = 2.5, y = 0.04, label = "REPLICATION<br>ERROR<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman"
-                ) +
-  geom_richtext(aes(x = 2.5, y = 0.044, label = "<p style = 'font-size:10px; text-align:justify'><i>(abs. difference)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  geom_text(aes(y = result - c(0.007,0.01,-0.007,0.007), x = c(1,2,3,4), label = round(fig3$result,3)), family = "Times New Roman") +
-  ylab("Absolute Difference from Original Effect") +
-  xlab(" ") +
-  coord_flip(ylim = c(0.005,0.08), clip = "on") +
-  scale_x_reverse() +
-  theme_classic() +
-  theme(text = element_text(family = "Times New Roman"),
-        axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
-        legend.position = "none",
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0))
-fig2c1
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2c1.png"))
-```
-
-
-### Fig 2C Team-Level
-
-```{r deviance_fig2, warning = F, message = F}
-agg_png(here::here("results","Fig2c2.png"), height = 350, width = 475, res = 144)
-fig2c2 <- ggplot(data = fig3b) +
-  geom_col(aes(y = result, x = c(1,2,3,4), fill = interaction(group, version))) +
-  geom_errorbar(aes(ymin = result-se, ymax = result+se, x = c(1,2,3,4),), color = "grey50", width = 0.5) +
-  scale_fill_manual(values = f2colors1,
-                    guide = guide_legend(reverse = TRUE)) +
-    geom_richtext(aes(x = 2.5, y = 0.04, label = "REPLICATION<br>ERROR<br>"), 
-                angle = 90, 
-                label.padding = unit(8, "pt"), family = "Times New Roman"
-                ) +
-  geom_richtext(aes(x = 2.5, y = 0.045, label = "<p style = 'font-size:10px; text-align:justify'><i>(between team avg.)<i></p>"), 
-                angle = 90, fill = NA, label.color = NA, family = "Times New Roman") +
-  geom_text(aes(y = result - c(0.007,0.012,-0.007,0.0085), x = c(1,2,3,4), label = round(fig3b$result,3)), family = "Times New Roman") +
-  ylab("Average of Team-Level Error") +
-  xlab(" ") +
-  coord_flip(ylim = c(0.005,0.09), clip = "on") +
-  scale_x_reverse() +
-
-  # add ICC to plot
-  annotate("text", x = 1, y = 0.085, label = paste0(round(icc_out$percent[9],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 2, y = 0.085, label = paste0(round(icc_out$percent[10],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 3, y = 0.085, label = paste0(round(icc_out$percent[11],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  annotate("text", x = 4, y = 0.085, label = paste0(round(icc_out$percent[12],0),"%"), size = 3, hjust = 0, color = "grey20", family = "Times New Roman") +
-  
-  theme_classic() +
-  theme(text = element_text(family = "Times New Roman"),
-        axis.line.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 11),
-        legend.position = "none",
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0))
- 
-fig2c2
-dev.off()
-
-knitr::include_graphics(here::here("results","Fig2c2.png"))
-```
-
 
 ## Table 1
 
 ### Setup
 
 ```{r table2, message = F, warning = F}
-cri_team <- readRDS(here::here("data","cri_team.RDS"))
-
 # start with descriptive table
 
-desc <- as.data.frame(matrix(nrow = 31, ncol = 8))
+desc <- as.data.frame(matrix(nrow = 38, ncol = 11))
 
-desc[1,] <- c("","","Team-Level","","","Effect-Level","","")
+desc[1,] <- c("","","Effect-Level","","","Team-Level","","","Team-Level Dichotomous","","")
 
-desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Transparent","Opaque", "Pooled")
+desc[2,] <- c("Variables","Measurement","Transparent","Opaque", "Pooled", "Transparent","Opaque", "Pooled", "TG", "OG", "Pooled")
 
-desc[,1] <- c("", "Variables","Cases", "Raw Replication Results", "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Curated Replication Results", "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Independent Variables", "Stata", "SD", "Sociology Degree","SD", "Stats-Skill","SD", "Difficulty","SD", "Team Size", "SD","Qualitative Categories", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
+desc[,1] <- c("", "Variables","Raw Replication Results", "Cases",  "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Trimmed Replication Results", "Cases", "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Curated Replication Results", "Cases",  "Verification", "Exact Verification", "Deviance", "Deviance, SD", "Independent Variables", "Stata", "SD", "Sociology Degree","SD", "Stats-Skill","SD", "Difficulty","SD", "Team Size", "SD","Qualitative Categories", "Mistake", "Procedural", "Mistake-Procedural", "Missing Component", "Interpretational", "Questionable Methods Competencies")
 
-desc[,2] <- c("", "Measurement","", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD","", "other software =0","", "other degrees =0","","4-question scale, stdzd,","","1-question, stdzd.","","1-3 persons","", "", "see text", "see text", "see text", "see text", "see text", "see text")
+desc[,2] <- c("", "Measurement","", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD", "", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD", "", "", "same direction =1","identical at two decimals =1", "absolute difference with original","team-level SD","", "other software =0","", "other degrees =0","","4-question scale, stdzd,","","1-question, stdzd.","","1-3 persons","", "", "see text", "see text", "see text", "see text", "see text", "see text")
+```
 
+### Effect-Level Scores
 
+```{r table1b, message = F, warning = F}
+###### EFFECT LEVEL ########
 # fill in transparent group results
 
-desc[3:31,6] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])),"", 
+desc[3:38,3] <- c("",
+                  sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])), 
                   mean(cri_long$verif[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$exact[cri_long$Exp1 == 1], na.rm = T),
                   mean(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
                   sd(cri_long$deviance_abs[cri_long$Exp1 == 1], na.rm = T),
                   "",
+                  sum(!is.na(cri_long_trim$verif[cri_long_trim$Exp1 == 1])),
+                  mean(cri_long_trim$verif[cri_long_trim$Exp1 == 1], na.rm = T),
+                  mean(cri_long_trim$exact[cri_long_trim$Exp1 == 1], na.rm = T),
+                  mean(cri_long_trim$deviance_abs[cri_long_trim$Exp1 == 1], na.rm = T),
+                  sd(cri_long_trim$deviance_abs[cri_long_trim$Exp1 == 1], na.rm = T),
+                  "",
+                  sum(!is.na(cri_cur_long$verif[cri_cur_long$Exp1 == 1])),
                   mean(cri_cur_long$verif[cri_cur_long$Exp1 == 1], na.rm = T),
                   mean(cri_cur_long$exact[cri_cur_long$Exp1 == 1], na.rm = T),
                   mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 1], na.rm = T),
@@ -670,12 +854,20 @@ desc[3:31,6] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 1])),"",
 
 # opaque
 
-desc[3:31,7] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])),"", 
+desc[3:38,4] <- c("",
+                  sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])), 
                   mean(cri_long$verif[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$exact[cri_long$Exp1 == 0], na.rm = T),
                   mean(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
                   sd(cri_long$deviance_abs[cri_long$Exp1 == 0], na.rm = T),
                   "",
+                  sum(!is.na(cri_long_trim$verif[cri_long_trim$Exp1 == 0])),
+                  mean(cri_long_trim$verif[cri_long_trim$Exp1 == 0], na.rm = T),
+                  mean(cri_long_trim$exact[cri_long_trim$Exp1 == 0], na.rm = T),
+                  mean(cri_long_trim$deviance_abs[cri_long_trim$Exp1 == 0], na.rm = T),
+                  sd(cri_long_trim$deviance_abs[cri_long_trim$Exp1 == 0], na.rm = T),
+                  "",
+                  sum(!is.na(cri_cur_long$verif[cri_cur_long$Exp1 == 0])),
                   mean(cri_cur_long$verif[cri_cur_long$Exp1 == 0], na.rm = T),
                   mean(cri_cur_long$exact[cri_cur_long$Exp1 == 0], na.rm = T),
                   mean(cri_cur_long$deviance_abs[cri_cur_long$Exp1 == 0], na.rm = T),
@@ -702,12 +894,20 @@ desc[3:31,7] <- c(sum(!is.na(cri_long$verif[cri_long$Exp1 == 0])),"",
 
 # pooled
 
-desc[3:31,8] <- c(sum(!is.na(cri_long$verif)),"", 
+desc[3:38,5] <- c("",
+                  sum(!is.na(cri_long$verif)), 
                   mean(cri_long$verif, na.rm = T),
                   mean(cri_long$exact, na.rm = T),
                   mean(cri_long$deviance_abs, na.rm = T),
                   sd(cri_long$deviance_abs, na.rm = T),
                   "",
+                  sum(!is.na(cri_long_trim$verif)),
+                  mean(cri_long_trim$verif, na.rm = T),
+                  mean(cri_long_trim$exact, na.rm = T),
+                  mean(cri_long_trim$deviance_abs, na.rm = T),
+                  sd(cri_long_trim$deviance_abs, na.rm = T),
+                  "",
+                  sum(!is.na(cri_cur_long$verif)),
                   mean(cri_cur_long$verif, na.rm = T),
                   mean(cri_cur_long$exact, na.rm = T),
                   mean(cri_cur_long$deviance_abs, na.rm = T),
@@ -724,6 +924,8 @@ desc[3:31,8] <- c(sum(!is.na(cri_long$verif)),"",
                   mean(cri_team$difficult, na.rm = T),
                   sd(cri_team$difficult, na.rm = T),
                   "",
+                  
+                  # Table 2 values here
                   length(unique(cri_sums$Team[cri_sums$Mistake != 0]))/85,
                   length(unique(cri_sums$Team[cri_sums$Procedural != 0]))/85,
                   length(unique(cri_sums$Team[cri_sums$Mistake_Procedural != 0]))/85,
@@ -731,6 +933,13 @@ desc[3:31,8] <- c(sum(!is.na(cri_long$verif)),"",
                   length(unique(cri_sums$Team[cri_sums$Interpretational != 0]))/85,
                   length(unique(cri_sums$Team[cri_sums$Questionable_Skills != 0]))/85
                   )
+```
+
+### Team-Level Scores
+
+```{r table1c, message = F, warning = F}
+###### TEAM LEVEL ########
+
 cri_long_pool <- cri_long %>%
     ungroup() %>%
   group_by(u_teamid2) %>%
@@ -751,6 +960,35 @@ cri_long_pool_t <- cri_long %>%
   summarise_all(.funs = c("mean", "sd"))
 
 cri_long_pool_o <- cri_long %>%
+    ungroup() %>%
+  subset(Exp1 == 0) %>%
+  group_by(u_teamid2) %>%
+  select(verif, exact, deviance_abs) %>%
+  summarise_all(.funs = c("mean", "sd")) %>%
+  ungroup() %>%
+  select(-u_teamid2) %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+cri_long_trim_pool <- cri_long_trim %>%
+    ungroup() %>%
+  group_by(u_teamid2) %>%
+  select(verif, exact, deviance_abs) %>%
+  summarise_all(.funs = c("mean", "sd")) %>%
+  ungroup() %>%
+  select(-u_teamid2) %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+cri_long_trim_pool_t <- cri_long_trim %>%
+    ungroup() %>%
+  subset(Exp1 == 1) %>%
+  group_by(u_teamid2) %>%
+  select(verif, exact, deviance_abs) %>%
+  summarise_all(.funs = c("mean", "sd")) %>%
+  ungroup() %>%
+  select(-u_teamid2) %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+cri_long_trim_pool_o <- cri_long_trim %>%
     ungroup() %>%
   subset(Exp1 == 0) %>%
   group_by(u_teamid2) %>%
@@ -791,18 +1029,115 @@ cri_long_cur_pool_o <- cri_cur_long %>%
 
 # team-level
 
-desc[3,3:5] <- c(39,46,85)
-desc[5:8,5] <- as.numeric(c(t(cri_long_pool[1,1:3]),cri_long_pool[1,9]))
-desc[5:8,3] <- as.numeric(c(t(cri_long_pool_t[1,1:3]),cri_long_pool_t[1,9]))
-desc[5:8,4] <- as.numeric(c(t(cri_long_pool_o[1,1:3]),cri_long_pool_o[1,9]))
+desc[4,6:8] <- c(39,46,85)
+desc[5:8,6] <- as.numeric(c(t(cri_long_pool_t[1,1:3]),cri_long_pool_t[1,9]))
+desc[5:8,7] <- as.numeric(c(t(cri_long_pool_o[1,1:3]),cri_long_pool_o[1,9]))
+desc[5:8,8] <- as.numeric(c(t(cri_long_pool[1,1:3]),cri_long_pool[1,9]))
 
-desc[10:13,5] <- as.numeric(c(t(cri_long_cur_pool[1,1:3]),cri_long_cur_pool[1,9]))
-desc[10:13,3] <- as.numeric(c(t(cri_long_cur_pool_t[1,1:3]),cri_long_cur_pool_t[1,9]))
-desc[10:13,4] <- as.numeric(c(t(cri_long_cur_pool_o[1,1:3]),cri_long_cur_pool_o[1,9]))
+desc[10,6:8] <- c(37,44,81)
+desc[11:14,6] <- as.numeric(c(t(cri_long_trim_pool_t[1,1:3]),cri_long_trim_pool_t[1,9]))
+desc[11:14,7] <- as.numeric(c(t(cri_long_trim_pool_o[1,1:3]),cri_long_trim_pool_o[1,9]))
+desc[11:14,8] <- as.numeric(c(t(cri_long_trim_pool[1,1:3]),cri_long_trim_pool[1,9]))
 
+desc[16,6:8] <- c(39,46,85)
+desc[17:20,6] <- as.numeric(c(t(cri_long_cur_pool_t[1,1:3]),cri_long_cur_pool_t[1,9]))
+desc[17:20,7] <- as.numeric(c(t(cri_long_cur_pool_o[1,1:3]),cri_long_cur_pool_o[1,9]))
+desc[17:20,8] <- as.numeric(c(t(cri_long_cur_pool[1,1:3]),cri_long_cur_pool[1,9]))
+```
+
+### Team-Level Dichotomous
+
+```{r table1d}
+###### TEAM LEVEL ########
+
+tbl1_1 <- fig2bZ %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_1_tg <- fig2bZ %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_1_og <- fig2bZ %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 0) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+# CURATED
+tbl1_2 <- tbl1a %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_2_tg <- tbl1a %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_2_og <- tbl1a %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 0) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+# TRIMMED
+tbl1_3 <- tbl1b %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_3_tg <- tbl1b %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 1) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+tbl1_3_og <- tbl1b %>%
+  mutate(deviance_abs = deviance_abs_fn1) %>%
+  subset(Exp1 == 0) %>%
+  select(verif, exact, deviance_abs) %>%
+  ungroup() %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+# team-level
+
+desc[4,9:11] <- c(39,46,85)
+desc[5:8,11] <- as.numeric(c(t(tbl1_1[1,1:3]),tbl1_1[1,6]))
+desc[5:8,9] <- as.numeric(c(t(tbl1_1_tg[1,1:3]),tbl1_1_tg[1,6]))
+desc[5:8,10] <- as.numeric(c(t(tbl1_1_og[1,1:3]),tbl1_1_og[1,6]))
+
+desc[10,9:11] <- c(37,44,81)
+desc[11:14,11] <- as.numeric(c(t(tbl1_3[1,1:3]),tbl1_3[1,6]))
+desc[11:14,9] <- as.numeric(c(t(tbl1_3_tg[1,1:3]),tbl1_3_tg[1,6]))
+desc[11:14,10] <- as.numeric(c(t(tbl1_3_og[1,1:3]),tbl1_3_og[1,6]))
+
+desc[16,9:11] <- c(39,46,85)
+desc[17:20,11] <- as.numeric(c(t(tbl1_2[1,1:3]),tbl1_2[1,6]))
+desc[17:20,9] <- as.numeric(c(t(tbl1_2_tg[1,1:3]),tbl1_2_tg[1,6]))
+desc[17:20,10] <- as.numeric(c(t(tbl1_2_og[1,1:3]),tbl1_2_og[1,6]))
+```
+
+
+
+```{r table1e, message = F, warning = F}
 write.csv(desc, file = here::here("results","Tbl1.csv"), row.names = F)
 
 ```
+
+
 
 ## Colophon
 
