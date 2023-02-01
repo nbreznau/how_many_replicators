@@ -5,5 +5,4 @@
 /surveyprep/notforpublicuse/**
 renv/
 .Rprofile
-data/data.Rdata
-data/cri_team.RDS
+
