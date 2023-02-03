@@ -571,7 +571,8 @@ fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
   annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 21), 
            label = c("TG", "OG", "TG", "OG"),
            hjust = 0, 
-           size = 5) +
+           size = 5,
+           family = "Times New Roman") +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
