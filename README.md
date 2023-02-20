@@ -19,6 +19,7 @@ This paper reports findings from a crowdsourced replication with two randomized 
 The workflow is captured in the folder 'codes' with Rmd files that should be run in order starting with 00 through 02. These files have been run and knitted into html output which can be read in any browser. More information about the original data files are available in each code file. To see these open the [code](../code/) folder or follow the following links:
 
 | File | Description |
+| ----------- | ----------- |
 | [00_Qualitative_Coding.Rmd](../code/00_Qualitative_Coding.html) | Extracts and counts qualitative categorizations of error by team |
 | [01_Data_Prep.Rmd](../code/01_Data_Prep.html) | Prepares and combines participant survey results and replicated numerical effects by team |
 | [02_Analysis.Rmd](../code/02_Analysis.html) | Correlations and regressions predicting our three reliability measures and two qualitative categories |
