@@ -451,11 +451,12 @@ a set of results where the two most deviant verification result teams
 were excluded from both groups (roughly 5% of each group). This carries
 the logic that teams that were unmotivated, unskilled or made major
 mistakes would probably not get their results published in a journal or
-in a study if they were subject to peer review, editor review or if seen
-by the original study’s authors. It also reflects that in three teams in
-the study had questionable methods competencies (also just under 5% of
-the total study). This leads to two teams being dropped from each group
-to have a fair/equal distribution of trimming by group</p>
+otherwise disseminated if they were subject to peer review,scrutiny by
+the scientific community, editor review or if seen by the original
+study’s authors. It also reflects that three teams in the study had
+questionable methods competencies (also just under 5% of the total
+study). This leads to two teams being dropped from each group to have a
+fair/equal distribution of trimming by group.</p>
 <pre class="r"><code># find most distant verifications
 cri_team_trim &lt;- cri_team %&gt;%
   group_by(exp) %&gt;%
@@ -2600,10 +2601,10 @@ cri_team_proc &lt;- cri_team %&gt;%
 
 MIS_1 &lt;- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake)
 PRO_1 &lt;- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc)
-MIS_2 &lt;- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 1))
-PRO_2 &lt;- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 1))
-MIS_3 &lt;- lm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 0))
-PRO_3 &lt;- lm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 0))</code></pre>
+MIS_2 &lt;- lm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 1))
+PRO_2 &lt;- lm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 1))
+MIS_3 &lt;- lm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 0))
+PRO_3 &lt;- lm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 0))</code></pre>
 <pre class="r"><code>tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = &quot;stars&quot;, p.threshold = c(0.05, 0.01, 0.001))</code></pre>
 <table style="border-collapse:collapse; border:none;">
 <tr>
@@ -3036,36 +3037,16 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 <pre class="r"><code># reviewer asked us to re-run these as logits
 MIS_1L &lt;- glm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = cri_team_mistake, family = &#39;binomial&#39;)
 PRO_1L &lt;- glm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = cri_team_proc, family = &#39;binomial&#39;)
-MIS_2L &lt;- glm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 1), family = &#39;binomial&#39;)
-PRO_2L &lt;- glm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 1), family = &#39;binomial&#39;)</code></pre>
+MIS_2L &lt;- glm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 1), family = &#39;binomial&#39;)
+PRO_2L &lt;- glm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 1), family = &#39;binomial&#39;)</code></pre>
 <pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
 <pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre class="r"><code>MIS_3L &lt;- glm(Mistake_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_mistake, exp == 0), family = &#39;binomial&#39;)
-PRO_3L &lt;- glm(Procedural_DV ~ stata + stat_skill + difficult + exp, data = subset(cri_team_proc, exp == 0), family = &#39;binomial&#39;)</code></pre>
-<pre class="r"><code>tab_model(MIS_1L, MIS_2L, MIS_3L, PRO_1L, PRO_2L, PRO_3L, show.se = F, show.ci = F, p.style = &quot;stars&quot;, p.threshold = c(0.05, 0.01, 0.001))</code></pre>
-<pre><code>## Warning: Model matrix is rank deficient. Parameters `exp` were not estimable.
-
-## Warning: Model matrix is rank deficient. Parameters `exp` were not estimable.
-
-## Warning: Model matrix is rank deficient. Parameters `exp` were not estimable.</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre><code>## Warning: Model matrix is rank deficient. Parameters `exp` were not estimable.</code></pre>
+<pre class="r"><code>MIS_3L &lt;- glm(Mistake_DV ~ stata + stat_skill + difficult, data = subset(cri_team_mistake, exp == 0), family = &#39;binomial&#39;)
+PRO_3L &lt;- glm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_team_proc, exp == 0), family = &#39;binomial&#39;)</code></pre>
+<p>Note that there are only 5 outcomes of 1 in Procedural for the TG.
+This seems to cause convergence problems when specifying a binomial
+function. So this is left out of the regression table.</p>
+<pre class="r"><code>tab_model(MIS_1L, MIS_2L, MIS_3L, PRO_1L, PRO_3L, show.se = F, show.ci = F, p.style = &quot;stars&quot;, p.threshold = c(0.05, 0.01, 0.001))</code></pre>
 <table style="border-collapse:collapse; border:none;">
 <tr>
 <th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
@@ -3079,9 +3060,6 @@ Mistake_DV
 </th>
 <th colspan="1" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
 Mistake_DV
-</th>
-<th colspan="1" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
-Procedural_DV
 </th>
 <th colspan="1" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
 Procedural_DV
@@ -3109,9 +3087,6 @@ Odds Ratios
 <td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
 Odds Ratios
 </td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col7">
-Odds Ratios
-</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
@@ -3130,9 +3105,6 @@ Odds Ratios
 2.13 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.00 <sup></sup>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
 1.04 <sup></sup>
 </td>
 </tr>
@@ -3153,9 +3125,6 @@ stata
 0.68 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.00 <sup></sup>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
 1.88 <sup></sup>
 </td>
 </tr>
@@ -3176,9 +3145,6 @@ stat skill
 1.31 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-1134635143444303086006602242404048628.00 <sup></sup>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
 0.93 <sup></sup>
 </td>
 </tr>
@@ -3199,10 +3165,6 @@ difficult
 3.89 <sup>*</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-3534051556438026738040604426804202486864426262020846468068222488068444664004084488282288002460424046020084420088004684280080480822864028202622622642426.00
-<sup></sup>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
 2.89 <sup></sup>
 </td>
 </tr>
@@ -3222,8 +3184,6 @@ exp
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
-</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
@@ -3240,9 +3200,6 @@ Observations
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="1">
 72
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="1">
-34
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="1">
 38
@@ -3265,20 +3222,25 @@ R<sup>2</sup> Tjur
 0.295
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-1.000
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.087
 </td>
 </tr>
 <tr>
-<td colspan="7" style="font-style:italic; border-top:double black; text-align:right;">
+<td colspan="6" style="font-style:italic; border-top:double black; text-align:right;">
 <ul>
 <li>p&lt;0.05   ** p&lt;0.01   *** p&lt;0.001
 </td>
 </tr></li>
 </ul>
 </table>
+</div>
+<div id="test-of-teams-with-0.0-error" class="section level4">
+<h4>Test # of Teams with 0.0 Error</h4>
+<pre class="r"><code>unique(cri_team$u_teamid[cri_team$dev_m == 0])</code></pre>
+<pre><code>##  [1]  2  3  9 15 29 36 38 40 47 63 70 71 78 82</code></pre>
+<p>They are all in the TG</p>
+<pre class="r"><code>unique(cri_team$u_teamid[cri_team$dev_m == 0 &amp; cri_team$exp == 1])</code></pre>
+<pre><code>##  [1]  2  3  9 15 29 36 38 40 47 63 70 71 78 82</code></pre>
 </div>
 </div>
 </div>
@@ -3311,34 +3273,34 @@ save.image(file = here::here(&quot;data&quot;,&quot;data_figs.Rdata&quot;))</cod
 ##  [1] specr_1.0.0      ggtext_0.1.2     see_0.7.4        lavaanPlot_0.6.2
 ##  [5] lavaan_0.6-13    rvest_1.0.3      sjlabelled_1.2.0 sjmisc_2.8.9    
 ##  [9] sjPlot_2.8.12    jtools_2.2.1     lme4_1.1-31      Matrix_1.5-1    
-## [13] ggpubr_0.5.0     ggplot2_3.4.0    kableExtra_1.3.4 ragg_1.2.5      
-## [17] boot_1.3-28      knitr_1.41       readxl_1.4.1     tidyr_1.2.1     
-## [21] lattice_0.20-45  readr_2.1.3      dplyr_1.0.10     pacman_0.5.1    
+## [13] ggpubr_0.5.0     ggplot2_3.4.1    kableExtra_1.3.4 ragg_1.2.5      
+## [17] boot_1.3-28      knitr_1.42       readxl_1.4.2     tidyr_1.3.0     
+## [21] lattice_0.20-45  readr_2.1.4      dplyr_1.1.1      pacman_0.5.1    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] minqa_1.2.5        colorspace_2.0-3   ggsignif_0.6.4     ellipsis_0.3.2    
+##  [1] minqa_1.2.5        colorspace_2.1-0   ggsignif_0.6.4     ellipsis_0.3.2    
 ##  [5] rprojroot_2.0.3    estimability_1.4.1 parameters_0.20.1  gridtext_0.1.5    
-##  [9] rstudioapi_0.14    listenv_0.9.0      furrr_0.3.1        fansi_1.0.3       
+##  [9] rstudioapi_0.14    listenv_0.9.0      furrr_0.3.1        fansi_1.0.4       
 ## [13] mvtnorm_1.1-3      xml2_1.3.3         codetools_0.2-18   splines_4.2.2     
 ## [17] mnormt_2.1.1       cachem_1.0.6       jsonlite_1.8.4     nloptr_2.0.3      
-## [21] ggeffects_1.1.4    broom_1.0.2        effectsize_0.8.2   DiagrammeR_1.0.9  
+## [21] ggeffects_1.1.4    broom_1.0.4        effectsize_0.8.2   DiagrammeR_1.0.9  
 ## [25] compiler_4.2.2     httr_1.4.4         sjstats_0.18.2     emmeans_1.8.4-1   
-## [29] backports_1.4.1    assertthat_0.2.1   fastmap_1.1.0      cli_3.6.0         
-## [33] visNetwork_2.1.2   htmltools_0.5.4    tools_4.2.2        igraph_1.3.5      
+## [29] backports_1.4.1    fastmap_1.1.0      cli_3.6.0          visNetwork_2.1.2  
+## [33] htmltools_0.5.4    tools_4.2.2        igraph_1.3.5       coda_0.19-4       
 ## [37] gtable_0.3.1       glue_1.6.2         Rcpp_1.0.9         carData_3.0-5     
-## [41] cellranger_1.1.0   jquerylib_0.1.4    vctrs_0.5.1        svglite_2.1.1     
-## [45] nlme_3.1-160       insight_0.18.8     xfun_0.36          stringr_1.5.0     
-## [49] globals_0.16.2     lifecycle_1.0.3    rstatix_0.7.1      future_1.30.0     
+## [41] cellranger_1.1.0   jquerylib_0.1.4    vctrs_0.6.1        svglite_2.1.1     
+## [45] nlme_3.1-160       insight_0.19.1     xfun_0.37          stringr_1.5.0     
+## [49] globals_0.16.2     lifecycle_1.0.3    rstatix_0.7.1      future_1.32.0     
 ## [53] MASS_7.3-58.1      scales_1.2.1       hms_1.1.2          parallel_4.2.2    
-## [57] RColorBrewer_1.1-3 yaml_2.3.6         pander_0.6.5       sass_0.4.4        
-## [61] stringi_1.7.12     bayestestR_0.13.0  rlang_1.0.6        pkgconfig_2.0.3   
-## [65] systemfonts_1.0.4  evaluate_0.19      purrr_1.0.1        htmlwidgets_1.6.1 
+## [57] RColorBrewer_1.1-3 yaml_2.3.7         pander_0.6.5       sass_0.4.4        
+## [61] stringi_1.7.12     bayestestR_0.13.0  rlang_1.1.0        pkgconfig_2.0.3   
+## [65] systemfonts_1.0.4  evaluate_0.20      purrr_1.0.1        htmlwidgets_1.6.1 
 ## [69] cowplot_1.1.1      tidyselect_1.2.0   here_1.0.1         parallelly_1.34.0 
-## [73] magrittr_2.0.3     R6_2.5.1           generics_0.1.3     DBI_1.1.3         
-## [77] pillar_1.8.1       withr_2.5.0        datawizard_0.6.5   abind_1.4-5       
-## [81] tibble_3.1.8       performance_0.10.2 modelr_0.1.10      crayon_1.5.2      
-## [85] car_3.1-1          utf8_1.2.2         tzdb_0.3.0         rmarkdown_2.19    
-## [89] grid_4.2.2         pbivnorm_0.6.0     digest_0.6.31      webshot_0.5.4     
+## [73] magrittr_2.0.3     R6_2.5.1           generics_0.1.3     pillar_1.9.0      
+## [77] withr_2.5.0        datawizard_0.6.5   abind_1.4-5        tibble_3.2.1      
+## [81] performance_0.10.2 modelr_0.1.10      crayon_1.5.2       car_3.1-1         
+## [85] utf8_1.2.3         tzdb_0.3.0         rmarkdown_2.19     grid_4.2.2        
+## [89] pbivnorm_0.6.0     digest_0.6.31      webshot_0.5.4      xtable_1.8-4      
 ## [93] textshaping_0.3.6  stats4_4.2.2       munsell_0.5.0      viridisLite_0.4.1 
 ## [97] bslib_0.4.2</code></pre>
 </div>

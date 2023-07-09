@@ -507,13 +507,14 @@ fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
   scale_x_reverse() +
   annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
            label = c("VERIFICATION (same sign)", "EXACT REPLICATION (within 0.01)"), 
-           hjust = 0, 
+           hjust = 0.05,
+           vjust = -0.05,
            size = 6, 
-           fontface = "italic",
+           fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 1), 
-           label = c("Transparent Group (TG)", "Opaque Group (OG)", "TG", "OG"),
+  annotate("text", x = c(2,3), y = c(1, 1), 
+           label = c("Transparent Group (TG)", "Opaque Group (OG)"),
            hjust = 0, 
            family = "Times New Roman",
            size = 5) +
@@ -523,7 +524,7 @@ fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 16),
-        axis.title.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16, hjust = 0, vjust = -0.5),
         legend.title = element_blank(),
         legend.position = "none",
         plot.title = element_blank())
@@ -562,23 +563,25 @@ fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
   coord_flip(xlim = c(6.5,1), ylim = c(-12,100),  clip = "on") +
   scale_x_reverse() +
   annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
-           label = c("VERIFICATION (95%+ of team results)", "EXACT REPLICATION (95%+ of team results)"), 
-           hjust = 0, 
+           label = c("VERIFICATION* (95%+)", "EXACT REPLICATION* (95%+)"), 
+           hjust = 0.05, 
+           vjust = -0.05,
            size = 6, 
-           fontface = "italic", 
+           fontface = "bold", 
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 21), 
-           label = c("TG", "OG", "TG", "OG"),
-           hjust = 0, 
-           size = 5) +
+  # annotate("text", x = c(2,3,5,6), y = c(1, 1, 1, 21), 
+  #          label = c("TG", "OG", "TG", "OG"),
+  #          hjust = 0, 
+  #          size = 5,
+  #          family = "Times New Roman") +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 16),
-        axis.title.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16, hjust = 0, vjust = -0.5),
         legend.title = element_blank(),
         legend.position = "none",
         plot.title = element_blank())
@@ -589,6 +592,7 @@ dev.off()
 knitr::include_graphics(here::here("results", "Fig1b.png"))
 
 ```
+
 #### Deviance Raw Effect-Level
 
 ```{r fig2newc}
@@ -619,15 +623,16 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
   annotate("text", x = 1.5, 
            y = -0.005, 
            label = c("REPLICATION ERROR"), 
-           hjust = 0, 
+           hjust = 0.1, 
+           vjust = -0.05,
            size = 6, 
-           fontface = "italic",
+           fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3), y = c(0.00,0.00), 
+  annotate("text", x = c(2,3), y = c(-0.006,-0.006), 
            label = c("TG", "OG"),
            family = "Times New Roman",
-           hjust = 0, 
+           hjust = 0.1, 
            size = 5) +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
@@ -635,7 +640,7 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 16),
-        axis.title.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16, hjust = 0, vjust = -0.5),
         legend.title = element_blank(),
         legend.position = "none",
         )
@@ -663,7 +668,7 @@ fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
             hjust = 0,
             size = 5) + 
   theme_classic() +
-  ylab("Average of the Average Absolute Difference by Team") +
+  ylab("Team Average of Average Absolute Differences") +
   xlab(" ") +
   coord_flip(xlim = c(3.5,1), 
              ylim = c(-0.005,0.09),  
@@ -672,23 +677,24 @@ fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
   annotate("text", x = 1.5, 
            y = -0.005, 
            label = c("REPLICATION ERROR"), 
-           hjust = 0, 
+           hjust = 0.1, 
+           vjust = -0.05,
            size = 6, 
-           fontface = "italic",
+           fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3), y = c(0.001,0.001), 
-           label = c("TG", "OG"),
-           hjust = 0, 
-           size = 5,
-           family = "Times New Roman") +
+  # annotate("text", x = c(2,3), y = c(0.001,0.001), 
+  #          label = c("TG", "OG"),
+  #          hjust = 0, 
+  #          size = 5,
+  #          family = "Times New Roman") +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 16),
-        axis.title.x = element_text(size = 16),
+        axis.title.x = element_text(size = 16, hjust = 0, vjust = -0.5),
         legend.title = element_blank(),
         legend.position = "none",
         #plot.title = element_text(hjust = 0, size = 18)
@@ -717,6 +723,8 @@ knitr::include_graphics(here::here("results","Fig1_New.png"))
 
 
 #### Part B. ICC
+
+In a previous version of Figure 1 we included the percent of variance that occurred between groups, but this became superfluous to any arguments made in the paper, so we removed it. We leave the code here in case readers are interested. 
 
 ```{r fig2b_icc}
 # calculate ICC/rho

@@ -355,8 +355,9 @@ display: none;
 
 <p>This project uses data from the Crowdsourced Replication Initiative
 (<a href="https://osf.io/preprints/socarxiv/6j9qb/">CRI</a>). This
-represents the first stage where reseracher participants had to
-replicate a study by Brady and Finnigan (<a href="https://doi.org/10.1177/0003122413513022">2014</a>). The teams
+represents the first stage where researcher participants were asked to
+computationally replicate the numerical findings from a study by Brady
+and Finnigan (<a href="https://doi.org/10.1177/0003122413513022">2014</a>). The teams
 consisted of 1-3 members and were randomly divided into two groups, one
 with the original study, paper and code (‘transparent group’) and the
 other with only a anonymized methods section, no knowledge of the
@@ -394,7 +395,7 @@ deviance from original, as the teams submitted them</td>
 </tr>
 <tr class="odd">
 <td>qual_out.csv</td>
-<td>Qualitative categories extracted in code routine 00</td>
+<td>Qualitative categories extracted from teams’ workflows</td>
 </tr>
 </tbody>
 </table>
@@ -413,7 +414,10 @@ completeFun &lt;- function(data,  desiredCols) {
 <div id="replication-results" class="section level3">
 <h3>Replication Results</h3>
 <p>Two teams submitted two different result sets, therefore, we need to
-give them unique team identifiers for the analytical phase</p>
+give them unique team identifiers for the analytical phase. Although
+these are obvious errors, we wanted to preserve the ecological validity
+of the researchers’ research process and did not intervene or ask them
+to submit just one set of results.</p>
 <pre class="r"><code>cri &lt;- read_xlsx(here::here(&quot;data&quot;,&quot;cristageone.xlsx&quot;))
 cri_cur &lt;- read_xlsx(here::here(&quot;data&quot;,&quot;cristageone.cur1.xlsx&quot;))
 
@@ -522,9 +526,13 @@ cri2_nomis &lt;- cbind(cri2_nomis,  preds)
 
 cri2_nomis &lt;- select(cri2_nomis,  u_teamid,  difficult,  stat_skill)
 
-cri2 &lt;- left_join(cri2,  cri2_nomis,  by = &quot;u_teamid&quot;)
-
-# mean replacement (don&#39;t use, too risky)
+cri2 &lt;- left_join(cri2,  cri2_nomis,  by = &quot;u_teamid&quot;)</code></pre>
+<pre><code>## Warning in left_join(cri2, cri2_nomis, by = &quot;u_teamid&quot;): Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 4 of `x` matches multiple rows in `y`.
+## ℹ Row 4 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.</code></pre>
+<pre class="r"><code># mean replacement (don&#39;t use, too risky)
 
 # cri2 &lt;- cri2 %&gt;%
 #  mutate(difficult = ifelse(is.na(difficult),  mean(difficult,  na.rm = T),  difficult), 
@@ -557,8 +565,6 @@ cri2$routine &lt;- ifelse(is.na(cri2$routine), 0, cri2$routine)
 
 cri &lt;- left_join(cri,  cri2,  by = &quot;u_teamid&quot;)
 
-
-
 cri_cur &lt;- left_join(cri_cur,  cri2,  by = &quot;u_teamid&quot;) 
 
 # check number of consistent degrees in our relevant sample
@@ -576,7 +582,7 @@ rm(teamsize,  routine, cri2)</code></pre>
 <h2>Prepare Replication Results</h2>
 <div id="original-results" class="section level3">
 <h3>Original Results</h3>
-<p>It is necessary to convert them into long form for plotting and
+<p>It is necessary to convert them into long format for plotting and
 analysis. Also, note that u_teamid2 keeps the two teams that submitted
 separate analyses by wave as distinct teams for now (team 59 and 81). If
 users want to identify which effects are replications of which
@@ -672,17 +678,19 @@ values</td>
 </tr>
 </tbody>
 </table>
+<div id="data-prep" class="section level3">
+<h3>Data Prep</h3>
 <pre class="r"><code>cri_long &lt;- cri_long %&gt;%
   mutate(or = round(as.numeric(or),3),
          orig_or = round(as.numeric(orig_or),3))
 
 cri_cur_long &lt;- cri_cur_long %&gt;%
   mutate(or = round(as.numeric(or),3),
-         orig_or = round(as.numeric(orig_or),3))
-
-# Verification
-
-# construct measure for positive or negative coefficient
+         orig_or = round(as.numeric(orig_or),3))</code></pre>
+</div>
+<div id="verification" class="section level3">
+<h3>Verification</h3>
+<pre class="r"><code># construct measure for positive or negative coefficient
 cri_long &lt;- cri_long %&gt;%
   mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or &gt; 1, 1, ifelse(orig_or &lt; 1, 2, 3))),
          rep_direction = ifelse(is.na(or), NA, ifelse(or &gt; 1, 1, ifelse(or &lt; 1, 2, 3))),
@@ -699,8 +707,9 @@ cri_cur_long &lt;- cri_cur_long %&gt;%
          exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance) &lt; 0.01, 1, 0)),
          verif = ifelse(verif == 0 &amp; exact == 1, 1, verif),
          verif = ifelse(verif == 0 &amp; sig == 0 &amp; orig_sig == 0, 1, verif))</code></pre>
-<div id="exact-replication---sig-test" class="section level3">
-<h3>Exact replication - sig test</h3>
+</div>
+<div id="exact-replication" class="section level3">
+<h3>Exact replication</h3>
 <p>One reviewer questioned if the &lt;0.01 cutoff included a similar
 p-value test, as with the ‘verification’ measure. We test this quickly
 here.</p>
@@ -709,7 +718,6 @@ here.</p>
 
 a &lt;- sum(cri_long$test_sig_exact, na.rm = T)
 b &lt;- sum(cri_long$exact, na.rm = T)</code></pre>
-<p>For Exact Replication, 90% of 95% sig signs from NHST match.</p>
 </div>
 <div id="remove-missing" class="section level3">
 <h3>Remove Missing</h3>
@@ -810,8 +818,8 @@ cri_long$degree_soc &lt;- ifelse(is.na(cri_long$degree), 3, cri_long$degree)
 cri_long$degree_soc &lt;- ifelse(cri_long$degree_soc == 1, 1, 0)</code></pre>
 </div>
 </div>
-<div id="combine-qualitiatie-categories" class="section level2">
-<h2>Combine Qualitiatie Categories</h2>
+<div id="combine-qualitative-categories" class="section level2">
+<h2>Combine Qualitative Categories</h2>
 <pre class="r"><code>qual_out &lt;- read.csv(here::here(&quot;results&quot;, &quot;qual_out.csv&quot;))
 qual_out &lt;- qual_out %&gt;%
   rename(u_teamid2 = Team) # to get unique matches (no repeats)
@@ -848,27 +856,27 @@ desired)</p>
 ## 
 ## other attached packages:
 ##  [1] lavaanPlot_0.6.2   lavaan_0.6-13      kableExtra_1.3.4   ragg_1.2.5        
-##  [5] boot_1.3-28        knitr_1.41         readxl_1.4.1       tidyr_1.2.1       
-##  [9] lattice_0.20-45    readr_2.1.3        dplyr_1.0.10       readstata13_0.10.0
+##  [5] boot_1.3-28        knitr_1.42         readxl_1.4.2       tidyr_1.3.0       
+##  [9] lattice_0.20-45    readr_2.1.4        dplyr_1.1.1        readstata13_0.10.0
 ## [13] pacman_0.5.1      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.9         here_1.0.1         svglite_2.1.1      visNetwork_2.1.2  
-##  [5] rprojroot_2.0.3    assertthat_0.2.1   digest_0.6.31      utf8_1.2.2        
-##  [9] R6_2.5.1           cellranger_1.1.0   stats4_4.2.2       evaluate_0.19     
-## [13] httr_1.4.4         pillar_1.8.1       rlang_1.0.6        rstudioapi_0.14   
-## [17] jquerylib_0.1.4    pbivnorm_0.6.0     rmarkdown_2.19     DiagrammeR_1.0.9  
-## [21] textshaping_0.3.6  webshot_0.5.4      stringr_1.5.0      htmlwidgets_1.6.1 
-## [25] munsell_0.5.0      compiler_4.2.2     xfun_0.36          pkgconfig_2.0.3   
-## [29] systemfonts_1.0.4  mnormt_2.1.1       htmltools_0.5.4    tidyselect_1.2.0  
-## [33] tibble_3.1.8       fansi_1.0.3        viridisLite_0.4.1  withr_2.5.0       
-## [37] tzdb_0.3.0         MASS_7.3-58.1      grid_4.2.2         jsonlite_1.8.4    
-## [41] lifecycle_1.0.3    DBI_1.1.3          magrittr_2.0.3     scales_1.2.1      
-## [45] cli_3.6.0          stringi_1.7.12     cachem_1.0.6       xml2_1.3.3        
-## [49] bslib_0.4.2        ellipsis_0.3.2     generics_0.1.3     vctrs_0.5.1       
-## [53] RColorBrewer_1.1-3 tools_4.2.2        glue_1.6.2         purrr_1.0.1       
-## [57] hms_1.1.2          parallel_4.2.2     fastmap_1.1.0      yaml_2.3.6        
-## [61] colorspace_2.0-3   rvest_1.0.3        sass_0.4.4</code></pre>
+##  [1] Rcpp_1.0.9         svglite_2.1.1      here_1.0.1         visNetwork_2.1.2  
+##  [5] rprojroot_2.0.3    digest_0.6.31      utf8_1.2.3         R6_2.5.1          
+##  [9] cellranger_1.1.0   stats4_4.2.2       evaluate_0.20      httr_1.4.4        
+## [13] pillar_1.9.0       rlang_1.1.0        rstudioapi_0.14    jquerylib_0.1.4   
+## [17] pbivnorm_0.6.0     rmarkdown_2.19     DiagrammeR_1.0.9   textshaping_0.3.6 
+## [21] webshot_0.5.4      stringr_1.5.0      htmlwidgets_1.6.1  munsell_0.5.0     
+## [25] compiler_4.2.2     xfun_0.37          pkgconfig_2.0.3    systemfonts_1.0.4 
+## [29] mnormt_2.1.1       htmltools_0.5.4    tidyselect_1.2.0   tibble_3.2.1      
+## [33] fansi_1.0.4        viridisLite_0.4.1  withr_2.5.0        tzdb_0.3.0        
+## [37] MASS_7.3-58.1      grid_4.2.2         jsonlite_1.8.4     lifecycle_1.0.3   
+## [41] magrittr_2.0.3     scales_1.2.1       cli_3.6.0          stringi_1.7.12    
+## [45] cachem_1.0.6       xml2_1.3.3         bslib_0.4.2        ellipsis_0.3.2    
+## [49] generics_0.1.3     vctrs_0.6.1        RColorBrewer_1.1-3 tools_4.2.2       
+## [53] glue_1.6.2         purrr_1.0.1        hms_1.1.2          parallel_4.2.2    
+## [57] fastmap_1.1.0      yaml_2.3.7         colorspace_2.1-0   rvest_1.0.3       
+## [61] sass_0.4.4</code></pre>
 </div>
 
 
