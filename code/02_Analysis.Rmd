@@ -301,11 +301,11 @@ trim_results <- mget(ls(patter = "T_"))
 
 Saved in Word for paper
 ```{r results}
-tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Orig.doc"))
+tab_model(orig_results, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Orig.doc"))
 
-tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Cur.doc"))
+tab_model(cur_results, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Cur.doc"))
 
-tab_model(trim_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Trim.doc"))
+tab_model(trim_results, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Trim.doc"))
 ```
 
 Printed here in workflow
@@ -354,7 +354,7 @@ PRO_3 <- lm(Procedural_DV ~ stata + stat_skill + difficult, data = subset(cri_te
 ```{r results4, warning = F, message = F}
 tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
 
-tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
+tab_model(MIS_1, MIS_2, MIS_3, PRO_1, PRO_2, PRO_3, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), file = here::here("results", "Reg_Table_Cats.doc"))
 ```
 
 #### Robustness check as logits
