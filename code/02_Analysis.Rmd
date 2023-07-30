@@ -299,8 +299,8 @@ trim_results <- mget(ls(patter = "T_"))
 
 ### Results
 
-Saved in Word for paper
-```{r results}
+Saved in Word for paper, hidden here in markdown.
+```{r results, include = F}
 tab_model(orig_results, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Orig.doc"))
 
 tab_model(cur_results, show.se = T, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"), file = here::here("results", "Reg_Table_Cur.doc"))
@@ -311,17 +311,20 @@ tab_model(trim_results, show.se = T, show.ci = F, p.style = "stars", p.threshold
 Printed here in workflow
 
 #### Original
+
 ```{r results2}
 tab_model(orig_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
 ```
 
 
 #### Curated
+
 ```{r results3}
 tab_model(cur_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Exact Pooled","Exact TG","Exact OG","Verif Pooled","Verif TG","Verif OG","Error Pooled","Error TG","Error OG"))
 ```
 
 #### Trimmed
+
 ```{r trim_results}
 tab_model(trim_results, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001), dv.labels = c("Pooled","TG","OG","Pooled","TG","OG","Pooled","TG","OG"))
 ```

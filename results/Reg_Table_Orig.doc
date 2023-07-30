@@ -34,11 +34,11 @@
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">(Intercept)</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.43 <sup>***</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.44 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.06</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.59 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.08</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.49 <sup>***</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.50 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">0.07</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">0.89 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">0.03</td>
@@ -46,12 +46,12 @@
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">0.03</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">0.91 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">0.04</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">0.09 <sup>**</sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.03</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">2.42 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">1.29</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6">0.03 <sup>***</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7">0.01</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">0.10 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">0.05</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">3.16 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">2.06</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">stata</td>
@@ -66,42 +66,42 @@
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">0.07 <sup>*</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">0.03</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">&#45;0.01 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">0.05</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;0.03 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.04</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">0.06</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;1.09 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">1.56</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6">&#45;0.02 <sup>*</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7">0.01</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;0.04 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">0.07</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;2.07 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">2.66</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">stat skill</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.03 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.02</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.06 <sup>*</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.06 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.03</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.00 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.00 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">0.03</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">&#45;0.01 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">0.01</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">&#45;0.02 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">0.01</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">&#45;0.00 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">&#45;0.01 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">0.02</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;0.01 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.01</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6">0.00 <sup>*</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;0.43 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.41</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6">0.00 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7">0.00</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;0.02 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">0.02</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;0.85 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">0.81</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">difficult</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.14 <sup>**</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.05</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.17 <sup>*</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.16 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.08</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.13 <sup>*</sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.14 <sup>*</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">0.05</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">&#45;0.06 <sup>**</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">0.02</td>
@@ -109,29 +109,29 @@
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">0.03</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">&#45;0.08 <sup>*</sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">0.03</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;0.01 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.02</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;1.32 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.93</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6">0.01 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7">0.01</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;0.02 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">0.04</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8">&#45;2.18 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 9">1.56</td>
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">degree soc</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.03 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">&#45;0.04 <sup></sup></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">0.07</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  "></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">&#45;0.02 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">0.03</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">0.04</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3"></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">0.01 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.04</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">0.11 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">1.50</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8"></td>
@@ -151,8 +151,8 @@
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3"></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;0.06 <sup></sup></td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">0.03</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  4">&#45;1.87 <sup></sup></td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  5">1.29</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 6"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn8 7"></td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center; modelcolumn9 8"></td>
@@ -172,15 +172,15 @@
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">R<sup>2</sup> / R<sup>2</sup> adjusted</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.305 / 0.261</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.272 / 0.209</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.156 / 0.095</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.166 / 0.114</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.302 / 0.258</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.268 / 0.206</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.160 / 0.100</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.163 / 0.110</td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.214 / 0.147</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.143 / 0.081</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.052 / -0.008</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.271 / 0.209</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.028 / -0.041</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.138 / 0.077</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.053 / -0.007</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.268 / 0.205</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="2">0.059 / -0.008</td>
 </tr>
 <tr>
 <td colspan="19" style="font-style:italic; border-top:double black; text-align:right;">* p&lt;0.05&nbsp;&nbsp;&nbsp;** p&lt;0.01&nbsp;&nbsp;&nbsp;*** p&lt;0.001</td>

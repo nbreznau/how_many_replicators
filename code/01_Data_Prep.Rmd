@@ -36,7 +36,7 @@ completeFun <- function(data,  desiredCols) {
 
 ### Replication Results
 
-Two teams submitted two different result sets,  therefore,  we need to give them unique team identifiers for the analytical phase. Although these are obvious errors, we wanted to preserve the ecological validity of the researchers' research process and did not intervene or ask them to submit just one set of results.
+Two teams submitted two different result sets,  therefore,  we need to give them unique team identifiers for the analysis phase. Although these are obvious errors, we wanted to preserve the ecological validity of the teams' research processes, and did not intervene or ask them to adjust their results post hoc.
 
 
 ```{r rep_data}
@@ -66,7 +66,7 @@ An anonymized version of this survey is cleaned and available for public use her
 
 Breznau, Nate, Eike Mark Rinke, and Alexander Wuttke. [2021](https://doi.org/10.7910/DVN/UUP8CX). “The Crowdsourced Replication Initiative Participant Survey.” Harvard Dataverse.
 
-The current workflow included a version of the survey that preceeded the public use file. Moreover, we made efforts to anonymize the participants, thus team numbers and range of variables are different. 
+The current workflow included a version of the survey that preceded the public use file. Moreover, we made efforts to anonymize the participants, thus team numbers and range of variables are different. 
 
 The following Stata file and its dependent SPSS files (the original survey data) were necessary to complete this routine, but the files used to create the following are not-anonymous so they are not shared. 
 
@@ -260,7 +260,7 @@ rm(columns)
 
 ### Long form
 
-```{r final_clean}
+```{r final_clean, warning = F}
 # gen DVs
 
 # update colnames
@@ -283,24 +283,8 @@ cri_long <- left_join(cri_long, cri_long_orig, by = c("dv_tag","Exp1"))
 
 cri_cur_long <- left_join(cri_cur_long, cri_long_orig, by = c("dv_tag","Exp1"))
 
-rm(cri_long_orig)
+## make ORs numeric
 
-
-```
-
-## Create Replication Measures
-
-We have three variables to measure 'verification'
-
-|Metric|Definition|Measure|
-|------|----------|---------|
-|*Verification* (verif)| The direction of the regression coefficient is the same as the original (pos/pos or neg/neg = 1, or both ns diff from zero = 1)
-|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
-|*Replication Error* (deviance_abs)|The absolute deviation of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
-
-### Data Prep
-
-```{r dp, warning = F, message = F}
 cri_long <- cri_long %>%
   mutate(or = round(as.numeric(or),3),
          orig_or = round(as.numeric(orig_or),3))
@@ -308,7 +292,68 @@ cri_long <- cri_long %>%
 cri_cur_long <- cri_cur_long %>%
   mutate(or = round(as.numeric(or),3),
          orig_or = round(as.numeric(orig_or),3))
+
+
+rm(cri_long_orig)
 ```
+
+## Correcting Odds Ratio Asymmetry
+
+Odds ratios are not symmetric around the value 1. An odds ratio of 2 is identical in size as an odds ratio of 0.5 (on is 2 times more and the other is 2 times less than 1). Therefore, for comparability we need to convert the odds ratios of replication results. 
+
+For replication purposes, we make "1"  equal to the original result, this shifts the odds ratio scale so that we now measure replication results in terms of magnitude larger or magnitude smaller. For example, if an original result is 1.5 OR, and two replicators come to the results 0.75 and 3.0 respectively, we need to divide the original by the former and then multiply by -1 (and all other replication values less than the original in all other cases) (1.5/0.75=2*-1= -2), and we need to alternatively divide the replication results of the latter (and all replication results that are higher than the original by the original) (3.0/1.5=2). This means these replicators are equivalent in their distance from the original, but in opposite directions. Simple subtraction would lead to asymmetric results (1.5-0.75=0.75 & 1.5-3.0=-1.50).
+
+### Correct Zeros
+
+The problem with the ratio approach is that four results reported in the replications were 0.000 at the third decimal place. Division with zero is of course not possible. For these cases we recode them to 0.001.
+
+Additionally, some teams reported coefficients instead of odds ratios. This meant that there were negative numbers reported as 'odds ratios', this of course does not work, so these have to be recoded to 0.001 (the smallest possible at this level of precision).
+
+```{r fixzeros, warning = F}
+cri_long <- cri_long %>%
+  mutate(or = case_when(
+    or <= 0.000 ~ 0.001,
+    .default = or
+  ))
+
+cri_cur_long <- cri_cur_long %>%
+  mutate(or = case_when(
+    or <= 0.000 ~ 0.001,
+    .default = or
+  ))  
+```
+
+### Make Deviance as Ratio
+
+This creates a symmetric measure that is equivalent for replication values above or below the original
+
+```{r ratio, warning = F}
+
+cri_long <- cri_long %>%
+  mutate(deviance_ratio = case_when(
+         or > orig_or ~ (or/orig_or)-1,
+         or < orig_or ~ (orig_or/or*-1)+1,
+         .default = 0.000)
+  )
+
+cri_cur_long <- cri_cur_long %>%
+  mutate(deviance_ratio = case_when(
+         or > orig_or ~ (or/orig_or)-1,
+         or < orig_or ~ (orig_or/or*-1)+1,
+         .default = 0.000)
+  )
+
+```
+## Create Replication Measures
+
+We have three variables to measure 'verification'
+
+|Metric|Definition|Measure|
+|------|----------|---------|
+|*Verification* (verif)| The direction of the regression coefficient is the same as the original| pos/pos or neg/neg = 1, or both ns diff from zero = 1|
+|*Exact Replication* (exact)|The ratio of the replication odds ratio to the original is within a 1% margin (i.e., within 0.01 decimal places)|1=exact, 0=not|
+|*Replication Error* (deviance_abs)|The absolute deviation as a ratio of the replication from the original|continuous measure starting from exact (=0) and increasing positive values|
+
 
 ### Verification
 
@@ -318,7 +363,7 @@ cri_long <- cri_long %>%
   mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
          rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
          verif = ifelse(is.na(orig_or), NA,ifelse(orig_direction == rep_direction, 1, 0)),
-         exact = ifelse(is.na(orig_or), NA,ifelse(abs(deviance) < 0.01, 1, 0)),
+         exact = ifelse(is.na(orig_or), NA,ifelse(abs(deviance_ratio) <= 0.01, 1, 0)),
          verif = ifelse(verif == 0 & exact == 1, 1, verif), # this corrects studies that are 1.001 and 0.999 for example which would otherwise be coded wrong in exact
          verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif)) # this corrects for studies that are close to odd-ratio of 1 (so effect of zero), but in both original and replication are insignificant, meaning that it is a verification (roughly zero & ns in both cases)
 
@@ -327,7 +372,7 @@ cri_cur_long <- cri_cur_long %>%
   mutate(orig_direction = ifelse(is.na(orig_or), NA, ifelse(orig_or > 1, 1, ifelse(orig_or < 1, 2, 3))),
          rep_direction = ifelse(is.na(or), NA, ifelse(or > 1, 1, ifelse(or < 1, 2, 3))),
          verif = ifelse(is.na(orig_or), NA, ifelse(orig_direction == rep_direction, 1, 0)),
-         exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance) < 0.01, 1, 0)),
+         exact = ifelse(is.na(orig_or), NA, ifelse(abs(deviance_ratio) <= 0.01, 1, 0)),
          verif = ifelse(verif == 0 & exact == 1, 1, verif),
          verif = ifelse(verif == 0 & sig == 0 & orig_sig == 0, 1, verif))
 ```
@@ -357,14 +402,24 @@ cri_cur_long <- completeFun(cri_cur_long, "or")
 
 ### Replication Error
 
+Some of the results lead to outlandish ratio scores of 1000 times difference or more, mostly because of two teams reporting coefficients instead of odds ratios. This gets fixed in the trimmed and curated versions, but not here. This creates a huge outlier bias in the regressions. Therefore, we trim at ratios of 50 in either direction. 
+
 ```{r reperror}
 #create replication error
 
 cri_long <- cri_long %>%
-  mutate(deviance_abs = abs(deviance))
+  mutate(deviance_abs = abs(deviance_ratio),
+         deviance_abs = case_when(
+           deviance_abs >=50 ~ 50,
+           deviance_abs < 50 ~ deviance_abs,
+         ))
 
 cri_cur_long <- cri_cur_long %>%
-  mutate(deviance_abs = abs(deviance))
+  mutate(deviance_abs = abs(deviance_ratio),
+         deviance_abs = case_when(
+           deviance_abs >=50 ~ 50,
+           deviance_abs < 50 ~ deviance_abs,
+         ))
 
 cri_long <- cri_long[order(cri_long$Exp1,cri_long$deviance_abs),]
 
