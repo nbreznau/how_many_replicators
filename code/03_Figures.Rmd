@@ -9,8 +9,8 @@ NOTE: All previous files must be run first for this file to run in its entirety
 |Metric|Definition|Measure|
 |------|----------|---------|
 |*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
-|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
-|*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
+|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to original within .01 decimal places |1=exact, 0=not|
+|*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio expressed as a ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
 ```{r setup, warning = F, message = F}
 
@@ -74,7 +74,7 @@ First we need to map values of *x* for *n* trials (so that *x* is always at leas
 
 ### Map Probabilities
 
-```{r fig1_prep}
+```{r fig1_prep, warning = F}
 # calculate x for each value of n
 # use a simple 25 n by 25 x matrix
 
@@ -607,7 +607,7 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
   scale_x_reverse() +
   scale_color_manual(values = f2colors32,
                     guide = guide_legend(reverse = TRUE)) +
-  geom_text(aes(y = 0.1, x = c(2,3),                 
+  geom_text(aes(y = c(0.05,0.45), x = c(2,3),                 
                 label = round(fig3t$result[c(1,2)],3)), 
             family = "Times New Roman",
             hjust = 0,
@@ -617,7 +617,7 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
   xlab(" ") +
   #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
   coord_flip(xlim = c(3.5,1), 
-             ylim = c(-0.005,0.09),  
+             ylim = c(-0.08,0.6),  
              clip = "on") +
   scale_x_reverse() +
   annotate("text", x = 1.5, 
@@ -629,7 +629,7 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
            fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3), y = c(-0.006,-0.006), 
+  annotate("text", x = c(2,3), y = c(-0.05,-0.05), 
            label = c("TG", "OG"),
            family = "Times New Roman",
            hjust = 0.1, 
@@ -662,7 +662,7 @@ fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
   scale_x_reverse() +
   scale_color_manual(values = f2colors32,
                     guide = guide_legend(reverse = TRUE)) +
-  geom_text(aes(y = 0.1, x = c(2,3),                 
+  geom_text(aes(y = c(0.05,0.9), x = c(2,3),                 
                 label = round(fig3bt$result[c(1,2)],3)), 
             family = "Times New Roman",
             hjust = 0,
@@ -671,7 +671,7 @@ fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
   ylab("Group Average of Team Averages\nin Absolute Differences in Odds-Ratios") +
   xlab(" ") +
   coord_flip(xlim = c(3.5,1), 
-             ylim = c(-0.005,0.09),  
+             ylim = c(-0.08,1),  
              clip = "on") +
   scale_x_reverse() +
   annotate("text", x = 1.5, 

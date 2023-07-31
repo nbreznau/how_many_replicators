@@ -402,7 +402,7 @@ cri_cur_long <- completeFun(cri_cur_long, "or")
 
 ### Replication Error
 
-Some of the results lead to outlandish ratio scores of 1000 times difference or more, mostly because of two teams reporting coefficients instead of odds ratios. This gets fixed in the trimmed and curated versions, but not here. This creates a huge outlier bias in the regressions. Therefore, we trim at ratios of 50 in either direction. 
+Some of the results lead to outlandish ratio scores of 1000 times difference or more, mostly because of two teams reporting coefficients instead of odds ratios. This gets fixed in the trimmed and curated versions, but not here. This creates a huge outlier bias in the regressions. Therefore, we trim at ratios of 7 in either direction, because this is basically where teams 77 and 80 start (the ones who made reporting errors). 
 
 ```{r reperror}
 #create replication error
@@ -410,15 +410,15 @@ Some of the results lead to outlandish ratio scores of 1000 times difference or 
 cri_long <- cri_long %>%
   mutate(deviance_abs = abs(deviance_ratio),
          deviance_abs = case_when(
-           deviance_abs >=50 ~ 50,
-           deviance_abs < 50 ~ deviance_abs,
+           deviance_abs >=7 ~ 7,
+           deviance_abs < 7 ~ deviance_abs,
          ))
 
 cri_cur_long <- cri_cur_long %>%
   mutate(deviance_abs = abs(deviance_ratio),
          deviance_abs = case_when(
-           deviance_abs >=50 ~ 50,
-           deviance_abs < 50 ~ deviance_abs,
+           deviance_abs >=7 ~ 7,
+           deviance_abs < 7 ~ deviance_abs,
          ))
 
 cri_long <- cri_long[order(cri_long$Exp1,cri_long$deviance_abs),]

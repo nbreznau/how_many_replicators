@@ -8,7 +8,7 @@ This file uses the cleaned data for the following variables to provide statistic
 |Metric|Definition|Measure|
 |------|----------|---------|
 |*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
-|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
+|*Exact Replication* (exact)|The ratio of the replication odds ratio to the original is within a 1% margin (i.e., within 0.01 decimal places)|1=exact, 0=not|
 |*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
 ```{r setup, warning = F, message = F}
