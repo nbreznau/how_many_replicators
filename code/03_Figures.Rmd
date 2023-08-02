@@ -17,7 +17,7 @@ NOTE: All previous files must be run first for this file to run in its entirety
 library(pacman)
 
 
-pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr", "ggtext","extrafont")
+pacman::p_load("dplyr", "readr", "lattice", "tidyr", "readxl", "knitr", "boot", "ragg", "kableExtra", "ggpubr","lme4", "jtools","sjPlot", "sjmisc", "sjlabelled", "rvest", "lavaan", "lavaanPlot", "see", "ggtext", "specr", "ggtext","extrafont", "ggridges")
 
 #font_import()
 loadfonts(device = "win")
@@ -128,6 +128,13 @@ for (col in c("p_75","p_76","p_77","p_78","p_79","p_80","p_81","p_82","p_83","p_
 }
 
 fig1_plot$p <- seq(75,99)
+
+# trim deviance_abs at 0.25, for density plotting purposes
+cri_long <- cri_long %>%
+  mutate(deviance_abs1 = case_when(
+    deviance_abs >= 0.15 ~ 0.15,
+    .default = deviance_abs
+  ))
 
 ```
 
@@ -598,29 +605,35 @@ knitr::include_graphics(here::here("results", "Fig1b.png"))
 ```{r fig2newc}
 f2colors32 <- c("#2D708EFF", "#95D840FF") 
 
-agg_png(here::here("results", "Fig1c.png"), res = 72, height = 225, width = 400)
+agg_png(here::here("results", "Fig1c.png"), res = 72, height = 300, width = 400)
 
-fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
+
+
+fig2aN_dev <- ggplot() +
   coord_flip() +
-  geom_errorbar(aes(ymin = deviance_abs_fn1-(2.58*(deviance_abs_fn2/sqrt(n_fn1))), ymax = deviance_abs_fn1+(2.58*(deviance_abs_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
-  geom_point(aes(y = deviance_abs_fn1, x = c(2,3), color = group, size = 5)) +
+  geom_point(aes(y = deviance_abs_fn1, x = c(2,4), color = group, size = 5), 
+             data = fig2t[c(1,2),]) +
   scale_x_reverse() +
+  geom_errorbar(aes(ymin = deviance_abs_fn1-(2.58*(deviance_abs_fn2/sqrt(n_fn1))), ymax = deviance_abs_fn1+(2.58*(deviance_abs_fn2/sqrt(n_fn1))), x = c(2,4),), 
+                color = "grey30", 
+                width = 0.3, 
+                data = fig2t[c(1,2),]) +
   scale_color_manual(values = f2colors32,
                     guide = guide_legend(reverse = TRUE)) +
-  geom_text(aes(y = c(0.05,0.45), x = c(2,3),                 
-                label = round(fig3t$result[c(1,2)],3)), 
+  geom_text(aes(y = fig3t$result[c(1,2)], x = c(1.7,3.7),     
+                label = round(fig3t$result[c(1,2)],2)), 
             family = "Times New Roman",
-            hjust = 0,
+            #hjust = 0,
             size = 5) + 
   theme_classic() +
-  ylab("Group Average of\nAbsolute Differences in Odds-Ratios") +
+  ylab("Absolute Difference of Replication Odds Ratios,\nAverage by Experimental Group") +
   xlab(" ") +
   #labs(title = "A. Raw Effect-Level Results, N = 3,742") +
-  coord_flip(xlim = c(3.5,1), 
-             ylim = c(-0.08,0.6),  
+  coord_flip(xlim = c(5.5,1), 
+             ylim = c(-0.12,1.00),  
              clip = "on") +
   scale_x_reverse() +
-  annotate("text", x = 1.5, 
+  annotate("text", x = 1.2, 
            y = -0.005, 
            label = c("REPLICATION ERROR"), 
            hjust = 0.1, 
@@ -629,7 +642,7 @@ fig2aN_dev <- ggplot(data = fig2t[c(1,2),]) +
            fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  annotate("text", x = c(2,3), y = c(-0.05,-0.05), 
+  annotate("text", x = c(2,4), y = c(-0.1,-0.1), 
            label = c("TG", "OG"),
            family = "Times New Roman",
            hjust = 0.1, 
@@ -654,27 +667,27 @@ knitr::include_graphics(here::here("results", "Fig1c.png"))
 ```{r fig2newd}
 f2colors32 <- c("#2D708EFF", "#95D840FF")
 
-agg_png(here::here("results", "Fig1d.png"), res = 72, height = 225, width = 400)
+agg_png(here::here("results", "Fig1d.png"), res = 72, height = 300, width = 400)
 fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
   coord_flip() +
-  geom_errorbar(aes(ymin = deviance_fn1-(1.96*(deviance_fn2/sqrt(n_fn1))), ymax = deviance_fn1+(1.96*(deviance_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
-  geom_point(aes(y = deviance_fn1, x = c(2,3), color = group, size = 5)) +
+  geom_point(aes(y = deviance_fn1, x = c(2,4), color = group, size = 5)) +
+  geom_errorbar(aes(ymin = deviance_fn1-(1.96*(deviance_fn2/sqrt(n_fn1))), ymax = deviance_fn1+(1.96*(deviance_fn2/sqrt(n_fn1))), x = c(2,4),), color = "grey30", width = 0.3) +
   scale_x_reverse() +
   scale_color_manual(values = f2colors32,
                     guide = guide_legend(reverse = TRUE)) +
-  geom_text(aes(y = c(0.05,0.9), x = c(2,3),                 
-                label = round(fig3bt$result[c(1,2)],3)), 
+  geom_text(aes(y = round(fig3bt$result[c(1,2)],2), x = c(1.7,3.7),                
+                label = round(fig3bt$result[c(1,2)],2)), 
             family = "Times New Roman",
-            hjust = 0,
+            #hjust = 0,
             size = 5) + 
   theme_classic() +
-  ylab("Group Average of Team Averages\nin Absolute Differences in Odds-Ratios") +
+  ylab("Absolute Difference in Replication Odds Ratios,\nTeam-Level Average by Experimental Group") +
   xlab(" ") +
-  coord_flip(xlim = c(3.5,1), 
-             ylim = c(-0.08,1),  
+  coord_flip(xlim = c(5.5,1), 
+             ylim = c(-0.12,1),  
              clip = "on") +
   scale_x_reverse() +
-  annotate("text", x = 1.5, 
+  annotate("text", x = 1.2, 
            y = -0.005, 
            label = c("REPLICATION ERROR"), 
            hjust = 0.1, 
@@ -683,11 +696,7 @@ fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
            fontface = "bold",
            family = "Times New Roman",
            color = "gray30") +
-  # annotate("text", x = c(2,3), y = c(0.001,0.001), 
-  #          label = c("TG", "OG"),
-  #          hjust = 0, 
-  #          size = 5,
-  #          family = "Times New Roman") +
+  #geom_segment(aes(x = 5.5, y = 0, xend = 1.5, yend = 0), color = "grey30", linetype = "dashed") +
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
@@ -704,7 +713,131 @@ dev.off()
 
 knitr::include_graphics(here::here("results", "Fig1d.png"))
 ```
+#### Density Plots
 
+```{r dens}
+
+
+agg_png(here::here("results", "Fig1csupa.png"), res = 72, height = 75, width = 400)
+fig1csupa <- ggplot() +
+  geom_density(aes(x = deviance_abs1),
+               color = f2colors32[1],
+               fill = f2colors32[1],
+               data = subset(cri_long, u_expgroup1 == "0")) +
+  annotate("text", x = 0.125, y = 18,
+           label = c("Higher values recoded\nfor plotting"),
+           size = 4,
+           family = "Times New Roman",
+           color = "gray22",
+           lineheight = 0.9) +
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_blank(),
+    axis.text = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+fig1csupa
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1csupa.png"))
+
+```
+
+```{r dens1}
+
+
+agg_png(here::here("results", "Fig1csupb.png"), res = 72, height = 100, width = 400)
+fig1csupb <- ggplot() +
+  geom_density(aes(x = deviance_abs1),
+               color = f2colors32[2],
+               fill = f2colors32[2],
+               data = subset(cri_long, u_expgroup1 == "1")) +
+  # annotate("text", x = 0.125, y = 18,
+  #          label = c("Higher values recoded\nfor plotting"),
+  #          size = 4,
+  #          family = "Times New Roman",
+  #          color = "gray22",
+  #          lineheight = 0.9) +
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_blank(),
+    axis.text = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+fig1csupb
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1csupb.png"))
+
+```
+
+```{r dens2}
+
+
+agg_png(here::here("results", "Fig1dsupa.png"), res = 72, height = 75, width = 400)
+fig1dsupa <- ggplot() +
+  geom_density(aes(x = dev_m),
+               color = f2colors32[1],
+               fill = f2colors32[1],
+               data = subset(cri_team_orig_c, exp == 1)) +
+  # annotate("text", x = 0.125, y = 18,
+  #          label = c("Higher values recoded\nfor plotting"),
+  #          size = 4,
+  #          family = "Times New Roman",
+  #          color = "gray22",
+  #          lineheight = 0.9) +
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_blank(),
+    axis.text = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+fig1dsupa
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1dsupa.png"))
+
+```
+
+```{r dens2}
+
+
+agg_png(here::here("results", "Fig1dsupb.png"), res = 72, height = 100, width = 400)
+fig1dsupa <- ggplot() +
+  geom_density(aes(x = dev_m),
+               color = f2colors32[2],
+               fill = f2colors32[2],
+               data = subset(cri_team_orig_c, exp == 0)) +
+  # annotate("text", x = 0.125, y = 18,
+  #          label = c("Higher values recoded\nfor plotting"),
+  #          size = 4,
+  #          family = "Times New Roman",
+  #          color = "gray22",
+  #          lineheight = 0.9) +
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    axis.title.x = element_blank(),
+    axis.text = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank()
+  )
+fig1dsupa
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig1dsupb.png"))
+
+```
 
 #### Bundled
 
