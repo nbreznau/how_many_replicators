@@ -808,7 +808,7 @@ knitr::include_graphics(here::here("results", "Fig1dsupa.png"))
 
 ```
 
-```{r dens2}
+```{r dens3}
 
 
 agg_png(here::here("results", "Fig1dsupb.png"), res = 72, height = 100, width = 400)
