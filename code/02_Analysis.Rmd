@@ -274,7 +274,11 @@ They are all in the TG
 ```{r tg}
 unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0 & cri_team_orig$exp == 1])
 ```
+They are all in the TG
 
+```{r tg}
+unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0 & cri_team_orig$exp == 1 & cri_team_orig$stata == 1])
+```
 
 ## Save Image
 
