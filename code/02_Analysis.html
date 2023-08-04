@@ -353,8 +353,51 @@ display: none;
 </div>
 
 
+<div id="dataframes-used" class="section level3">
+<h3>DATAFRAMES USED</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cri</em></td>
+<td>Original replication data at the effect-level in wide format</td>
+</tr>
+<tr class="even">
+<td><em>cri_long</em></td>
+<td>Raw replication results in long form</td>
+</tr>
+<tr class="odd">
+<td><em>cri_cur_long</em></td>
+<td>Curated results in long form</td>
+</tr>
+<tr class="even">
+<td><em>cri_long_trim</em></td>
+<td>Trimmed results (5%) in long form</td>
+</tr>
+<tr class="odd">
+<td><em>cri_team_orig</em></td>
+<td>Raw results aggregated by team</td>
+</tr>
+<tr class="even">
+<td><em>cri_team_cur</em></td>
+<td>Curated results aggregated by team</td>
+</tr>
+<tr class="odd">
+<td><em>cri_team_trim</em></td>
+<td>Trimmed results aggregated by team</td>
+</tr>
+</tbody>
+</table>
 <p>This file uses the cleaned data for the following variables to
 provide statistical output.</p>
+</div>
+<div id="dependent-variables" class="section level3">
+<h3>DEPENDENT VARIABLES</h3>
 <table>
 <colgroup>
 <col width="24%" />
@@ -378,8 +421,8 @@ significance at p&lt;0.05 threshold</td>
 </tr>
 <tr class="even">
 <td><em>Exact Replication</em> (exact)</td>
-<td>The value of the replication odd-ratio is identical to the second
-decimal place of the original</td>
+<td>The ratio of the replication odds ratio to the original is within a
+1% margin (i.e., within 0.01 decimal places)</td>
 <td>1=exact, 0=not</td>
 </tr>
 <tr class="odd">
@@ -395,6 +438,7 @@ positive values to measure the error</td>
 library(pacman)
 
 pacman::p_load(&quot;dplyr&quot;, &quot;readr&quot;, &quot;lattice&quot;, &quot;tidyr&quot;, &quot;readxl&quot;, &quot;knitr&quot;, &quot;boot&quot;, &quot;ragg&quot;, &quot;kableExtra&quot;, &quot;ggpubr&quot;,&quot;lme4&quot;, &quot;jtools&quot;,&quot;sjPlot&quot;, &quot;sjmisc&quot;, &quot;sjlabelled&quot;, &quot;rvest&quot;, &quot;lavaan&quot;, &quot;lavaanPlot&quot;, &quot;see&quot;, &quot;ggtext&quot;, &quot;specr&quot;)</code></pre>
+</div>
 <div id="load-data" class="section level2">
 <h2>Load Data</h2>
 <pre class="r"><code># load data from 01_Data_Prep
@@ -404,133 +448,11 @@ load(file = here::here(&quot;data&quot;,&quot;data.Rdata&quot;))
 # disable scientific notation
 options(scipen = 999)</code></pre>
 </div>
-<div id="team-level-data-prep" class="section level2">
-<h2>Team-Level Data Prep</h2>
-<p>Our observations take place only at the team level, therefore it is
-only necessary to run a regression on the team averages (‘level-2’) of
-the three outcome variables <em>verif</em>, <em>exact</em> and
-<em>deviance_abs</em>.</p>
-<p>Aggregate data to team-level</p>
-<pre class="r"><code># curated
-cri_team &lt;- cri_cur_long %&gt;%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
-  group_by(u_teamid) %&gt;%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T),
-            routine = mean(routine, na.rm = T))
-
-cri_team_orig &lt;- cri_long %&gt;%
-  group_by(u_teamid) %&gt;%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T))</code></pre>
-<div id="trim-reanalysis" class="section level3">
-<h3>5% Trim Reanalysis</h3>
-<p>Based on peer review feedback we decided it is pertinent to generate
-a set of results where the two most deviant verification result teams
-were excluded from both groups (roughly 5% of each group). This carries
-the logic that teams that were unmotivated, unskilled or made major
-mistakes would probably not get their results published in a journal or
-otherwise disseminated if they were subject to peer review,scrutiny by
-the scientific community, editor review or if seen by the original
-study’s authors. It also reflects that three teams in the study had
-questionable methods competencies (also just under 5% of the total
-study). This leads to two teams being dropped from each group to have a
-fair/equal distribution of trimming by group.</p>
-<pre class="r"><code># find most distant verifications
-cri_team_trim &lt;- cri_team %&gt;%
-  group_by(exp) %&gt;%
-  arrange(verif_m) %&gt;%
-  mutate(count = row_number())
-
-#select lowest scores on verif by team
-team_trim &lt;- unique(cri_team_trim$u_teamid[cri_team_trim$count &lt; 3])
-
-#create new df with those lowest two teams removed
-cri_long_trim &lt;- cri_long %&gt;%
-  subset(!(u_teamid %in% team_trim))
-
-rm(cri_team_trim)</code></pre>
-<pre class="r"><code>cri_team_trimmed &lt;- cri_long_trim %&gt;%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
-  group_by(u_teamid) %&gt;%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T),
-            routine = mean(routine, na.rm = T))</code></pre>
-</div>
-<div id="final-prep" class="section level3">
-<h3>Final Prep</h3>
-<pre class="r"><code>cri_team$degree &lt;- factor(cri_team$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
-
-cri_team_orig$degree &lt;- factor(cri_team_orig$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
-
-cri_team_trimmed$degree &lt;- factor(cri_team_trimmed$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
-
-cri_team_orig &lt;- cri_team_orig %&gt;%
-  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
-
-cri_team &lt;- cri_team %&gt;%
-  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
-
-cri_team_trimmed &lt;- cri_team_trimmed %&gt;%
-  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
-
-# trim outlier
-cri_team$stat_skill &lt;- ifelse(cri_team$stat_skill &lt; -4, -4, cri_team$stat_skill)
-cri_team_orig$stat_skill &lt;- ifelse(cri_team_orig$stat_skill &lt; -4, -4, cri_team_orig$stat_skill)
-
-# make an easy file for descriptives for 03_Figures workflow
-write_rds(cri_team_orig, here::here(&quot;data&quot;,&quot;cri_team.RDS&quot;))
-
-# merge qualitative features
-qual_out &lt;- qual_out %&gt;%
-  rename(u_teamid = u_teamid2)
-
-cri_team &lt;- cri_team %&gt;%
-  left_join(qual_out, by = &quot;u_teamid&quot;)
-
-cri_team_orig &lt;- cri_team_orig %&gt;%
-  left_join(qual_out, by = &quot;u_teamid&quot;)
-
-cri_team_trimmed &lt;- cri_team_trimmed %&gt;%
-  left_join(qual_out, by = &quot;u_teamid&quot;)</code></pre>
-</div>
-</div>
 <div id="statistics-and-predictive-models" class="section level2">
 <h2>Statistics and Predictive Models</h2>
 <div id="correlations-by-group" class="section level3">
 <h3>Correlations by Group</h3>
-<pre class="r"><code>cri_team_c&lt;- cri_team %&gt;%
+<pre class="r"><code>cri_team_c&lt;- cri_team_cur %&gt;%
   select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
 
 cri_team_orig_c &lt;- cri_team_orig %&gt;%
@@ -623,18 +545,18 @@ O_2_OG &lt;- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team
 O_3_OG &lt;- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
 
 # curated - pooled
-M_1 &lt;- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
-M_2 &lt;- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
-M_3 &lt;- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_1 &lt;- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
+M_2 &lt;- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
+M_3 &lt;- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
 
 # curated - by group
-M_1_aTG &lt;- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
-M_2_aTG &lt;- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
-M_3_aTG &lt;- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_1_aTG &lt;- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
+M_2_aTG &lt;- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
+M_3_aTG &lt;- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
 
-M_1_OG &lt;- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
-M_2_OG &lt;- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
-M_3_OG &lt;- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_1_OG &lt;- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
+M_2_OG &lt;- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
+M_3_OG &lt;- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
 
 # trimmed - pooled
 
@@ -733,13 +655,13 @@ Estimates
 (Intercept)
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.44 <sup>***</sup>
+0.45 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.59 <sup>***</sup>
+0.60 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.50 <sup>***</sup>
+0.51 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.89 <sup>***</sup>
@@ -861,7 +783,7 @@ difficult
 degree soc
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.04 <sup></sup>
+-0.05 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
@@ -887,7 +809,7 @@ degree soc
 exp
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.25 <sup>***</sup>
+0.24 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
@@ -945,13 +867,13 @@ Observations
 R<sup>2</sup> / R<sup>2</sup> adjusted
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.302 / 0.258
+0.297 / 0.252
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.268 / 0.206
+0.265 / 0.202
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.160 / 0.100
+0.164 / 0.104
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.163 / 0.110
@@ -966,7 +888,7 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 0.050 / -0.011
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.268 / 0.205
+0.267 / 0.205
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.049 / -0.019
@@ -1054,13 +976,13 @@ Estimates
 (Intercept)
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.54 <sup>***</sup>
+0.56 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.76 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.57 <sup>***</sup>
+0.58 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.93 <sup>***</sup>
@@ -1089,7 +1011,7 @@ stata
 0.08 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.12 <sup></sup>
+0.11 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.04 <sup></sup>
@@ -1159,7 +1081,7 @@ difficult
 -0.16 <sup>**</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.07 <sup>***</sup>
+-0.06 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 -0.00 <sup></sup>
@@ -1182,7 +1104,7 @@ difficult
 degree soc
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.00 <sup></sup>
+-0.00 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
@@ -1208,7 +1130,7 @@ degree soc
 exp
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.23 <sup>***</sup>
+0.22 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
@@ -1266,25 +1188,25 @@ Observations
 R<sup>2</sup> / R<sup>2</sup> adjusted
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.333 / 0.291
+0.326 / 0.283
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.130 / 0.056
+0.126 / 0.051
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.240 / 0.186
+0.248 / 0.194
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.230 / 0.182
+0.232 / 0.183
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.048 / -0.034
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.289 / 0.239
+0.293 / 0.242
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.314 / 0.270
+0.313 / 0.270
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.096 / 0.018
@@ -1375,13 +1297,13 @@ Estimates
 (Intercept)
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.47 <sup>***</sup>
+0.48 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.63 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.52 <sup>***</sup>
+0.53 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 0.92 <sup>***</sup>
@@ -1410,7 +1332,7 @@ stata
 0.13 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.23 <sup>*</sup>
+0.22 <sup>*</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 -0.01 <sup></sup>
@@ -1442,7 +1364,7 @@ stat skill
 -0.03 <sup></sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.06 <sup></sup>
+-0.06 <sup>*</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 -0.00 <sup></sup>
@@ -1529,7 +1451,7 @@ degree soc
 exp
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.26 <sup>***</sup>
+0.25 <sup>***</sup>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 </td>
@@ -1587,13 +1509,13 @@ Observations
 R<sup>2</sup> / R<sup>2</sup> adjusted
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.296 / 0.249
+0.290 / 0.243
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.270 / 0.203
+0.267 / 0.200
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
-0.107 / 0.040
+0.110 / 0.043
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="1">
 0.105 / 0.045
@@ -1635,12 +1557,12 @@ we do a similar subset where cases are kept with at least one instance
 of Procedural and Mistake-Procedural (=1) with those having any Mistake
 dropped.</p>
 <pre class="r"><code># set up data
-cri_team_mistake &lt;- cri_team %&gt;%
+cri_team_mistake &lt;- cri_team_cur %&gt;%
   mutate(Mistake_DV = ifelse(Mistake == 1 | Mistake_Procedural == 1, 1, 0),
          drop = ifelse(Mistake_DV != 1 &amp; Procedural == 1, 0, 1)) %&gt;%
   subset(drop == 1)
 
-cri_team_proc &lt;- cri_team %&gt;%
+cri_team_proc &lt;- cri_team_cur %&gt;%
   mutate(Procedural_DV = ifelse(Procedural == 1 | Mistake_Procedural == 1, 1, 0),
          drop = ifelse(Procedural_DV !=1 &amp; Mistake == 1, 0, 1)) %&gt;%
   subset(drop == 1)
@@ -2386,10 +2308,10 @@ R<sup>2</sup> Tjur
 </div>
 <div id="test-of-teams-with-0.0-error" class="section level4">
 <h4>Test # of Teams with 0.0 Error</h4>
-<pre class="r"><code>unique(cri_team$u_teamid[cri_team$dev_m == 0])</code></pre>
+<pre class="r"><code>unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0])</code></pre>
 <pre><code>##  [1]  2  3  9 15 29 36 38 40 47 63 70 71 78 82</code></pre>
 <p>They are all in the TG</p>
-<pre class="r"><code>unique(cri_team$u_teamid[cri_team$dev_m == 0 &amp; cri_team$exp == 1])</code></pre>
+<pre class="r"><code>unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0 &amp; cri_team_orig$exp == 1])</code></pre>
 <pre><code>##  [1]  2  3  9 15 29 36 38 40 47 63 70 71 78 82</code></pre>
 </div>
 </div>

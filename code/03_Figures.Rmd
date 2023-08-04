@@ -9,7 +9,7 @@ NOTE: All previous files must be run first for this file to run in its entirety
 |Metric|Definition|Measure|
 |------|----------|---------|
 |*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
-|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to original within .01 decimal places |1=exact, 0=not|
+|*Exact Replication* (exact)|The value of the replication odd-ratio is identical to original within 1% (0.01 as a ratio) |1=exact, 0=not|
 |*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio expressed as a ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
 ```{r setup, warning = F, message = F}

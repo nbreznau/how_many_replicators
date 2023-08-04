@@ -3,7 +3,21 @@ title: "02 Data Analysis"
 output: html_document
 ---
 
+### DATAFRAMES USED
+
+|Name|Definition|
+|------|----------|
+|*cri*| Original replication data at the effect-level in wide format|
+|*cri_long*| Raw replication results in long form|
+|*cri_cur_long*|Curated results in long form|
+|*cri_long_trim*|Trimmed results (5%) in long form|
+|*cri_team_orig*|Raw results aggregated by team|
+|*cri_team_cur*|Curated results aggregated by team|
+|*cri_team_trim*|Trimmed results aggregated by team|
+
 This file uses the cleaned data for the following variables to provide statistical output.
+
+### DEPENDENT VARIABLES
 
 |Metric|Definition|Measure|
 |------|----------|---------|
@@ -31,140 +45,12 @@ options(scipen = 999)
 ```
 
 
-## Team-Level Data Prep
-
-Our observations take place only at the team level, therefore it is only necessary to run a regression on the team averages ('level-2') of the three outcome variables *verif*, *exact* and *deviance_abs*.
-
-Aggregate data to team-level
-
-```{r aggregate_team}
-
-# curated
-cri_team <- cri_cur_long %>%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
-  group_by(u_teamid) %>%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T),
-            routine = mean(routine, na.rm = T))
-
-cri_team_orig <- cri_long %>%
-  group_by(u_teamid) %>%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T))
-
-```
-
-### 5% Trim Reanalysis
-
-Based on peer review feedback we decided it is pertinent to generate a set of results where the two most deviant verification result teams were excluded from both groups (roughly 5% of each group). This carries the logic that teams that were unmotivated, unskilled or made major mistakes would probably not get their results published in a journal or otherwise disseminated if they were subject to peer review,scrutiny by the scientific community, editor review or if seen by the original study's authors. It also reflects that three teams in the study had questionable methods competencies (also just under 5% of the total study). This leads to two teams being dropped from each group to have a fair/equal distribution of trimming by group.
-
-```{r trimmed}
-# find most distant verifications
-cri_team_trim <- cri_team %>%
-  group_by(exp) %>%
-  arrange(verif_m) %>%
-  mutate(count = row_number())
-
-#select lowest scores on verif by team
-team_trim <- unique(cri_team_trim$u_teamid[cri_team_trim$count < 3])
-
-#create new df with those lowest two teams removed
-cri_long_trim <- cri_long %>%
-  subset(!(u_teamid %in% team_trim))
-
-rm(cri_team_trim)
-  
-```
-
-```{r trim2}
-cri_team_trimmed <- cri_long_trim %>%
-  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %>%
-  group_by(u_teamid) %>%
-  summarize(verif_m = mean(verif, na.rm = T),
-            verif_sd = sd(verif, na.rm = T),
-            exact_m = mean(exact, na.rm = T),
-            exact_sd = sd(exact, na.rm = T),
-            dev_m = mean(deviance_abs, na.rm = T),
-            dev_sd = sd(deviance_abs, na.rm = T),
-            stata = mean(stata, na.rm = T),
-            degree = mean(degree, na.rm = T),
-            stat_skill = mean(stat_skill, na.rm = T),
-            numinteam = mean(numinteam, na.rm = T),
-            exp = mean(u_expgroup1, na.rm = T),
-            difficult = mean(difficult, na.rm = T),
-            routine = mean(routine, na.rm = T))
-```
-
-### Final Prep
-
-```{r finalprep}
-cri_team$degree <- factor(cri_team$degree, labels = c("Sociology", "Political Science", "Other"))
-
-cri_team_orig$degree <- factor(cri_team_orig$degree, labels = c("Sociology", "Political Science", "Other"))
-
-cri_team_trimmed$degree <- factor(cri_team_trimmed$degree, labels = c("Sociology", "Political Science", "Other"))
-
-cri_team_orig <- cri_team_orig %>%
-  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
-
-cri_team <- cri_team %>%
-  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
-
-cri_team_trimmed <- cri_team_trimmed %>%
-  mutate(degree_soc = ifelse(degree == "Sociology", 1, 0))
-
-# trim outlier
-cri_team$stat_skill <- ifelse(cri_team$stat_skill < -4, -4, cri_team$stat_skill)
-cri_team_orig$stat_skill <- ifelse(cri_team_orig$stat_skill < -4, -4, cri_team_orig$stat_skill)
-
-# make an easy file for descriptives for 03_Figures workflow
-write_rds(cri_team_orig, here::here("data","cri_team.RDS"))
-
-# merge qualitative features
-qual_out <- qual_out %>%
-  rename(u_teamid = u_teamid2)
-
-cri_team <- cri_team %>%
-  left_join(qual_out, by = "u_teamid")
-
-cri_team_orig <- cri_team_orig %>%
-  left_join(qual_out, by = "u_teamid")
-
-cri_team_trimmed <- cri_team_trimmed %>%
-  left_join(qual_out, by = "u_teamid")
-
-
-```
-
-
-
 ## Statistics and Predictive Models
 
 ### Correlations by Group
 
 ```{r corr, warning = F, message = F}
-cri_team_c<- cri_team %>%
+cri_team_c<- cri_team_cur %>%
   select(exp, verif_m, exact_m, dev_m, stata, stat_skill, difficult, degree_soc, numinteam, Mistake, Procedural, Mistake_Procedural, Interpretational, Questionable_Skills)
 
 cri_team_orig_c <- cri_team_orig %>%
@@ -262,18 +148,18 @@ O_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_or
 O_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_orig, exp == 0))
 
 # curated - pooled
-M_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
-M_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
-M_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team)
+M_1 <- lm(exact_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
+M_2 <- lm(verif_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
+M_3 <- lm(dev_m ~ stata + stat_skill + difficult + degree_soc + exp, data = cri_team_cur)
 
 # curated - by group
-M_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
-M_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
-M_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 1))
+M_1_aTG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
+M_2_aTG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
+M_3_aTG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 1))
 
-M_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
-M_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
-M_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team, exp == 0))
+M_1_OG <- lm(exact_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
+M_2_OG <- lm(verif_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
+M_3_OG <- lm(dev_m ~ stata + stat_skill + difficult, data = subset(cri_team_cur, exp == 0))
 
 # trimmed - pooled
 
@@ -335,12 +221,12 @@ We investigate the multivariate associations of team-level variables and whether
 
 ```{r reg_error}
 # set up data
-cri_team_mistake <- cri_team %>%
+cri_team_mistake <- cri_team_cur %>%
   mutate(Mistake_DV = ifelse(Mistake == 1 | Mistake_Procedural == 1, 1, 0),
          drop = ifelse(Mistake_DV != 1 & Procedural == 1, 0, 1)) %>%
   subset(drop == 1)
 
-cri_team_proc <- cri_team %>%
+cri_team_proc <- cri_team_cur %>%
   mutate(Procedural_DV = ifelse(Procedural == 1 | Mistake_Procedural == 1, 1, 0),
          drop = ifelse(Procedural_DV !=1 & Mistake == 1, 0, 1)) %>%
   subset(drop == 1)
@@ -376,16 +262,17 @@ Note that there are only 5 outcomes of 1 in Procedural for the TG. This seems to
 ```{r logitout}
 tab_model(MIS_1L, MIS_2L, MIS_3L, PRO_1L, PRO_3L, show.se = F, show.ci = F, p.style = "stars", p.threshold = c(0.05, 0.01, 0.001))
 ```
+
 #### Test # of Teams with 0.0 Error
 
 ```{r t}
-unique(cri_team$u_teamid[cri_team$dev_m == 0])
+unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0])
 ```
 
 They are all in the TG
 
 ```{r tg}
-unique(cri_team$u_teamid[cri_team$dev_m == 0 & cri_team$exp == 1])
+unique(cri_team_orig$u_teamid[cri_team_orig$dev_m == 0 & cri_team_orig$exp == 1])
 ```
 
 

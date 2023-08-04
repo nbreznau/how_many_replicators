@@ -699,15 +699,15 @@ cri_cur_long &lt;- cri_cur_long %&gt;%
 values above or below the original</p>
 <pre class="r"><code>cri_long &lt;- cri_long %&gt;%
   mutate(deviance_ratio = case_when(
-         or &gt; orig_or ~ (or/orig_or)-1,
-         or &lt; orig_or ~ (orig_or/or*-1)+1,
+         or &gt; orig_or ~ round((or/orig_or)-1,3),
+         or &lt; orig_or ~ round((orig_or/or*-1)+1,3),
          .default = 0.000)
   )
 
 cri_cur_long &lt;- cri_cur_long %&gt;%
   mutate(deviance_ratio = case_when(
-         or &gt; orig_or ~ (or/orig_or)-1,
-         or &lt; orig_or ~ (orig_or/or*-1)+1,
+         or &gt; orig_or ~ round((or/orig_or)-1,3),
+         or &lt; orig_or ~ round((orig_or/or*-1)+1,3),
          .default = 0.000)
   )</code></pre>
 </div>
@@ -906,12 +906,139 @@ cri &lt;- cri %&gt;%
 </div>
 <div id="optional-variable-labels" class="section level2">
 <h2>Optional Variable Labels</h2>
-<p>See variable_labels.R to set up haven labels (and export to Stata if
-desired)</p>
+<p>The file variable_labels.R contains labels, so the user can use haven
+labels (and for example export to Stata if desired)</p>
+</div>
+<div id="team-level-data-prep" class="section level2">
+<h2>Team-Level Data Prep</h2>
+<p>Our observations take place only at the team level, therefore it is
+only necessary to run a regression on the team averages (‘level-2’) of
+the three outcome variables <em>verif</em>, <em>exact</em> and
+<em>deviance_abs</em>.</p>
+<p>Aggregate data to team-level</p>
+<pre class="r"><code># curated
+cri_team &lt;- cri_cur_long %&gt;%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
+  group_by(u_teamid) %&gt;%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T),
+            routine = mean(routine, na.rm = T))
+
+cri_team_orig &lt;- cri_long %&gt;%
+  group_by(u_teamid) %&gt;%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T))</code></pre>
+<div id="trim-reanalysis" class="section level3">
+<h3>5% Trim Reanalysis</h3>
+<p>Based on peer review feedback we decided it is pertinent to generate
+a set of results where the two most deviant verification result teams
+were excluded from both groups (roughly 5% of each group). This carries
+the logic that teams that were unmotivated, unskilled or made major
+mistakes would probably not get their results published in a journal or
+otherwise disseminated if they were subject to peer review,scrutiny by
+the scientific community, editor review or if seen by the original
+study’s authors. It also reflects that three teams in the study had
+questionable methods competencies (also just under 5% of the total
+study). This leads to two teams being dropped from each group to have a
+fair/equal distribution of trimming by group.</p>
+<pre class="r"><code># find most distant verifications
+cri_team_trim &lt;- cri_team %&gt;%
+  group_by(exp) %&gt;%
+  arrange(verif_m) %&gt;%
+  mutate(count = row_number())
+
+#select lowest scores on verif by team
+team_trim &lt;- unique(cri_team_trim$u_teamid[cri_team_trim$count &lt; 3])
+
+#create new df with those lowest two teams removed
+cri_long_trim &lt;- cri_long %&gt;%
+  subset(!(u_teamid %in% team_trim))
+
+rm(cri_team_trim)</code></pre>
+<pre class="r"><code>cri_team_trimmed &lt;- cri_long_trim %&gt;%
+  mutate(u_expgroup1 = as.numeric(u_expgroup1)) %&gt;%
+  group_by(u_teamid) %&gt;%
+  summarize(verif_m = mean(verif, na.rm = T),
+            verif_sd = sd(verif, na.rm = T),
+            exact_m = mean(exact, na.rm = T),
+            exact_sd = sd(exact, na.rm = T),
+            dev_m = mean(deviance_abs, na.rm = T),
+            dev_sd = sd(deviance_abs, na.rm = T),
+            stata = mean(stata, na.rm = T),
+            degree = mean(degree, na.rm = T),
+            stat_skill = mean(stat_skill, na.rm = T),
+            numinteam = mean(numinteam, na.rm = T),
+            exp = mean(u_expgroup1, na.rm = T),
+            difficult = mean(difficult, na.rm = T),
+            routine = mean(routine, na.rm = T))</code></pre>
+</div>
+<div id="final-prep" class="section level3">
+<h3>Final Prep</h3>
+<pre class="r"><code>cri_team$degree &lt;- factor(cri_team$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
+
+cri_team_orig$degree &lt;- factor(cri_team_orig$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
+
+cri_team_trimmed$degree &lt;- factor(cri_team_trimmed$degree, labels = c(&quot;Sociology&quot;, &quot;Political Science&quot;, &quot;Other&quot;))
+
+cri_team_orig &lt;- cri_team_orig %&gt;%
+  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
+
+cri_team &lt;- cri_team %&gt;%
+  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
+
+cri_team_trimmed &lt;- cri_team_trimmed %&gt;%
+  mutate(degree_soc = ifelse(degree == &quot;Sociology&quot;, 1, 0))
+
+# trim outlier
+cri_team$stat_skill &lt;- ifelse(cri_team$stat_skill &lt; -4, -4, cri_team$stat_skill)
+cri_team_orig$stat_skill &lt;- ifelse(cri_team_orig$stat_skill &lt; -4, -4, cri_team_orig$stat_skill)</code></pre>
+</div>
+<div id="descriptive-output-file" class="section level3">
+<h3>Descriptive output file</h3>
+<pre class="r"><code># make an easy file for descriptives for 03_Figures workflow
+write_rds(cri_team_orig, here::here(&quot;data&quot;,&quot;cri_team.RDS&quot;))</code></pre>
+<pre class="r"><code># merge qualitative features
+qual_out &lt;- qual_out %&gt;%
+  rename(u_teamid = u_teamid2)
+
+cri_team_cur &lt;- cri_team %&gt;%
+  left_join(qual_out, by = &quot;u_teamid&quot;)
+
+cri_team_orig &lt;- cri_team_orig %&gt;%
+  left_join(qual_out, by = &quot;u_teamid&quot;)
+
+cri_team_trimmed &lt;- cri_team_trimmed %&gt;%
+  left_join(qual_out, by = &quot;u_teamid&quot;)
+
+rm(cri_team)</code></pre>
+</div>
 </div>
 <div id="save-data" class="section level2">
 <h2>Save Data</h2>
-<pre class="r"><code>save.image(file = here::here(&quot;data&quot;,&quot;data.Rdata&quot;))</code></pre>
+<pre class="r"><code>rm(cri_cur, qual_out, imp, a, b, m1, team_trim)
+
+save.image(file = here::here(&quot;data&quot;,&quot;data.Rdata&quot;))</code></pre>
 </div>
 <div id="colophon" class="section level2">
 <h2>Colophon</h2>
