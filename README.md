@@ -1,4 +1,8 @@
-# The Reliability of Computational Replications (Anonymous Version)
+# The Reliability of Computational Replications
+
+Nate Breznau<br>
+Eike Mark Rinke<br>
+Alexander Wuttke<br>
 
 Part of the Crowdsourced Replication Initiative ([Breznau, Rinke and Wuttke 2019](https://osf.io/preprints/socarxiv/6j9qb/)) investigating the reliability of research. Includes a direct replication of Brady and Finnigan ([2014](https://journals.sagepub.com/doi/full/10.1177/0003122413513022)) undertaken by 85 independent research teams to verify their original numerical results testing the hypothesis that immigration undermines support for social policy in rich/Global North democracies. There was an experimental condition varying the transparency of the replication materials provided. 
 
