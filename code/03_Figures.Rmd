@@ -478,10 +478,84 @@ fig2bt$result <- round(fig2bt$result,1)
 
 ```
 
+#### Get ICC
+
+```{r fig2b_icc}
+# calculate ICC/rho
+
+#1. estimate empty model
+m1t <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
+m1o <- lmer(verif ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
+m2t <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
+m2o <- lmer(verif ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
+m3t <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
+m3o <- lmer(exact ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
+m4t <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
+m4o <- lmer(exact ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
+m5t <- lmer(deviance_abs ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==1))
+m5o <- lmer(deviance_abs ~ (1|u_teamid), data = subset(cri_long, cri_long$Exp1==0))
+m6t <- lmer(deviance_abs ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==1))
+m6o <- lmer(deviance_abs ~ (1|u_teamid), data = subset(cri_cur_long, cri_cur_long$Exp1==0))
+
+#2. icc
+a <- icc_specs(m1t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, transparent, verification") %>%
+  subset(grp == "u_teamid")
+aa <- icc_specs(m1o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, opaque, verification") %>%
+  subset(grp == "u_teamid")
+b <- icc_specs(m2t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, transparent, verification") %>%
+  subset(grp == "u_teamid")
+bb <- icc_specs(m2o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, opaque, verification") %>%
+  subset(grp == "u_teamid")
+c <- icc_specs(m3t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, transparent, exact replication") %>%
+  subset(grp == "u_teamid")
+cc <- icc_specs(m3o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, opaque, exact replication") %>%
+  subset(grp == "u_teamid")
+d <- icc_specs(m4t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, transparent, exact replication") %>%
+  subset(grp == "u_teamid")
+dd <- icc_specs(m4o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, opaque, exact replication") %>%
+  subset(grp == "u_teamid")
+e <- icc_specs(m5t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, transparent, replication error") %>%
+  subset(grp == "u_teamid")
+ee <- icc_specs(m5o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Original, opaque, replication error") %>%
+  subset(grp == "u_teamid")
+f <- icc_specs(m6t) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, transparent, replication error") %>%
+  subset(grp == "u_teamid")
+ff <- icc_specs(m6o) %>%
+  mutate_if(is.numeric, round, 2) %>%
+  mutate(test = "Curated, opaque, replication error") %>%
+  subset(grp == "u_teamid")
+
+icc_out <- rbind(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
+rm(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
+```
+
 
 #### Raw Effect-Level Results
+
 ```{r fig2new}
-f2colors3 <- c("#2D708EFF", "#95D840FF") 
+f2colors3 <- c("#2D708EFF", "#95D840FF")
 
 agg_png(filename = here::here("results", "Fig1a.png"), res = 72, height = 400, width = 400)
 fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
@@ -506,7 +580,7 @@ fig2aN <- ggplot(data = fig2t[c(1,2,5,6),]) +
   coord_flip(xlim = c(6.5,1), ylim = c(-12,100),  clip = "on") +
   scale_x_reverse() +
   annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
-           label = c("VERIFICATION (same sign)", "EXACT REPLICATION (within 0.01)"), 
+           label = c("DIRECTIONAL REPRODUCTION", "EXACT REPLICATION (=< 0.01)"), 
            hjust = 0, 
            size = 6, 
            fontface = "italic",
@@ -534,6 +608,7 @@ knitr::include_graphics(here::here("results", "Fig1a.png"))
 ```
 
 #### Raw Team-Level Results
+
 ```{r fig2newb}
 # data had se's calculated wrong, fix here
 fig2bt$se[c(1,2)] = (fig2bt$verif_fn2[c(1,2)]*100)/sqrt(fig2bt$n_fn1[c(1,2)])
@@ -562,7 +637,7 @@ fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
   coord_flip(xlim = c(6.5,1), ylim = c(-12,100),  clip = "on") +
   scale_x_reverse() +
   annotate("text", x = c(1.2,4.2), y = c(-12, -12), 
-           label = c("VERIFICATION (95%+ of team results)", "EXACT REPLICATION (95%+ of team results)"), 
+           label = c("DIRECTIONAL REP (95%+ of results)", "EXACT REPLICATION (95%+ of results)"), 
            hjust = 0, 
            size = 6, 
            fontface = "italic", 
@@ -573,6 +648,12 @@ fig2bN <- ggplot(data = fig2bt[c(1,2,5,6),]) +
            hjust = 0, 
            size = 5,
            family = "Times New Roman") +
+#  annotate("text", x = 1.2, y = 97, parse = T, label = expression(paste("Between ", sigma^{2})), size = 4, color = "grey10", family = "Times New Roman") +
+#  annotate("text", x = 2, y = 97, label = paste0(round(icc_out$percent[1],0),"%"), size = 4, hjust = 0, color = "grey10", family = "Times New Roman") +
+#  annotate("text", x = 3, y = 97, label = paste0(round(icc_out$percent[2],0),"%"), size = 4, hjust = 0, color = "grey10", family = "Times New Roman") +
+#  annotate("text", x = 5, y = 97, label = paste0(round(icc_out$percent[5],0),"%"), size = 4, hjust = 0, color = "grey10", family = "Times New Roman") +
+#  annotate("text", x = 6, y = 97, label = paste0(round(icc_out$percent[6],0),"%"), size = 4, hjust = 0, color = "grey10", family = "Times New Roman") +
+
   theme_classic() +
   theme(text = element_text(family = "Times New Roman"),
         axis.line.y = element_blank(),
@@ -653,7 +734,7 @@ f2colors32 <- c("#2D708EFF", "#95D840FF")
 agg_png(here::here("results", "Fig1d.png"), res = 72, height = 225, width = 400)
 fig2bN_dev <- ggplot(data = fig2b[c(1,2),]) +
   coord_flip() +
-  geom_errorbar(aes(ymin = deviance_fn1-(1.96*(deviance_fn2/sqrt(n_fn1))), ymax = deviance_fn1+(1.96*(deviance_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
+  geom_errorbar(aes(ymin = deviance_fn1-(1.8*(deviance_fn2/sqrt(n_fn1))), ymax = deviance_fn1+(1.96*(deviance_fn2/sqrt(n_fn1))), x = c(2,3),), color = "grey30", width = 0.3) +
   geom_point(aes(y = deviance_fn1, x = c(2,3), color = group, size = 5)) +
   scale_x_reverse() +
   scale_color_manual(values = f2colors32,
@@ -790,6 +871,57 @@ icc_out <- rbind(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 rm(a,aa,b,bb,c,cc,d,dd,e,ee,f,ff)
 ```
 
+## Generate team sums
+
+### Calculate
+
+```{r teamsums}
+cri_sums <- cri_sums %>%
+  mutate(errors = Mistake + Procedural + Interpretational + Mistake_Procedural + Missing_Parts)
+```
+
+### Figure
+
+```{r fig}
+
+agg_png(here::here("results", "Fig_3.png"), res = 72, height = 250, width = 450)
+
+error_counts <- cri_sums %>%
+  subset(u_teamid2 != 8101 & u_teamid2 != 591) %>%
+  count(errors) %>%
+  filter(errors %in% 0:3)  # Only keep error values 0, 1, 2, 3
+
+# Arrange data and calculate the midpoint for each 'errors' group
+cri_sums <- cri_sums %>%
+    subset(u_teamid2 != 8101 & u_teamid2 != 591) %>%
+  arrange(desc(errors)) %>%
+  mutate(u_teamid2 = factor(u_teamid2, levels = unique(u_teamid2)))
+
+# Calculate the midpoint of x-axis positions for each unique errors value
+midpoints <- cri_sums %>%
+    subset(u_teamid2 != 8101 & u_teamid2 != 591) %>%
+  group_by(errors) %>%
+  summarize(midpoint = mean(as.numeric(u_teamid2))) %>%
+  filter(errors %in% 0:3)
+
+# Join midpoints with error_counts
+error_counts <- error_counts %>%
+  left_join(midpoints, by = "errors")
+
+# Create the plot
+ggplot(cri_sums, aes(x = u_teamid2, y = errors)) +
+  geom_bar(stat = "identity") +
+  # Add text labels for the counts at the calculated midpoints
+  geom_text(data = error_counts, aes(x = midpoint, y = errors, label = n), 
+            vjust = -0.5, size = 5) +
+  labs(x = "Eighty-Five Teams", y = "Number of Errors") +
+  theme_classic() +
+  theme(axis.text.x = element_blank())
+
+dev.off()
+
+knitr::include_graphics(here::here("results", "Fig_3.png"))
+```
 
 ## Table 1
 
