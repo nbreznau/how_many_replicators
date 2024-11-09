@@ -8,7 +8,7 @@ NOTE: All previous files must be run first for this file to run in its entirety
 
 |Metric|Definition|Measure|
 |------|----------|---------|
-|*Verification* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
+|*Direct Reproduction* (verif)| The direction of the regression coefficient is the same as the original & either within 0.05 absolute difference or the same significance at p<0.05 threshold|1=verified, 0=not|
 |*Exact Replication* (exact)|The value of the replication odd-ratio is identical to the second decimal place of the original|1=exact, 0=not|
 |*Replication Error* (deviance_abs)|The absolute deviation of the replicated odd-ratio from the original odds-ratio | continuous measure starting from exact (=0) and increasing in positive values to measure the error |
 
@@ -60,7 +60,7 @@ kable_styling(kable(t_rct, caption = "Test for Random Assignment\n(NHST t-test o
 
 A total of `r sum(cri_long$insamp, na.rm = T)` results from `r length(unique(cri_long$u_teamid))` teams
 
-## Figure 2
+## Figure 3
 
 This plots how many replicators it would take to achieve replication reliability defined as the minimum number of replicators to result in a majority coming to the correct answer (here a verification) at a confidence level of 95%. 
 
@@ -142,7 +142,7 @@ P90 <- expression(paste(italic("P"), " > 90%"))
 
 reps <- "If the true binomial probability of a replication\nbeing correct is 89% (x-axis) then 7+ independent\nreplications (y-axis) guarantees that a majority\n(at least 4 of 7) are correct in 99% of all potential\nreplication trials"
 
-agg_png(filename = here::here("results","Fig2.png"), res = 144, width = 500, height = 400)
+agg_png(filename = here::here("results","Fig_3.png"), res = 144, width = 500, height = 400)
 fig1_plot %>%
   mutate(P_90 = P_90 - 0.05,
          P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
@@ -176,7 +176,7 @@ fig1_plot %>%
         panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
 dev.off()
 
-knitr::include_graphics(here::here("results","Fig2.png"))
+knitr::include_graphics(here::here("results","Fig_3.png"))
 ```
 
 ## Summary Statistics 
@@ -480,7 +480,7 @@ fig2bt$result <- round(fig2bt$result,1)
 
 #### Get ICC
 
-```{r fig2b_icc}
+```{r fig2b_iccx}
 # calculate ICC/rho
 
 #1. estimate empty model
@@ -880,11 +880,11 @@ cri_sums <- cri_sums %>%
   mutate(errors = Mistake + Procedural + Interpretational + Mistake_Procedural + Missing_Parts)
 ```
 
-### Figure
+### Figure 2
 
 ```{r fig}
 
-agg_png(here::here("results", "Fig_3.png"), res = 72, height = 250, width = 450)
+agg_png(here::here("results", "Fig_2.png"), res = 72, height = 250, width = 450)
 
 error_counts <- cri_sums %>%
   subset(u_teamid2 != 8101 & u_teamid2 != 591) %>%
@@ -920,7 +920,7 @@ ggplot(cri_sums, aes(x = u_teamid2, y = errors)) +
 
 dev.off()
 
-knitr::include_graphics(here::here("results", "Fig_3.png"))
+knitr::include_graphics(here::here("results", "Fig_2.png"))
 ```
 
 ## Table 1

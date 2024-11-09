@@ -370,7 +370,7 @@ provide statistical output.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td><em>Verification</em> (verif)</td>
+<td><em>Direct Reproduction</em> (verif)</td>
 <td>The direction of the regression coefficient is the same as the
 original &amp; either within 0.05 absolute difference or the same
 significance at p&lt;0.05 threshold</td>
@@ -379,7 +379,7 @@ significance at p&lt;0.05 threshold</td>
 <tr class="even">
 <td><em>Exact Replication</em> (exact)</td>
 <td>The value of the replication odd-ratio is identical to the second
-decimal place of the original</td>
+decimal place of the original (0.01)</td>
 <td>1=exact, 0=not</td>
 </tr>
 <tr class="odd">
@@ -3252,11 +3252,12 @@ save.image(file = here::here(&quot;data&quot;,&quot;data_figs.Rdata&quot;))</cod
 <div id="colophon" class="section level2">
 <h2>Colophon</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R version 4.2.2 (2022-10-31 ucrt)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 19045)
+<pre><code>## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
+## 
 ## 
 ## locale:
 ## [1] LC_COLLATE=English_United States.utf8 
@@ -3265,43 +3266,55 @@ save.image(file = here::here(&quot;data&quot;,&quot;data_figs.Rdata&quot;))</cod
 ## [4] LC_NUMERIC=C                          
 ## [5] LC_TIME=English_United States.utf8    
 ## 
+## time zone: Europe/Berlin
+## tzcode source: internal
+## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] specr_1.0.0      ggtext_0.1.2     see_0.7.4        lavaanPlot_0.6.2
-##  [5] lavaan_0.6-13    rvest_1.0.3      sjlabelled_1.2.0 sjmisc_2.8.9    
-##  [9] sjPlot_2.8.12    jtools_2.2.1     lme4_1.1-31      Matrix_1.5-1    
-## [13] ggpubr_0.5.0     ggplot2_3.4.0    kableExtra_1.3.4 ragg_1.2.5      
-## [17] boot_1.3-28      knitr_1.41       readxl_1.4.1     tidyr_1.2.1     
-## [21] lattice_0.20-45  readr_2.1.3      dplyr_1.0.10     pacman_0.5.1    
+##  [1] specr_1.0.0      ggtext_0.1.2     see_0.9.0        lavaanPlot_0.8.1
+##  [5] lavaan_0.6-18    rvest_1.0.4      sjlabelled_1.2.0 sjmisc_2.8.10   
+##  [9] sjPlot_2.8.16    jtools_2.3.0     lme4_1.1-35.5    Matrix_1.7-0    
+## [13] ggpubr_0.6.0     ggplot2_3.5.1    kableExtra_1.4.0 ragg_1.3.2      
+## [17] boot_1.3-30      knitr_1.48       readxl_1.4.3     tidyr_1.3.1     
+## [21] lattice_0.22-6   readr_2.1.5      dplyr_1.1.4      pacman_0.5.1    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] minqa_1.2.5        colorspace_2.0-3   ggsignif_0.6.4     ellipsis_0.3.2    
-##  [5] rprojroot_2.0.3    estimability_1.4.1 parameters_0.20.1  gridtext_0.1.5    
-##  [9] rstudioapi_0.14    listenv_0.9.0      furrr_0.3.1        fansi_1.0.3       
-## [13] mvtnorm_1.1-3      xml2_1.3.3         codetools_0.2-18   splines_4.2.2     
-## [17] mnormt_2.1.1       cachem_1.0.6       jsonlite_1.8.4     nloptr_2.0.3      
-## [21] ggeffects_1.1.4    broom_1.0.2        effectsize_0.8.2   DiagrammeR_1.0.9  
-## [25] compiler_4.2.2     httr_1.4.4         sjstats_0.18.2     emmeans_1.8.4-1   
-## [29] backports_1.4.1    assertthat_0.2.1   fastmap_1.1.0      cli_3.6.0         
-## [33] visNetwork_2.1.2   htmltools_0.5.4    tools_4.2.2        igraph_1.3.5      
-## [37] gtable_0.3.1       glue_1.6.2         Rcpp_1.0.9         carData_3.0-5     
-## [41] cellranger_1.1.0   jquerylib_0.1.4    vctrs_0.5.1        svglite_2.1.1     
-## [45] nlme_3.1-160       insight_0.18.8     xfun_0.36          stringr_1.5.0     
-## [49] globals_0.16.2     lifecycle_1.0.3    rstatix_0.7.1      future_1.30.0     
-## [53] MASS_7.3-58.1      scales_1.2.1       hms_1.1.2          parallel_4.2.2    
-## [57] RColorBrewer_1.1-3 yaml_2.3.6         pander_0.6.5       sass_0.4.4        
-## [61] stringi_1.7.12     bayestestR_0.13.0  rlang_1.0.6        pkgconfig_2.0.3   
-## [65] systemfonts_1.0.4  evaluate_0.19      purrr_1.0.1        htmlwidgets_1.6.1 
-## [69] cowplot_1.1.1      tidyselect_1.2.0   here_1.0.1         parallelly_1.34.0 
-## [73] magrittr_2.0.3     R6_2.5.1           generics_0.1.3     DBI_1.1.3         
-## [77] pillar_1.8.1       withr_2.5.0        datawizard_0.6.5   abind_1.4-5       
-## [81] tibble_3.1.8       performance_0.10.2 modelr_0.1.10      crayon_1.5.2      
-## [85] car_3.1-1          utf8_1.2.2         tzdb_0.3.0         rmarkdown_2.19    
-## [89] grid_4.2.2         pbivnorm_0.6.0     digest_0.6.31      webshot_0.5.4     
-## [93] textshaping_0.3.6  stats4_4.2.2       munsell_0.5.0      viridisLite_0.4.1 
-## [97] bslib_0.4.2</code></pre>
+##   [1] RColorBrewer_1.1-3  rstudioapi_0.16.0   jsonlite_1.8.8     
+##   [4] datawizard_0.13.0   magrittr_2.0.3      TH.data_1.1-2      
+##   [7] estimability_1.5.1  nloptr_2.1.1        rmarkdown_2.28     
+##  [10] vctrs_0.6.5         minqa_1.2.8         effectsize_0.8.9   
+##  [13] rstatix_0.7.2       htmltools_0.5.8.1   forcats_1.0.0      
+##  [16] broom_1.0.6         cellranger_1.1.0    sass_0.4.9         
+##  [19] parallelly_1.38.0   bslib_0.8.0         htmlwidgets_1.6.4  
+##  [22] sandwich_3.1-0      emmeans_1.10.4      zoo_1.8-12         
+##  [25] cachem_1.1.0        igraph_2.0.3        lifecycle_1.0.4    
+##  [28] pkgconfig_2.0.3     R6_2.5.1            fastmap_1.2.0      
+##  [31] future_1.34.0       digest_0.6.37       colorspace_2.1-1   
+##  [34] furrr_0.3.1         rprojroot_2.0.4     textshaping_0.4.0  
+##  [37] fansi_1.0.6         httr_1.4.7          abind_1.4-5        
+##  [40] compiler_4.4.1      here_1.0.1          withr_3.0.1        
+##  [43] pander_0.6.5        backports_1.5.0     carData_3.0-5      
+##  [46] performance_0.12.3  broom.mixed_0.2.9.5 ggsignif_0.6.4     
+##  [49] MASS_7.3-60.2       sjstats_0.19.0      tools_4.4.1        
+##  [52] pbivnorm_0.6.0      glue_1.7.0          quadprog_1.5-8     
+##  [55] DiagrammeR_1.0.11   nlme_3.1-164        gridtext_0.1.5     
+##  [58] grid_4.4.1          generics_0.1.3      gtable_0.3.5       
+##  [61] tzdb_0.4.0          hms_1.1.3           xml2_1.3.6         
+##  [64] car_3.1-2           utf8_1.2.4          pillar_1.9.0       
+##  [67] stringr_1.5.1       splines_4.4.1       survival_3.6-4     
+##  [70] tidyselect_1.2.1    svglite_2.1.3       stats4_4.4.1       
+##  [73] xfun_0.47           visNetwork_2.1.2    stringi_1.8.4      
+##  [76] yaml_2.3.10         evaluate_0.24.0     codetools_0.2-20   
+##  [79] tibble_3.2.1        cli_3.6.3           xtable_1.8-4       
+##  [82] parameters_0.22.2   systemfonts_1.1.0   munsell_0.5.1      
+##  [85] jquerylib_0.1.4     Rcpp_1.0.13         globals_0.16.3     
+##  [88] ggeffects_1.7.1     coda_0.19-4.1       parallel_4.4.1     
+##  [91] bayestestR_0.15.0   listenv_0.9.1       viridisLite_0.4.2  
+##  [94] mvtnorm_1.3-1       scales_1.3.0        insight_0.20.5     
+##  [97] purrr_1.0.2         rlang_1.1.4         cowplot_1.1.3      
+## [100] multcomp_1.4-26     mnormt_2.1.1</code></pre>
 </div>
 
 

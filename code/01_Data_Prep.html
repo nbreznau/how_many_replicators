@@ -522,9 +522,13 @@ cri2_nomis &lt;- cbind(cri2_nomis,  preds)
 
 cri2_nomis &lt;- select(cri2_nomis,  u_teamid,  difficult,  stat_skill)
 
-cri2 &lt;- left_join(cri2,  cri2_nomis,  by = &quot;u_teamid&quot;)
-
-# mean replacement (don&#39;t use, too risky)
+cri2 &lt;- left_join(cri2,  cri2_nomis,  by = &quot;u_teamid&quot;)</code></pre>
+<pre><code>## Warning in left_join(cri2, cri2_nomis, by = &quot;u_teamid&quot;): Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 4 of `x` matches multiple rows in `y`.
+## ℹ Row 4 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.</code></pre>
+<pre class="r"><code># mean replacement (don&#39;t use, too risky)
 
 # cri2 &lt;- cri2 %&gt;%
 #  mutate(difficult = ifelse(is.na(difficult),  mean(difficult,  na.rm = T),  difficult), 
@@ -830,11 +834,12 @@ desired)</p>
 </div>
 <div id="colophon" class="section level2">
 <h2>Colophon</h2>
-<pre><code>## R version 4.2.2 (2022-10-31 ucrt)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 19045)
+<pre><code>## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
+## 
 ## 
 ## locale:
 ## [1] LC_COLLATE=English_United States.utf8 
@@ -843,32 +848,34 @@ desired)</p>
 ## [4] LC_NUMERIC=C                          
 ## [5] LC_TIME=English_United States.utf8    
 ## 
+## time zone: Europe/Berlin
+## tzcode source: internal
+## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] lavaanPlot_0.6.2   lavaan_0.6-13      kableExtra_1.3.4   ragg_1.2.5        
-##  [5] boot_1.3-28        knitr_1.41         readxl_1.4.1       tidyr_1.2.1       
-##  [9] lattice_0.20-45    readr_2.1.3        dplyr_1.0.10       readstata13_0.10.0
+##  [1] lavaanPlot_0.8.1   lavaan_0.6-18      kableExtra_1.4.0   ragg_1.3.2        
+##  [5] boot_1.3-30        knitr_1.48         readxl_1.4.3       tidyr_1.3.1       
+##  [9] lattice_0.22-6     readr_2.1.5        dplyr_1.1.4        readstata13_0.10.1
 ## [13] pacman_0.5.1      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.9         here_1.0.1         svglite_2.1.1      visNetwork_2.1.2  
-##  [5] rprojroot_2.0.3    assertthat_0.2.1   digest_0.6.31      utf8_1.2.2        
-##  [9] R6_2.5.1           cellranger_1.1.0   stats4_4.2.2       evaluate_0.19     
-## [13] httr_1.4.4         pillar_1.8.1       rlang_1.0.6        rstudioapi_0.14   
-## [17] jquerylib_0.1.4    pbivnorm_0.6.0     rmarkdown_2.19     DiagrammeR_1.0.9  
-## [21] textshaping_0.3.6  webshot_0.5.4      stringr_1.5.0      htmlwidgets_1.6.1 
-## [25] munsell_0.5.0      compiler_4.2.2     xfun_0.36          pkgconfig_2.0.3   
-## [29] systemfonts_1.0.4  mnormt_2.1.1       htmltools_0.5.4    tidyselect_1.2.0  
-## [33] tibble_3.1.8       fansi_1.0.3        viridisLite_0.4.1  withr_2.5.0       
-## [37] tzdb_0.3.0         MASS_7.3-58.1      grid_4.2.2         jsonlite_1.8.4    
-## [41] lifecycle_1.0.3    DBI_1.1.3          magrittr_2.0.3     scales_1.2.1      
-## [45] cli_3.6.0          stringi_1.7.12     cachem_1.0.6       xml2_1.3.3        
-## [49] bslib_0.4.2        ellipsis_0.3.2     generics_0.1.3     vctrs_0.5.1       
-## [53] RColorBrewer_1.1-3 tools_4.2.2        glue_1.6.2         purrr_1.0.1       
-## [57] hms_1.1.2          parallel_4.2.2     fastmap_1.1.0      yaml_2.3.6        
-## [61] colorspace_2.0-3   rvest_1.0.3        sass_0.4.4</code></pre>
+##  [1] xfun_0.47          bslib_0.8.0        htmlwidgets_1.6.4  visNetwork_2.1.2  
+##  [5] tzdb_0.4.0         quadprog_1.5-8     vctrs_0.6.5        tools_4.4.1       
+##  [9] generics_0.1.3     stats4_4.4.1       parallel_4.4.1     tibble_3.2.1      
+## [13] fansi_1.0.6        pkgconfig_2.0.3    RColorBrewer_1.1-3 lifecycle_1.0.4   
+## [17] compiler_4.4.1     stringr_1.5.1      textshaping_0.4.0  munsell_0.5.1     
+## [21] mnormt_2.1.1       htmltools_0.5.8.1  sass_0.4.9         yaml_2.3.10       
+## [25] pillar_1.9.0       jquerylib_0.1.4    MASS_7.3-60.2      cachem_1.1.0      
+## [29] tidyselect_1.2.1   digest_0.6.37      stringi_1.8.4      purrr_1.0.2       
+## [33] rprojroot_2.0.4    fastmap_1.2.0      grid_4.4.1         here_1.0.1        
+## [37] colorspace_2.1-1   cli_3.6.3          magrittr_2.0.3     DiagrammeR_1.0.11 
+## [41] utf8_1.2.4         pbivnorm_0.6.0     withr_3.0.1        scales_1.3.0      
+## [45] rmarkdown_2.28     cellranger_1.1.0   hms_1.1.3          evaluate_0.24.0   
+## [49] viridisLite_0.4.2  rlang_1.1.4        Rcpp_1.0.13        glue_1.7.0        
+## [53] xml2_1.3.6         svglite_2.1.3      rstudioapi_0.16.0  jsonlite_1.8.8    
+## [57] R6_2.5.1           systemfonts_1.1.0</code></pre>
 </div>
 
 
