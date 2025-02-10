@@ -884,7 +884,7 @@ cri_sums <- cri_sums %>%
 
 ```{r fig}
 
-agg_png(here::here("results", "Fig_2.png"), res = 72, height = 250, width = 450)
+agg_png(here::here("results", "Fig_2.png"), res = 144, height = 500, width = 800)
 
 error_counts <- cri_sums %>%
   subset(u_teamid2 != 8101 & u_teamid2 != 591) %>%
@@ -910,12 +910,14 @@ error_counts <- error_counts %>%
 
 # Create the plot
 ggplot(cri_sums, aes(x = u_teamid2, y = errors)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity",
+           width = .7) +
   # Add text labels for the counts at the calculated midpoints
   geom_text(data = error_counts, aes(x = midpoint, y = errors, label = n), 
             vjust = -0.5, size = 5) +
   labs(x = "Eighty-Five Teams", y = "Number of Errors") +
   theme_classic() +
+  scale_y_continuous(breaks = c(1,2,3,4,5,6)) +
   theme(axis.text.x = element_blank())
 
 dev.off()
@@ -1082,22 +1084,26 @@ cri_long_pool <- cri_long %>%
   select(-u_teamid2) %>%
   summarise_all(.funs = c("mean", "sd"))
 
-cri_long_pool_t <- cri_long %>%
+cri_long_pool_tx <- cri_long %>%
     ungroup() %>%
   subset(Exp1 == 1) %>%
   group_by(u_teamid2) %>%
   select(verif, exact, deviance_abs) %>%
-  summarise_all(.funs = c("mean", "sd")) %>%
+  summarise_all(.funs = c("mean", "sd")) 
+
+cri_long_pool_t <- cri_long_pool_tx %>% 
   ungroup() %>%
   select(-u_teamid2) %>%
   summarise_all(.funs = c("mean", "sd"))
 
-cri_long_pool_o <- cri_long %>%
+cri_long_pool_ox <- cri_long %>%
     ungroup() %>%
   subset(Exp1 == 0) %>%
   group_by(u_teamid2) %>%
   select(verif, exact, deviance_abs) %>%
-  summarise_all(.funs = c("mean", "sd")) %>%
+  summarise_all(.funs = c("mean", "sd"))
+
+cri_long_pool_o <- cri_long_pool_ox %>%
   ungroup() %>%
   select(-u_teamid2) %>%
   summarise_all(.funs = c("mean", "sd"))
