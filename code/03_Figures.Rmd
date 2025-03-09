@@ -142,37 +142,37 @@ P90 <- expression(paste(italic("P"), " > 90%"))
 
 reps <- "If the true binomial probability of a replication\nbeing correct is 89% (x-axis) then 7+ independent\nreplications (y-axis) guarantees that a majority\n(at least 4 of 7) are correct in 99% of all potential\nreplication trials"
 
-agg_png(filename = here::here("results","Fig_3.png"), res = 144, width = 500, height = 400)
+agg_png(filename = here::here("results","Fig_3.png"), res = 144, width = 700, height = 600)
 fig1_plot %>%
   mutate(P_90 = P_90 - 0.05,
          P_95 = P_95 + 0.05) %>% # shift lines slightly as a visual 'dodge'
   ggplot(aes(x = p)) +
-  geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5, family = "Times New Roman") +
-  geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5, family = "Times New Roman") +
-  geom_line(aes(y = P_90), color = "#453781FF", size = 1.5, family = "Times New Roman") +
+  geom_line(aes(y = P_99), color = "#3CBB75FF", size = 1.5) +
+  geom_line(aes(y = P_95), color = "#287D8EFF", size = 1.5) +
+  geom_line(aes(y = P_90), color = "#453781FF", size = 1.5) +
   # text box and curved arrow
   geom_curve(
     aes(x = 93, y = 12, xend = 89.1, yend = 7.5),
     arrow = arrow(length = unit(0.03, "npc"), type = "closed", angle = 20),
     color = "grey40", curvature = -0.3, lwd = 0.3) +
-  annotate("label", x = 98.5, y = 15.5, label = reps, color = "grey40", size = 2.75, hjust = 0, fill = "white", family = "Times New Roman") +
+  annotate("label", x = 98.5, y = 15.5, label = reps, color = "grey40", size = 2.75, hjust = 0, fill = "white") +
   # add white points on top of lines
-  geom_point(aes(y = P_99), color = "white", size = 0.8, family = "Times New Roman") +
-  geom_point(aes(y = P_95), color = "white", size = 0.8, family = "Times New Roman") +
-  geom_point(aes(y = P_90), color = "white", size = 0.8, family = "Times New Roman") +
+  geom_point(aes(y = P_99), color = "white", size = 0.8) +
+  geom_point(aes(y = P_95), color = "white", size = 0.8) +
+  geom_point(aes(y = P_90), color = "white", size = 0.8) +
   # P labels
-  annotate("label", x = 83, y = 9, label = P99, color = "#3CBB75FF", fill = "white", family = "Times New Roman", size = 2.5) +
-  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white", family = "Times New Roman", size = 2.5) +
-  annotate("label", x = 80.5, y = 2.75, label = P90, color = "#453781FF", fill = "white", family = "Times New Roman", size = 2.5) +
+  annotate("label", x = 83, y = 9, label = P99, color = "#3CBB75FF", fill = "white", size = 2.5) +
+  annotate("label", x = 82, y = 6, label = P95, color = "#287D8EFF", fill = "white", size = 2.5) +
+  annotate("label", x = 80.5, y = 2.75, label = P90, color = "#453781FF", fill = "white", size = 2.5) +
     scale_x_reverse() +
 
   ylim(1,20) +
   labs(y = yl, x = xl) +
   scale_y_continuous(breaks = waiver(), n.breaks = 20) +
   theme_classic() +
-  theme(text = element_text(family = "Times New Roman", size = 8),
-        axis.title.x = element_text(family = "Times New Roman", size = 9, margin = margin(t = 18)),
-        axis.title.y = element_text(family = "Times New Roman", size = 9),
+  theme(text = element_text(size = 8),
+        axis.title.x = element_text(size = 9, margin = margin(t = 18)),
+        axis.title.y = element_text(size = 9),
         panel.grid.major = element_line(color = "grey90", linetype = "dashed", size = 0.33))
 dev.off()
 
